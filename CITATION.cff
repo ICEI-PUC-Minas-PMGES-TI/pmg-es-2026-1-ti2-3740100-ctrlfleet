@@ -1,31 +1,34 @@
 cff-version: 1.0.1
 message: Please cite this software using these metadata.
-title: 
+title: CtrlFleet
 authors:
-  - family-names: sobrenome do aluno 1
-    given-names: Nome do aluno 1 
-  - family-names: sobrenome do aluno 2
-    given-names: Nome do aluno 2 
-  - family-names: sobrenome do aluno 3
-    given-names: Nome do aluno 3 
-  - family-names: sobrenome do aluno 4
-    given-names: Nome do aluno 4 
-  - family-names: sobrenome do aluno 5
-    given-names: Nome do aluno 5 
-  - family-names: sobrenome do aluno 6
-    given-names: Nome do aluno 6 
+  - family-names: Fernanda Alves de Andrade
+    given-names: Alexia 
+  - family-names: Augusto Martins de Carvalho
+    given-names: Guilherme  
+  - family-names: Eduardo Carneiro da Silva
+    given-names: Ítalo 
+  - family-names: Vial Leite Soares
+    given-names: João Victor
+  - family-names: Maia Marques Pinheiro
+    given-names: Lucas
+  - family-names: Galileu Thales de Oliveira
+    given-names: Rafael 
+  - name-suffix: Professor
+    affiliation: PUC Minas
+    family-names: Soares de Paiva Lacerda
+    given-names: Lucca 
   - name-suffix: Professora
     affiliation: PUC Minas
-    family-names: Alonso Veloso
-    given-names: Eveline 
-  - name-suffix: Professora
-    affiliation: PUC Minas
-    family-names: Baroni De Carvalho
-    given-names: Juliana Amaral 
+    family-names: Hanne Soares de Andrade
+    given-names: Michelle 
 keywords:
-  - 
-  - 
-repository-code: 
+  - Gestão
+  - Veículos
+  - Frota
+  - Motorista
+  - Prefeitura
+repository-code: https://github.com/lvcasxm/trabalho-interdisciplinar-aplica-o-processos-e-neg-cios.git
 license: CC-BY-4.0
-version: 1.0.0
-date-released:
+version: 2.0.0
+date-released: 2026-03-10
