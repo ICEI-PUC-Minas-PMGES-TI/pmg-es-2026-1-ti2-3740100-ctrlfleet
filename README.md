@@ -1,6 +1,14 @@
 # CtrlFleet
 
-Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
+A CtrlFleet é uma empresa que busca resolver o problema de gestão de veículos em prefeituras e órgãos públicos. Desenvolvemos um sistema completo que integra o solicitante da viagem, o motorista e o administrador geral, permitindo uma análise centralizada e otimizada dos processos de deslocamento da empresa, garantindo menores riscos administrativos, eficiência operacional, uso eficiente de recursos e rastreabilidade.
+
+O serviço garante:
+
+* **Gestão de Frotas:** Controle centralizado dos veículos, documentos, licenciamento e histórico patrimonial da frota.
+* **Gestão de Pessoas:** Cadastro de motoristas, controle de habilitações, escalas de trabalho e responsabilidades operacionais.
+* **Gestão de agendamentos/reservas:** Solicitação, autorização e controle de uso dos veículos para garantir a disponibilidade estratégica.
+* **Gestão de Manutenção (corretiva e preventiva):** Monitoramento de revisões, troca de peças e reparos emergenciais para assegurar a operacionalidade.
+
 
 ## Integrantes
 
