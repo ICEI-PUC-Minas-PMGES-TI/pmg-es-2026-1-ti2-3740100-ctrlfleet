@@ -24,7 +24,8 @@ _Instituto de Informática e Ciências Exatas – Pontifícia Universidade Cató
 
 ---
 
-_**Resumo**. 
+**Resumo**
+
 A gestão de frotas em órgãos públicos ainda é realizada, em muitos casos, por meio de métodos manuais e planilhas eletrônicas pouco estruturadas, o que compromete a eficiência operacional e a transparência no uso dos recursos públicos. Este trabalho propõe o desenvolvimento de um sistema web para controle, monitoramento e gestão de frotas de veículos públicos, contemplando processos como cadastro de veículos e motoristas, registro de uso, controle de manutenções e abastecimento. Como resultado, espera-se uma plataforma funcional que centralize informações, automatize alertas e gere relatórios gerenciais, contribuindo para uma administração pública mais eficiente, rastreável e transparente.
 
 ---
