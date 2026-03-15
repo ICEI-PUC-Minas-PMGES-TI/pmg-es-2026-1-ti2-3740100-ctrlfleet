@@ -2,10 +2,15 @@
 
 
 *Alexia Fernanda Alves de Andrade
+
 *Guilherme Augusto Martins de Carvalho
+
 *Ítalo Eduardo Carneiro da Silva
+
 *João Victor Vial Leite Soares
+
 *Lucas Maia Marques Pinheiro
+
 *Rafael Galileu Thales Oliveira
 
 ---
