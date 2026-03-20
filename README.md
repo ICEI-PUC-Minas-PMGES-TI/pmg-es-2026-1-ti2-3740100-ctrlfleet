@@ -1,6 +1,7 @@
-# Nome do projeto
+# CtrlFleet
 
-Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
+Sistema web desenvolvido para centralizar e automatizar a gestão de frotas de veículos em órgãos públicos, substituindo métodos manuais e planilhas por uma solução informatizada. O projeto visa resolver problemas como falta de controle de manutenções, uso não autorizado de veículos, dificuldades em auditorias e ausência de rastreabilidade de quilometragem e consumo de combustível.
+A plataforma contempla quatro processos principais: cadastro e gestão de veículos (dados técnicos, documentação e status operacional), registro de uso (motorista, destino, horários e quilometragem), controle de manutenções preventivas e corretivas com alertas automáticos, e controle de abastecimento com monitoramento de consumo e geração de relatórios. O sistema é destinado a gestores de frota, motoristas, setores administrativos e financeiros, além de órgãos de controle externo.
 
 ## Integrantes
 

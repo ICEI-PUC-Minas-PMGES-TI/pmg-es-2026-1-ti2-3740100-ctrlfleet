@@ -1,27 +1,20 @@
-# TITULO DO PROJETO
+# Ctrl Fleet
 
 
-**Nome completo do Aluno 1, email do aluno 1**
-
-**Nome completo do Aluno 2, email do aluno 2**
-
-**Nome completo do Aluno 3, email do aluno 3**
-
-**Nome completo do Aluno 4, email do aluno 4**
-
-**Nome completo do Aluno 5, email do aluno 5**
-
-**Nome completo do Aluno 6, email do aluno 6**
+* Alexia Fernanda Alves de Andrade
+* Guilherme Augusto Martins de Carvalho
+* Ítalo Eduardo Carneiro da Silva
+* João Victor Vial Leite Soares
+* Lucas Maia Marques Pinheiro
+* Rafael Galileu Thales Oliveira
 
 ---
 
 Professores:
 
-** Prof. Nome do Prof 1 **
 
-** Prof. Nome do Prof 2 **
-
-** Prof. Nome do Prof 3 **
+* Lucca Soares de Paiva Lacerda
+* Michelle Hanne Soares de Andrade
 
 ---
 
@@ -31,47 +24,50 @@ _Instituto de Informática e Ciências Exatas – Pontifícia Universidade Cató
 
 ---
 
-_**Resumo**. Escrever aqui o resumo. O resumo deve contextualizar rapidamente o trabalho, descrever seu objetivo e, ao final, 
-mostrar algum resultado relevante do trabalho (até 10 linhas)._
+**Resumo**
+
+A gestão de frotas em órgãos públicos ainda é realizada, em muitos casos, por meio de métodos manuais e planilhas eletrônicas pouco estruturadas, o que compromete a eficiência operacional e a transparência no uso dos recursos públicos. Este trabalho propõe o desenvolvimento de um sistema web para controle, monitoramento e gestão de frotas de veículos públicos, contemplando processos como cadastro de veículos e motoristas, registro de uso, controle de manutenções e abastecimento. Como resultado, espera-se uma plataforma funcional que centralize informações, automatize alertas e gere relatórios gerenciais, contribuindo para uma administração pública mais eficiente, rastreável e transparente.
 
 ---
 
 
 ## 1. Introdução
 
-_Apresente uma frase introdutória definindo o que será apresentado._
+Este trabalho apresenta o desenvolvimento de um Sistema Web de Gestão de Frota Pública, voltado à digitalização e automação dos processos administrativos relacionados ao controle de veículos em órgãos governamentais.
 
 ### 1.1 Contextualização
 
-_Na **contextualização**, o aluno deve dizer do que se trata o trabalho, em que área ou contexto se insere.
-A **contextualização** deve ser desenvolvida de algo mais genérico para algo mais específico. 
-A citação de pesquisas quantitativas é bem aceita aqui (corretamente referenciadas)._
+A administração pública depende de frotas de veículos para a execução de diversas atividades essenciais, como transporte institucional, fiscalização, manutenção urbana e serviços administrativos em geral. A gestão adequada desses recursos exige controle rigoroso sobre utilização, manutenção, documentação e custos operacionais. No entanto, grande parte dos órgãos públicos brasileiros — prefeituras, secretarias, universidades e autarquias — ainda recorre a métodos manuais ou planilhas eletrônicas pouco estruturadas para realizar esse controle, o que resulta em baixa rastreabilidade, dificuldade de auditoria e maior suscetibilidade a erros e irregularidades.
+
 
 ### 1.2 Problema
 
-_Em seguida o aluno deve caminhar a contextualização para descrever o **problema** que o trabalho trata. 
-O **problema** pode ser algo vivido em uma empresa específica. Neste caso, o aluno deve rapidamente apresentar 
-o cenário de problema da empresa. A empresa só deve ser citada explicitamente se o aluno tiver autorização 
-para tal._
+A ausência de um sistema informatizado adequado para a gestão de frotas públicas gera uma série de problemas operacionais e administrativos. Entre eles destacam-se: a falta de controle sistemático sobre manutenções preventivas e corretivas, o uso indevido ou não autorizado de veículos oficiais, a ausência de rastreabilidade da quilometragem e do consumo de combustível, e a dificuldade de prestação de contas perante órgãos de controle externo, como os tribunais de contas. Esse cenário compromete a eficiência da administração pública e pode gerar desperdício de recursos financeiros, além de riscos administrativos e legais para os gestores responsáveis.
+
 
 ### 1.3 Objetivo geral
 
-_O aluno deve escrever um pequeno parágrafo ou frase com o **objetivo geral** do trabalho. 
-O objetivo deve ser bem direto, específico e definido com verbos de ação (elaborar, propor, avaliar, comparar, desenvolver, etc.). No caso específico deste projeto, o objetivo deste trabalho é desenvolver um sistema para automação de processos para um problema específico._
+Desenvolver um sistema web para controle, monitoramento e gestão eficiente da frota de veículos de órgãos públicos, centralizando informações, automatizando processos administrativos e apoiando a tomada de decisão gerencial.
+
 
 #### 1.3.1 Objetivos específicos
 
-_Apresente também alguns (pelo menos 4) **objetivos específicos** dependendo de onde você vai querer 
-concentrar sua prática investigativa, ou como você irá aprofundar seu trabalho._
+*Implementar o cadastro detalhado de veículos, contemplando informações como placa, modelo, ano de fabricação, secretaria vinculada, status de operação e documentação obrigatória (IPVA, seguro e licenciamento).
+*Permitir o cadastro de motoristas e o registro de cada utilização de veículo, incluindo responsável, destino, data, horário e quilometragem inicial e final.
+*Desenvolver o módulo de controle de manutenções preventivas e corretivas, com registro de ocorrências, histórico por veículo e geração de alertas automáticos baseados em periodicidade ou quilometragem.
+*Implementar o controle de abastecimentos, possibilitando o monitoramento do consumo de combustível e a geração de relatórios analíticos de custos e desempenho da frota.
+Gerar relatórios gerenciais que subsidiem auditorias, prestações de contas e o planejamento estratégico do uso da frota.
 
 ### 1.4 Justificativas
 
-_Mostre também as **justificativas** para o 
-desenvolvimento do seu trabalho e, caso deseje, destaque alguma contribuição do trabalho._
+A implantação de um sistema informatizado de gestão de frota pública justifica-se pela necessidade de maior controle, segurança e transparência na utilização dos veículos oficiais. A digitalização desses processos contribui diretamente para a redução de custos com manutenções emergenciais, o melhor planejamento do uso dos veículos e o fortalecimento do controle documental. Além disso, o sistema facilita auditorias e processos de prestação de contas, aumentando a confiabilidade das informações e promovendo uma gestão pública mais responsável. Do ponto de vista acadêmico, o projeto representa a aplicação prática de conceitos de engenharia de software, modelagem de processos de negócio e desenvolvimento web em um contexto de relevância social.
+
 
 ## 2. Participantes do processo
 
-_Apresente aqui os perfis dos usuários-chave do sistema. Diversas são as informações que podem ser relevantes para a definição dos perfis dos usuários, tais como idade, gênero, aspectos culturais, nível de educação, entre outros. A pesquisa de mercado pode ser uma ferramenta poderosa para se identificar e caracterizar os perfis de usuários. Apresente claramente o papel a ser desempenhado por cada usuário._
+**Gestor de frota —** principal usuário operacional do sistema. Trata-se de um servidor público com nível médio ou superior de escolaridade, responsável pelo acompanhamento geral da frota. Utiliza o sistema para cadastrar veículos, acompanhar manutenções, analisar relatórios e tomar decisões administrativas. Necessita de uma interface clara e com acesso rápido a indicadores e alertas.
+**Motorista —** usuário com perfil operacional, podendo ter diferentes níveis de escolaridade e familiaridade com tecnologia. É responsável por registrar informações de uso do veículo, como quilometragem, destino e horários. A interface destinada a esse perfil deve ser simples e intuitiva.
+**Setor administrativo e financeiro —** servidores responsáveis pelo controle interno de custos e documentação. Utilizam o sistema para acompanhar despesas com combustível e manutenção, além de controlar a regularidade documental dos veículos. Possuem, em geral, nível superior de escolaridade e experiência com ferramentas de gestão.
 
 ## 3. Modelagem do processo de negócio
 
