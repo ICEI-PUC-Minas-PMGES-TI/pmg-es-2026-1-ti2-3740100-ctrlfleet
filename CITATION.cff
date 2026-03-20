@@ -1,34 +1,33 @@
-cff-version: 1.0.1
+cff-version: 2.0.1
 message: Please cite this software using these metadata.
 title: CtrlFleet
 authors:
   - family-names: Fernanda Alves de Andrade
     given-names: Alexia 
   - family-names: Augusto Martins de Carvalho
-    given-names: Guilherme  
+    given-names: Guilherme 
   - family-names: Eduardo Carneiro da Silva
     given-names: Ítalo 
   - family-names: Vial Leite Soares
-    given-names: João Victor
+    given-names: João Victor 
   - family-names: Maia Marques Pinheiro
-    given-names: Lucas
-  - family-names: Galileu Thales de Oliveira
+    given-names: Lucas 
+  - family-names: Galileu Thales Oliveira
     given-names: Rafael 
   - name-suffix: Professor
     affiliation: PUC Minas
     family-names: Soares de Paiva Lacerda
-    given-names: Lucca 
+    given-names: Lucca
   - name-suffix: Professora
     affiliation: PUC Minas
     family-names: Hanne Soares de Andrade
     given-names: Michelle 
 keywords:
   - Gestão
+  - Frotas
   - Veículos
-  - Frota
-  - Motorista
   - Prefeitura
-repository-code: https://github.com/lvcasxm/trabalho-interdisciplinar-aplica-o-processos-e-neg-cios.git
+repository-code: https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-1-ti2-3740100-ctrlfleet.git
 license: CC-BY-4.0
 version: 2.0.0
-date-released: 2026-03-10
+date-released: 2025-03-10
