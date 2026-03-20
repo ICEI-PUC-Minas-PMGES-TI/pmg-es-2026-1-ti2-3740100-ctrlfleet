@@ -68,16 +68,17 @@ A implantação de um sistema informatizado de gestão de frota pública justifi
 **Gestor de frota —** principal usuário operacional do sistema. Trata-se de um servidor público com nível médio ou superior de escolaridade, responsável pelo acompanhamento geral da frota. Utiliza o sistema para cadastrar veículos, acompanhar manutenções, analisar relatórios e tomar decisões administrativas. Necessita de uma interface clara e com acesso rápido a indicadores e alertas.
 **Motorista —** usuário com perfil operacional, podendo ter diferentes níveis de escolaridade e familiaridade com tecnologia. É responsável por registrar informações de uso do veículo, como quilometragem, destino e horários. A interface destinada a esse perfil deve ser simples e intuitiva.
 **Setor administrativo e financeiro —** servidores responsáveis pelo controle interno de custos e documentação. Utilizam o sistema para acompanhar despesas com combustível e manutenção, além de controlar a regularidade documental dos veículos. Possuem, em geral, nível superior de escolaridade e experiência com ferramentas de gestão.
+**Solicitante de veículo —** servidor público responsável por solicitar a utilização de veículos para atividades institucionais, como deslocamentos administrativos, vistorias ou serviços externos. Pode possuir diferentes níveis de escolaridade e familiaridade com sistemas. Utiliza o sistema para registrar solicitações de uso, informando destino, data e finalidade. Necessita de uma interface simples, com foco na facilidade de solicitação e acompanhamento do status do pedido.
 
 ## 3. Modelagem do processo de negócio
 
 ### 3.1. Análise da situação atual
 
-_Apresente uma descrição textual de como os sistemas atuais resolvem o problema que seu projeto se propõe a resolver. Caso sua proposta seja inovadora e não existam processos claramente definidos, **apresente como as tarefas que o seu sistema pretende implementar são executadas atualmente**, mesmo que não se utilize tecnologia computacional._
+Atualmente, a gestão de frotas públicas é feita, em muitos casos, por meio de controles manuais ou planilhas eletrônicas. Essas soluções são pouco organizadas e não integradas, o que dificulta o acesso e a confiabilidade das informações. O controle de uso dos veículos, manutenções, abastecimentos e documentação geralmente é feito de forma separada e manual, aumentando as chances de erros, perda de dados e falta de atualização. Além disso, não há um acompanhamento eficiente das manutenções, que muitas vezes ocorrem apenas quando surgem problemas. Essas limitações dificultam a tomada de decisão, o controle dos recursos e a realização de auditorias, comprometendo a eficiência e a transparência da gestão.
 
 ### 3.2. Descrição geral da proposta de solução
 
-_Apresente aqui uma descrição da sua proposta abordando seus limites e suas ligações com as estratégias do negócio e os objetivos geral e específicos do projeto. Apresente aqui as oportunidades de melhorias._
+A proposta é desenvolver um sistema web para centralizar e automatizar a gestão da frota pública. O sistema permitirá o cadastro de veículos e motoristas, registro de uso, controle de abastecimentos, acompanhamento de manutenções e monitoramento da documentação, além da geração de relatórios e alertas automáticos. Como limitação, o sistema depende do correto preenchimento dos dados pelos usuários e, inicialmente, não terá integração com outros sistemas externos. A solução busca melhorar a organização das informações, reduzir erros e apoiar a tomada de decisão. Entre os principais benefícios estão a redução de custos, maior controle da frota, melhor planejamento de manutenções e mais facilidade em auditorias e prestação de contas.
 
 ### 3.3. Modelagem dos processos
 
