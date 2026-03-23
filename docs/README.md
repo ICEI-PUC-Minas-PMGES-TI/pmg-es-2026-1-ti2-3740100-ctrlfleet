@@ -15,6 +15,7 @@ Professores:
 
 * Lucca Soares de Paiva Lacerda
 * Michelle Hanne Soares de Andrade
+* Luiz Carlos da Silva
 
 ---
 
