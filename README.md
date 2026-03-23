@@ -16,7 +16,7 @@ A plataforma contempla quatro processos principais: cadastro e gestão de veícu
 
 * Lucca Soares de Paiva Lacerda
 * Michelle Hanne Soares de Andrade
-* Nome completo do professor 3
+* Luiz Carlos da Silva
 
 ## Instruções de utilização
 

@@ -17,7 +17,11 @@ authors:
   - name-suffix: Professor
     affiliation: PUC Minas
     family-names: Soares de Paiva Lacerda
-    given-names: Lucca
+    given-names: Lucca 
+  - name-suffix: Professor
+    affiliation: PUC Minas
+    family-names: Carlos da Silva
+    given-names: Luiz
   - name-suffix: Professora
     affiliation: PUC Minas
     family-names: Hanne Soares de Andrade
