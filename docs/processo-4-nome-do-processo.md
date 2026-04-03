@@ -1,67 +1,80 @@
-### 3.3.4 Processo 4 – NOME DO PROCESSO
+### 3.3.4 Processo 4 – Gestão de Reserva
 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 4. 
-Em seguida, apresente o modelo do processo 4, descrito no padrão BPMN._
+O processo de reserva de veículos representa uma das principais lacunas nos sistemas manuais atualmente adotados pelos órgãos públicos. Na situação atual, solicitações de uso são realizadas de forma verbal ou por e-mail, sem padronização, sem registro formal e sem mecanismo de aprovação estruturado. Isso favorece conflitos de agenda, uso não autorizado de veículos e ausência de rastreabilidade sobre quem solicitou, quem aprovou e qual foi a finalidade do deslocamento.
 
-![Exemplo de um Modelo BPMN do PROCESSO 4](images/process.png "Modelo BPMN do Processo 4.")
+A principal oportunidade de melhoria consiste em digitalizar e formalizar o fluxo de solicitação e aprovação de reservas. O sistema exibirá apenas veículos e motoristas disponíveis no período informado, eliminando a necessidade de uma etapa explícita de verificação de conflitos. Cada reserva deverá ser justificada e aprovada pelo gestor de frota antes de ser efetivada. Após a decisão, o solicitante será notificado automaticamente, e os dados da reserva aprovada alimentarão diretamente o módulo de registro de uso, garantindo rastreabilidade completa sem retrabalho.
 
+O modelo BPMN do processo encontra-se representado a seguir:
+
+![Modelo BPMN do Processo 4 – Gestão de Reserva](images/process.png "Modelo BPMN do Processo 4.")
+
+---
 
 #### Detalhamento das atividades
 
-_Descreva aqui cada uma das propriedades das atividades do processo 4. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+**Realizar Solicitação de Reserva**
 
-_Os tipos de dados a serem utilizados são:_
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+|---|---|---|---|
+| Nome do solicitante | Caixa de Texto | Somente leitura | Usuário logado |
+| Setor / Secretaria | Caixa de Texto | Somente leitura | Setor do usuário logado |
+| Data de saída | Data | Igual ou posterior à data atual; obrigatório | — |
+| Horário de saída | Hora | Obrigatório | — |
+| Data de retorno previsto | Data | Igual ou posterior à data de saída; obrigatório | — |
+| Horário de retorno previsto | Hora | Obrigatório | — |
+| Destino | Caixa de Texto | Obrigatório | — |
+| Finalidade / Justificativa | Área de Texto | Mínimo de 20 caracteres; obrigatório | — |
+| Veículo | Seleção única | Exibe apenas veículos disponíveis no período informado; obrigatório | — |
+| Motorista | Seleção única | Exibe apenas motoristas disponíveis no período informado; obrigatório | — |
 
-_* **Área de texto** - campo texto de múltiplas linhas_
-
-_* **Caixa de texto** - campo texto de uma linha_
-
-_* **Número** - campo numérico_
-
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
-
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
-
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
-
-_* **Imagem** - campo contendo uma imagem_
-
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
-
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
-
-_* **Arquivo** - campo de upload de documento_
-
-_* **Link** - campo que armazena uma URL_
-
-_* **Tabela** - campo formado por uma matriz de valores_
-
-**Nome da atividade 1**
-
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
-
-| **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
+| **Comandos** | **Destino** | **Tipo** |
+|---|---|---|
+| Enviar solicitação | Aprovação da Reserva | default |
+| Cancelar | Início do Processo | cancel |
 
 
-**Nome da atividade 2**
+**Aprovar Reserva (Gestor de Frota)**
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
+A solicitação é encaminhada ao gestor de frota, que analisa as informações e decide pela aprovação ou reprovação.
 
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+|---|---|---|---|
+| Dados da solicitação | Tabela | Somente leitura | — |
+| Decisão | Seleção única | Aprovado / Reprovado; obrigatório | — |
+| Parecer | Área de Texto | Obrigatório em caso de reprovação | — |
+| Data e hora da decisão | Data e Hora | Preenchida automaticamente | Data e hora atuais |
+
+| **Comandos** | **Destino** | **Tipo** |
+|---|---|---|
+| Confirmar decisão | Notificação ao Solicitante | default |
+
+
+**Notificar Solicitante**
+
+O sistema envia automaticamente uma notificação ao solicitante com o resultado da análise do gestor.
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+|---|---|---|---|
+| Status da reserva | Caixa de Texto | Aprovada / Reprovada; somente leitura | — |
+| Parecer do gestor | Área de Texto | Somente leitura | — |
+| Dados confirmados da reserva | Tabela | Exibido apenas em caso de aprovação; somente leitura | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+|---|---|---|
+| Visualizar reserva | Consulta de Reservas | default |
+| Voltar ao início | Início do Processo | cancel |
+
+
+**Registrar Reserva**
+
+Executado automaticamente pelo sistema após a aprovação. Bloqueia o veículo e o motorista no período e cria o rascunho de registro de uso correspondente.
+
+| **Campo** | **Tipo** | **Restrições** | **Valor default** |
+|---|---|---|---|
+| Código da reserva | Caixa de Texto | Gerado automaticamente; somente leitura | — |
+| Status | Seleção única | Confirmada / Em andamento / Concluída / Cancelada | Confirmada |
+| Vínculo com registro de uso | Link | Gerado automaticamente | — |
+
+| **Comandos** | **Destino** | **Tipo** |
+|---|---|---|
+| Concluir | Fim do Processo | default |
