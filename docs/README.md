@@ -87,9 +87,9 @@ A proposta é desenvolver um sistema web para centralizar e automatizar a gestã
 
 [PROCESSO 2 - Gestão de pessoas](processo-2-gestao-de-pessoas.md "Detalhamento do Processo 2.")
 
-[PROCESSO 3 - Gestão de reservas](processo-3-gestao-de-manutencao.md "Detalhamento do Processo 3.")
+[PROCESSO 3 - Gestão de manutenção](processo-3-gestao-de-manutencao.md "Detalhamento do Processo 3.")
 
-[PROCESSO 4 - Gestão de manuteção](processo-4-gestao-de-reserva.md "Detalhamento do Processo 4.")
+[PROCESSO 4 - Gestão de reservas](processo-4-gestao-de-reserva.md "Detalhamento do Processo 4.")
 
 ## 4. Projeto da solução
 
