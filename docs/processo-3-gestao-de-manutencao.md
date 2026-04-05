@@ -1,7 +1,10 @@
-### 3.3.3 Processo 3 – NOME DO PROCESSO
+### 3.3.3 Processo 3 – Gestão de Manutenção
 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 3. 
-Em seguida, apresente o modelo do processo 3, descrito no padrão BPMN._
+O processo de gestão de manutenção representa uma das principais lacunas nos controles manuais atualmente adotados pelas organizações. Na situação atual, o acompanhamento de manutenções preventivas e corretivas é frequentemente realizado de forma descentralizada, dependendo de planilhas isoladas, anotações informais ou da própria memória dos motoristas. Isso favorece a ocorrência de quebras inesperadas, o aumento significativo dos custos operacionais, riscos à segurança dos condutores e a ausência de rastreabilidade sobre o histórico de serviços e peças substituídas em cada veículo.
+
+A principal oportunidade de melhoria consiste em digitalizar e automatizar o ciclo de acompanhamento e registro dos reparos da frota. O sistema monitorará a quilometragem e o tempo de uso de cada veículo, gerando alertas automáticos para as manutenções preventivas e eliminando a dependência de verificações manuais. No caso das manutenções corretivas, os relatos de falhas poderão ser registrados de forma padronizada. Cada ordem de serviço deverá ser avaliada e aprovada pelo gestor de frota antes da execução na oficina. Após a conclusão, os dados de custos e o tempo de inatividade alimentarão diretamente o módulo de histórico do veículo e os relatórios de despesas, garantindo rastreabilidade completa sem retrabalho.
+
+O modelo BPMN do processo encontra-se representado a seguir:
 
 ![Exemplo de um Modelo BPMN do PROCESSO 3](images/process.png "Modelo BPMN do Processo 3.")
 
