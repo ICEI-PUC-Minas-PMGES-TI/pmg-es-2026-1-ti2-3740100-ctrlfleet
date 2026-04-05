@@ -1,67 +1,101 @@
 ### 3.3.1 Processo 1 – NOME DO PROCESSO
 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 1. 
-Em seguida, apresente o modelo do processo 1, descrito no padrão BPMN._
+O processo de gestão de frotas, especialmente no controle de veículos, documentos e histórico, ainda apresenta falhas quando feito de forma manual. Atualmente, muitas informações são controladas por planilhas separadas ou anotações, o que pode causar vencimento de documentos, uso de veículos irregulares e dificuldade para acompanhar o histórico da frota.
+
+A melhoria está em utilizar um sistema digital que centralize todas essas informações. Nele, será possível cadastrar veículos, evitar dados duplicados e acompanhar automaticamente os prazos de documentos como IPVA, seguro e licenciamento, com alertas antes do vencimento. Caso um documento expire, o veículo pode ser bloqueado até a regularização.
+
+Além disso, o sistema permitirá atualizar documentos de forma simples, controlar o status dos veículos (ativo, em manutenção, reservado ou inativo) e registrar todas as movimentações em um histórico completo. Também será possível registrar a baixa de veículos, mantendo todas as informações salvas. Assim, o processo se torna mais organizado, seguro e eficiente, reduzindo erros e retrabalho.
 
 ![Exemplo de um Modelo BPMN do PROCESSO 1](images/gestao_de_frotas_bpmn.png "Modelo BPMN do Processo 1.")
 
 #### Detalhamento das atividades
 
-_Descreva aqui cada uma das propriedades das atividades do processo 1. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+**Cadastrar Veículo**
 
-_Os tipos de dados a serem utilizados são:_
+| **Campo**              | **Tipo**       | **Restrições**                              | **Valor default** |
+| ---------------------- | -------------- | ------------------------------------------- | ----------------- |
+| Placa                  | Caixa de Texto | Única; obrigatório                          | —                 |
+| Modelo                 | Caixa de Texto | Obrigatório                                 | —                 |
+| Ano                    | Numérico       | Obrigatório                                 | —                 |
+| Secretaria responsável | Seleção única  | Obrigatório                                 | —                 |
+| Status                 | Seleção única  | Ativo / Em manutenção / Reservado / Inativo | Ativo             |
+| Categoria CNH          | Seleção única  | Obrigatório                                 | —                 |
 
-_* **Área de texto** - campo texto de múltiplas linhas_
+| **Comandos**   | **Destino**            | **Tipo** |
+| -------------- | ---------------------- | -------- |
+| Salvar veículo | Registro de Documentos | default  |
+| Cancelar       | Início do Processo     | cancel   |
 
-_* **Caixa de texto** - campo texto de uma linha_
+**Registrar Documentos**
 
-_* **Número** - campo numérico_
+| **Campo**     | **Tipo** | **Restrições** | **Valor default** |
+| ------------- | -------- | -------------- | ----------------- |
+| IPVA          | Data     | Obrigatório    | —                 |
+| Seguro        | Data     | Obrigatório    | —                 |
+| Licenciamento | Data     | Obrigatório    | —                 |
 
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
+| **Comandos**      | **Destino**                 | **Tipo** |
+| ----------------- | --------------------------- | -------- |
+| Salvar documentos | Monitoramento de Documentos | default  |
 
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
+**Monitorar Documentos (Sistema)**
 
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
+Executado automaticamente pelo sistema, que verifica os prazos de validade dos documentos.
 
-_* **Imagem** - campo contendo uma imagem_
+| **Campo**           | **Tipo**       | **Restrições**                           | **Valor default** |
+| ------------------- | -------------- | ---------------------------------------- | ----------------- |
+| Status do documento | Caixa de Texto | Válido / Próximo do vencimento / Vencido | —                 |
+| Alerta              | Notificação    | Automático                               | —                 |
+| Situação do veículo | Caixa de Texto | Bloqueado se vencido                     | —                 |
 
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
+| **Comandos** | **Destino**          | **Tipo** |
+| ------------ | -------------------- | -------- |
+| Gerar alerta | Atualizar Documentos | default  |
 
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
+**Atualizar Documentos**
 
-_* **Arquivo** - campo de upload de documento_
+| **Campo**         | **Tipo**      | **Restrições**                | **Valor default** |
+| ----------------- | ------------- | ----------------------------- | ----------------- |
+| Tipo de documento | Seleção única | IPVA / Seguro / Licenciamento | —                 |
+| Nova validade     | Data          | Obrigatório                   | —                 |
+| Comprovante       | Upload        | Opcional                      | —                 |
 
-_* **Link** - campo que armazena uma URL_
+| **Comandos**       | **Destino**          | **Tipo** |
+| ------------------ | -------------------- | -------- |
+| Salvar atualização | Histórico do Veículo | default  |
+| Cancelar           | Início do Processo   | cancel   |
 
-_* **Tabela** - campo formado por uma matriz de valores_
+**Controlar Status do Veículo**
 
+| **Campo** | **Tipo**      | **Restrições**                              | **Valor default** |
+| --------- | ------------- | ------------------------------------------- | ----------------- |
+| Status    | Seleção única | Ativo / Em manutenção / Reservado / Inativo | —                 |
 
-**Nome da atividade 1**
+| **Comandos**     | **Destino**              | **Tipo** |
+| ---------------- | ------------------------ | -------- |
+| Atualizar status | Disponibilidade da Frota | default  |
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
+**Consultar Histórico**
 
-| **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
+| **Campo**        | **Tipo** | **Restrições**                        | **Valor default** |
+| ---------------- | -------- | ------------------------------------- | ----------------- |
+| Movimentações    | Tabela   | Somente leitura                       | —                 |
+| Tipo de registro | Filtro   | Uso / Manutenção / Documento / Status | —                 |
 
+| **Comandos**        | **Destino**         | **Tipo** |
+| ------------------- | ------------------- | -------- |
+| Visualizar detalhes | Registro específico | default  |
+| Voltar              | Início do Processo  | cancel   |
 
-**Nome da atividade 2**
+**Registrar Baixa do Veículo**
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
+| **Campo**       | **Tipo**       | **Restrições**  | **Valor default** |
+| --------------- | -------------- | --------------- | ----------------- |
+| Motivo da baixa | Área de Texto  | Obrigatório     | —                 |
+| Data da baixa   | Data           | Obrigatório     | Data atual        |
+| Status final    | Caixa de Texto | Somente leitura | Inativo           |
 
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+| **Comandos**    | **Destino**          | **Tipo** |
+| --------------- | -------------------- | -------- |
+| Confirmar baixa | Histórico do Veículo | default  |
+| Cancelar        | Início do Processo   | cancel   |
