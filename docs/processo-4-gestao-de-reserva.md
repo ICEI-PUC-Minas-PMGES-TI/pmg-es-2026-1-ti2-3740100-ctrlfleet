@@ -6,7 +6,7 @@ A principal oportunidade de melhoria consiste em digitalizar e formalizar o flux
 
 O modelo BPMN do processo encontra-se representado a seguir:
 
-![Modelo BPMN do Processo 4 – Gestão de Reserva](images/process.png "Modelo BPMN do Processo 4.")
+![Modelo BPMN do Processo 4 – Gestão de Reserva](images/gestao_de_reservas_bpmn.png "Modelo BPMN do Processo 4.")
 
 ---
 
