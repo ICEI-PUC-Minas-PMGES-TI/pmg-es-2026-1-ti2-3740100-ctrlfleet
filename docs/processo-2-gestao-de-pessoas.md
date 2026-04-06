@@ -7,7 +7,7 @@ A melhoria está na utilização de um sistema digital que centralize essas info
 Além disso, será possível atualizar habilitações com facilidade, gerenciar a escala de trabalho dos motoristas e garantir que apenas condutores disponíveis e habilitados sejam alocados. Para os usuários solicitantes, o sistema permitirá definir permissões de acesso e controlar quem pode realizar solicitações. Também será possível inativar motoristas e usuários quando necessário, mantendo todo o histórico registrado. Dessa forma, o processo se torna mais organizado, seguro e eficiente, reduzindo erros e melhorando o controle da frota.
 
 
-![Exemplo de um Modelo BPMN do PROCESSO 2](images/process.png "Modelo BPMN do Processo 2.")
+![Exemplo de um Modelo BPMN do PROCESSO 2](images/gestao_de_pessoas_bpmn.png "Modelo BPMN do Processo 2.")
 
 
 #### Detalhamento das atividades
