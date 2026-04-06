@@ -16,6 +16,7 @@ Registrar Solicitação de Manutenção. Atividade inicial onde o motorista rela
 **Registrar Solicitação de Manutenção**
 
 | **Campo**              | **Tipo**         | **Restrições**                       | **Valor default** |
+|------------------------|------------------|--------------------------------------|-------------------|
 | Veículo                | Seleção única    | Obrigatório                          | -                 |
 | Origem da Solicitação  | Seleção única    | Preventiva / Corretiva               | Corretiva         |
 | Quilometragem Atual    | Número           | Obrigatório                          | -                 |
@@ -24,6 +25,7 @@ Registrar Solicitação de Manutenção. Atividade inicial onde o motorista rela
 | Data da Identificação  | Data             | Não pode ser futura                  | Data atual        |
 
 | **Comandos**         |  **Destino**                   | **Tipo** |
+|----------------------|--------------------------------|----------|
 | Enviar solicitação   | Analisar Solicitação           | default  |
 | Cancelar             | Início do Processo             | cancel   |
 
@@ -31,56 +33,66 @@ Registrar Solicitação de Manutenção. Atividade inicial onde o motorista rela
 **Analisar Solicitação (Gestor de Frota)**
 
 | **Campo**                | **Tipo**      | **Restrições**                    | **Valor default** |
+|--------------------------|---------------|-----------------------------------|-------------------|
 | Dados do Veículo / Falha | Tabela        | Somente leitura                   | -                 |
 | Histórico de Manutenção  | Link          | Acesso ao prontuário do veículo   | -                 |
 | Decisão de Aprovação     | Seleção única | Aprovado/Reprovado/Obrigatório    | -                 |                   
 | Prioridade               | Seleção única | Baixa / Média / Alta              | Média             |
 
 | **Comandos**         |  **Destino**                     | **Tipo**          |
+|----------------------|----------------------------------|-------------------|
 | Confirmar Análise    | Aprovar Manutenção? (Gateway)    | default           |
 
 
 **Registrar Motivo do Indeferimento**
 
 | **Campo**                 | **Tipo**         | **Restrições**     | **Valor default** |
+|---------------------------|------------------|--------------------|-------------------|
 | Justificativa da Reprova  | Área de Texto    | Obrigatório        | -                 |
 | Data da Decisão           | Data e Hora      | Somente leitura    | Data e hora atual |
 
 | **Comandos**    |  **Destino**                   | **Tipo** |
+|-----------------|--------------------------------|----------|
 | Finalizar       | Solicitação indeferida (Fim)   | default  |
 
 
 **Autorizar e Encaminhar para Oficina**
 
 | **Campo**              | **Tipo**         | **Restrições**  | **Valor default** |
+|------------------------|------------------|-----------------|-------------------|
 | Oficina Credenciada    | Seleção única    | Obrigatóro      | -                 |
 | Prazo Previsto (Dias)  | Número           | Mínimo 1        | 2                 |
 | Ordem de Serviço (PDF) | Arquivo          | Opcional        | -                 |
 
 | **Comandos**         |  **Destino**                   | **Tipo** |
+|----------------------|--------------------------------|----------|
 | Iniciar Manutenção   | Registrar Conclusão e Custos   | default  |
 
 
 **Registrar Conclusão e Custos**
 
 | **Campo**                 | **Tipo**      | **Restrições**                       | **Valor default** |
+|---------------------------|---------------|--------------------------------------|-------------------|
 | Detalhamento de Serviços  | Tabela        | Descrição, Qtd e Valor Unitário      | -                 |
 | Valor Total Final         | Número        | Somente leitura (Soma da tabela)     | -                 |
 | Comprovante / NF          | Arquivo       | Obrigatório (PDF ou Imagem)          | -                 |
 | Garantia do Serviço       | Seleção única | 3 meses / 6 meses / 12 meses         | -                 |
 
 | **Comandos**                |  **Destino**                   | **Tipo** |
+|-----------------------------|--------------------------------|----------|
 | Finalizar Ordem de Serviço  | Atualizar Histórico e Alertas  | default  |
 
 
 **Atualizar Histórico e Alertas (Tarefa de Serviço)**
 
 | **Campo**               | **Tipo**       | **Restrições**                | **Valor default** |
-| Status do Veículo       | Seleção única  | Somente leitura               | Disponível
+|-------------------------|----------------|-------------------------------|-------------------|
+| Status do Veículo       | Seleção única  | Somente leitura               | Disponível        |
 | Próxima Revisão (KM)    | Número         | Calculado automaticamente     | -                 |
 | Custo Total Acumulado   | Número         | Atualizado no banco de dados  | -                 |
 
 | **Comandos**  |  **Destino**  | **Tipo** |
+|---------------|---------------|----------|
 | Concluir      | Fim           | default  |
 
 
