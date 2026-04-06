@@ -11,60 +11,78 @@ O modelo BPMN do processo encontra-se representado a seguir:
 
 #### Detalhamento das atividades
 
-_Descreva aqui cada uma das propriedades das atividades do processo 3. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+Registrar Solicitação de Manutenção. Atividade inicial onde o motorista relata o problema ou confirma a necessidade de preventiva.
 
-_Os tipos de dados a serem utilizados são:_
+**Registrar Solicitação de Manutenção**
 
-_* **Área de texto** - campo texto de múltiplas linhas_
-
-_* **Caixa de texto** - campo texto de uma linha_
-
-_* **Número** - campo numérico_
-
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
-
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
-
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
-
-_* **Imagem** - campo contendo uma imagem_
-
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
-
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
-
-_* **Arquivo** - campo de upload de documento_
-
-_* **Link** - campo que armazena uma URL_
-
-_* **Tabela** - campo formado por uma matriz de valores_
-
-**Nome da atividade 1**
-
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
+| **Campo**              | **Tipo**         | **Restrições**                       | **Valor default** |
+| Veículo                | Seleção única    | Obrigatório                          | -                 |
+| Origem da Solicitação  | Seleção única    | Preventiva / Corretiva               | Corretiva         |
+| Quilometragem Atual    | Número           | Obrigatório                          | -                 |
+| Descrição do Problema  | Área de Texto    | Mínimo de 15 caracteres; obrigatório | -                 |
+| Evidências (Fotos)     | Imagem           | Opcional                             | -                 |
+| Data da Identificação  | Data             | Não pode ser futura                  | Data atual        |
 
 | **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
+| Enviar solicitação   | Analisar Solicitação           | default  |
+| Cancelar             | Início do Processo             | cancel   |
 
 
-**Nome da atividade 2**
+**Analisar Solicitação (Gestor de Frota)**
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
+| **Campo**                | **Tipo**      | **Restrições**                    | **Valor default** |
+| Dados do Veículo / Falha | Tabela        | Somente leitura                   | -                 |
+| Histórico de Manutenção  | Link          | Acesso ao prontuário do veículo   | -                 |
+| Decisão de Aprovação     | Seleção única | Aprovado/Reprovado/Obrigatório    | -                 |                   
+| Prioridade               | Seleção única | Baixa / Média / Alta              | Média             |
 
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+| **Comandos**         |  **Destino**                     | **Tipo**          |
+| Confirmar Análise    | Aprovar Manutenção? (Gateway)    | default           |
+
+
+**Registrar Motivo do Indeferimento**
+
+| **Campo**                 | **Tipo**         | **Restrições**     | **Valor default** |
+| Justificativa da Reprova  | Área de Texto    | Obrigatório        | -                 |
+| Data da Decisão           | Data e Hora      | Somente leitura    | Data e hora atual |
+
+| **Comandos**    |  **Destino**                   | **Tipo** |
+| Finalizar       | Solicitação indeferida (Fim)   | default  |
+
+
+**Autorizar e Encaminhar para Oficina**
+
+| **Campo**              | **Tipo**         | **Restrições**  | **Valor default** |
+| Oficina Credenciada    | Seleção única    | Obrigatóro      | -                 |
+| Prazo Previsto (Dias)  | Número           | Mínimo 1        | 2                 |
+| Ordem de Serviço (PDF) | Arquivo          | Opcional        | -                 |
+
+| **Comandos**         |  **Destino**                   | **Tipo** |
+| Iniciar Manutenção   | Registrar Conclusão e Custos   | default  |
+
+
+**Registrar Conclusão e Custos**
+
+| **Campo**                 | **Tipo**      | **Restrições**                       | **Valor default** |
+| Detalhamento de Serviços  | Tabela        | Descrição, Qtd e Valor Unitário      | -                 |
+| Valor Total Final         | Número        | Somente leitura (Soma da tabela)     | -                 |
+| Comprovante / NF          | Arquivo       | Obrigatório (PDF ou Imagem)          | -                 |
+| Garantia do Serviço       | Seleção única | 3 meses / 6 meses / 12 meses         | -                 |
+
+| **Comandos**                |  **Destino**                   | **Tipo** |
+| Finalizar Ordem de Serviço  | Atualizar Histórico e Alertas  | default  |
+
+
+**Atualizar Histórico e Alertas (Tarefa de Serviço)**
+
+| **Campo**               | **Tipo**       | **Restrições**                | **Valor default** |
+| Status do Veículo       | Seleção única  | Somente leitura               | Disponível
+| Próxima Revisão (KM)    | Número         | Calculado automaticamente     | -                 |
+| Custo Total Acumulado   | Número         | Atualizado no banco de dados  | -                 |
+
+| **Comandos**  |  **Destino**  | **Tipo** |
+| Concluir      | Fim           | default  |
+
+
+
+
