@@ -6,7 +6,7 @@ A principal oportunidade de melhoria consiste em digitalizar e automatizar o cic
 
 O modelo BPMN do processo encontra-se representado a seguir:
 
-![Exemplo de um Modelo BPMN do PROCESSO 3](images/process.png "Modelo BPMN do Processo 3.")
+![Exemplo de um Modelo BPMN do PROCESSO 3](images/gestao_de_manutencao_bpmn.png "Modelo BPMN do Processo 3.")
 
 
 #### Detalhamento das atividades
