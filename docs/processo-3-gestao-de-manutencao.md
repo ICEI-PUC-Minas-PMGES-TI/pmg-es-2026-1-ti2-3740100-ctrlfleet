@@ -37,7 +37,7 @@ Registrar Solicitação de Manutenção. Atividade inicial onde o motorista rela
 | Dados do Veículo / Falha | Tabela        | Somente leitura                   | -                 |
 | Histórico de Manutenção  | Link          | Acesso ao prontuário do veículo   | -                 |
 | Decisão de Aprovação     | Seleção única | Aprovado/Reprovado/Obrigatório    | -                 |                   
-| Prioridade               | Seleção única | Baixa / Média / Alta              | Média             |
+| Prioridade               | Seleção única | Baixa / Média / Alta              | Baixa             |
 
 | **Comandos**         |  **Destino**                     | **Tipo**          |
 |----------------------|----------------------------------|-------------------|
