@@ -12,7 +12,7 @@
 
 | **Dimensão**   | **Tecnologia**  | **Uso no Projeto** |
 | ---            | ---             |  ---                  |
-| SGBD           | MySQL 8           | Armazenamento relacional de dados (usuários, veículos, reservas)    |
+| SGBD           | PostgreSQL 18           | Armazenamento relacional de dados (usuários, veículos, reservas)    |
 | Front end      | React+Tailwind+JavaScript   | Interface do sistema para admin, gestor, solicitante e motorista    |
 | Back end       | Java 21 + SpringBoot | Implementação da API e regras de negócio       |
 | Deploy         | Render    | Hospedagem e disponibilização da aplicação     |
