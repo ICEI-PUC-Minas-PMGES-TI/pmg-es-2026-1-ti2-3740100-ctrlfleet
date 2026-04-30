@@ -4,7 +4,7 @@ import { SectionCard } from '../components/common/SectionCard';
 import { StatCard } from '../components/common/StatCard';
 import { UserFilters } from '../components/admin/UserFilters';
 import { UserTable } from '../components/admin/UserTable';
-import { adminUsers, userRoleOptions, userStatusTabs } from '../data/adminData';
+import { adminSecretariats, adminUsers, userRoleOptions, userStatusTabs } from '../data/adminData';
 
 function filterByStatus(user, status) {
   return status === 'Todos' || user.status === status;
@@ -14,24 +14,37 @@ function filterByRole(user, role) {
   return role === 'Perfil (Todos)' || user.role === role;
 }
 
+function onlyDigits(value) {
+  return value.replace(/\D/g, '');
+}
+
 export function AdminUsersPage() {
-  const [search, setSearch] = useState('');
+  const [nameSearch, setNameSearch] = useState('');
+  const [cpfSearch, setCpfSearch] = useState('');
+  const [selectedSecretariat, setSelectedSecretariat] = useState('Secretaria (Todas)');
   const [selectedRole, setSelectedRole] = useState('Perfil (Todos)');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
 
   const filteredUsers = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedNameSearch = nameSearch.trim().toLowerCase();
+    const cpfSearchDigits = onlyDigits(cpfSearch);
 
     return adminUsers.filter((user) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        user.name.toLowerCase().includes(normalizedSearch) ||
-        user.email.toLowerCase().includes(normalizedSearch) ||
-        user.secretariat.toLowerCase().includes(normalizedSearch);
+      const matchesName =
+        normalizedNameSearch.length === 0 || user.name.toLowerCase().includes(normalizedNameSearch);
+      const matchesCpf = cpfSearchDigits.length === 0 || onlyDigits(user.cpf).includes(cpfSearchDigits);
+      const matchesSecretariat =
+        selectedSecretariat === 'Secretaria (Todas)' || user.secretariat === selectedSecretariat;
 
-      return matchesSearch && filterByStatus(user, selectedStatus) && filterByRole(user, selectedRole);
+      return (
+        matchesName &&
+        matchesCpf &&
+        matchesSecretariat &&
+        filterByStatus(user, selectedStatus) &&
+        filterByRole(user, selectedRole)
+      );
     });
-  }, [search, selectedRole, selectedStatus]);
+  }, [cpfSearch, nameSearch, selectedRole, selectedSecretariat, selectedStatus]);
 
   const summaryCards = useMemo(
     () => [
@@ -81,12 +94,17 @@ export function AdminUsersPage() {
 
       <SectionCard>
         <UserFilters
+          cpfSearch={cpfSearch}
+          nameSearch={nameSearch}
+          onCpfSearchChange={setCpfSearch}
+          onNameSearchChange={setNameSearch}
           onRoleChange={setSelectedRole}
-          onSearchChange={setSearch}
+          onSecretariatChange={setSelectedSecretariat}
           onStatusChange={setSelectedStatus}
           role={selectedRole}
           roleOptions={userRoleOptions}
-          search={search}
+          secretariat={selectedSecretariat}
+          secretariats={['Secretaria (Todas)', ...adminSecretariats]}
           selectedStatus={selectedStatus}
           statusTabs={userStatusTabs}
         />

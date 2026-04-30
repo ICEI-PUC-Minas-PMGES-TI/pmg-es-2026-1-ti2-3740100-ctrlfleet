@@ -428,6 +428,18 @@ a {
   align-items: center;
 }
 
+.admin-user-filters {
+  grid-template-columns: repeat(3, minmax(220px, 1fr)) 220px;
+}
+
+.admin-user-filters__secretariat {
+  grid-column: 4;
+}
+
+.admin-user-filters .filter-tabs {
+  grid-column: 1 / 4;
+}
+
 .search-field,
 .select-field,
 .form-field input,
@@ -622,6 +634,15 @@ a {
 .icon-button--label {
   width: auto;
   padding: 0 14px;
+}
+
+.icon-button--danger {
+  color: var(--danger);
+}
+
+.icon-button--danger:hover {
+  border-color: rgba(209, 79, 74, 0.28);
+  background: var(--danger-soft);
 }
 
 .vehicle-card-list {

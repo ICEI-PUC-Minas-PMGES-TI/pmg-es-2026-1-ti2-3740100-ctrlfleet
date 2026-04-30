@@ -9,12 +9,13 @@ export function UserTable({ users }) {
         <table className="fleet-table admin-table">
           <thead>
             <tr>
-              <th>Usuário</th>
+              <th>Usuario</th>
+              <th>CPF</th>
               <th>Perfil</th>
               <th>Secretaria</th>
               <th>Status</th>
-              <th>Último acesso</th>
-              <th>Ações</th>
+              <th>Ultimo acesso</th>
+              <th>Acoes</th>
             </tr>
           </thead>
           <tbody>
@@ -31,6 +32,7 @@ export function UserTable({ users }) {
                     </div>
                   </div>
                 </td>
+                <td>{user.cpf}</td>
                 <td>{user.role}</td>
                 <td>{user.secretariat}</td>
                 <td>
@@ -42,8 +44,8 @@ export function UserTable({ users }) {
                     <Link aria-label={`Editar ${user.name}`} className="icon-button" to={`/admin/usuarios/${user.id}/editar`}>
                       <Icon name="edit" />
                     </Link>
-                    <button aria-label={`Revisar permissões de ${user.name}`} className="icon-button" type="button">
-                      <Icon name="shield" />
+                    <button aria-label={`Inativar ${user.name}`} className="icon-button icon-button--danger" type="button">
+                      <Icon name="close" />
                     </button>
                   </div>
                 </td>
@@ -68,6 +70,10 @@ export function UserTable({ users }) {
             </div>
             <dl className="vehicle-card__meta">
               <div>
+                <dt>CPF</dt>
+                <dd>{user.cpf}</dd>
+              </div>
+              <div>
                 <dt>Perfil</dt>
                 <dd>{user.role}</dd>
               </div>
@@ -76,14 +82,20 @@ export function UserTable({ users }) {
                 <dd>{user.secretariat}</dd>
               </div>
               <div>
-                <dt>Último acesso</dt>
+                <dt>Ultimo acesso</dt>
                 <dd>{user.lastAccess}</dd>
               </div>
             </dl>
-            <Link className="icon-button icon-button--label" to={`/admin/usuarios/${user.id}/editar`}>
-              <Icon name="edit" />
-              <span>Editar usuário</span>
-            </Link>
+            <div className="table-actions">
+              <Link className="icon-button icon-button--label" to={`/admin/usuarios/${user.id}/editar`}>
+                <Icon name="edit" />
+                <span>Editar usuario</span>
+              </Link>
+              <button className="icon-button icon-button--label icon-button--danger" type="button">
+                <Icon name="close" />
+                <span>Inativar</span>
+              </button>
+            </div>
           </article>
         ))}
       </div>

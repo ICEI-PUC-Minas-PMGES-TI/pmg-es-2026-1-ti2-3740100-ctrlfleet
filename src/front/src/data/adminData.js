@@ -20,6 +20,7 @@ export const adminSecretariats = ['Gabinete', 'Saúde', 'Educação', 'Obras', '
 
 export const adminUsers = [
   {
+    cpf: '123.456.789-10',
     email: 'ana.costa@ctrlfleet.gov.br',
     id: 'ana-costa',
     lastAccess: 'Hoje, 09:42',
@@ -29,6 +30,7 @@ export const adminUsers = [
     status: 'Ativo',
   },
   {
+    cpf: '234.567.890-21',
     email: 'joao.duarte@ctrlfleet.gov.br',
     id: 'joao-duarte',
     lastAccess: 'Ontem, 17:15',
@@ -38,6 +40,7 @@ export const adminUsers = [
     status: 'Ativo',
   },
   {
+    cpf: '345.678.901-32',
     email: 'marina.silva@ctrlfleet.gov.br',
     id: 'marina-silva',
     lastAccess: 'Aguardando primeiro acesso',
@@ -47,6 +50,7 @@ export const adminUsers = [
     status: 'Pendente',
   },
   {
+    cpf: '456.789.012-43',
     email: 'carlos.rocha@ctrlfleet.gov.br',
     id: 'carlos-rocha',
     lastAccess: '25/04/2026, 11:03',
@@ -56,6 +60,7 @@ export const adminUsers = [
     status: 'Bloqueado',
   },
   {
+    cpf: '567.890.123-54',
     email: 'beatriz.lima@ctrlfleet.gov.br',
     id: 'beatriz-lima',
     lastAccess: '18/04/2026, 08:21',
