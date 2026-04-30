@@ -112,6 +112,13 @@ a {
   color: #ee5e44;
 }
 
+.sidebar__logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
 .sidebar__brand strong,
 .mobile-topbar__brand span {
   display: block;
@@ -201,15 +208,18 @@ a {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #f06b4e, #c73d2c);
+  font-size: 0.88rem;
   font-weight: 800;
+  line-height: 1;
+  text-align: center;
 }
 
-.sidebar__profile strong,
-.sidebar__profile span {
+.sidebar__profile div strong,
+.sidebar__profile div span {
   display: block;
 }
 
-.sidebar__profile span {
+.sidebar__profile div span {
   color: rgba(255, 255, 255, 0.55);
   font-size: 0.78rem;
 }
@@ -551,7 +561,8 @@ a {
 }
 
 .status-badge--reservado,
-.status-badge--inativo {
+.status-badge--inativo,
+.status-badge--pendente {
   background: rgba(105, 114, 136, 0.12);
   color: #52607a;
 }
@@ -793,6 +804,150 @@ a {
   margin-bottom: 6px;
 }
 
+.quick-link--with-meta small,
+.audit-item small,
+.settings-row span,
+.role-card p,
+.role-card dt,
+.role-card dd,
+.user-cell span,
+.user-card span {
+  color: var(--muted);
+}
+
+.quick-link--with-meta small {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-cell div strong,
+.user-cell div span {
+  display: block;
+}
+
+.user-cell__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+}
+
+.avatar-initials {
+  display: block;
+  line-height: 1;
+  transform: translateY(1px);
+}
+
+.admin-summary {
+  margin: 0 0 18px;
+}
+
+.admin-access-links {
+  margin-top: 18px;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.role-card h3 {
+  margin: 12px 0 6px;
+}
+
+.role-card p {
+  margin: 0;
+}
+
+.role-card dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  margin: 0;
+}
+
+.role-card dt {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.role-card dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.audit-item {
+  display: grid;
+  gap: 8px;
+}
+
+.audit-item div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-list {
+  display: grid;
+  gap: 14px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.settings-row strong,
+.settings-row span {
+  display: block;
+}
+
+.settings-row input {
+  width: 46px;
+  height: 24px;
+  accent-color: var(--accent);
+}
+
+.settings-form {
+  grid-template-columns: 1fr;
+}
+
 .shell-backdrop {
   display: none;
 }
@@ -867,6 +1022,7 @@ a {
 
 @media (max-width: 760px) {
   .stats-grid,
+  .role-grid,
   .summary-list,
   .form-grid,
   .step-progress {
@@ -893,6 +1049,7 @@ a {
   .table-summary,
   .detail-hero,
   .documents-list__item,
+  .settings-row,
   .placeholder-card {
     flex-direction: column;
     align-items: flex-start;

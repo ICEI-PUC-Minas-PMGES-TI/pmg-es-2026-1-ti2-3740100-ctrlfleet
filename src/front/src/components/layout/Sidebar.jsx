@@ -1,16 +1,16 @@
 import { NavLink } from 'react-router-dom';
 import { Icon } from '../common/Icon';
-import { navigationItems } from '../../data/fleetData';
+import { adminNavigationItems } from '../../data/adminData';
 
 export function Sidebar({ isOpen, onClose }) {
   return (
     <aside className={`sidebar ${isOpen ? 'is-open' : ''}`}>
       <div className="sidebar__header">
         <div className="sidebar__brand">
-          <Icon name="fleet" />
+          <img alt="CtrlFleet" className="sidebar__logo" src="/ctrlfleet-logo-icon.png" />
           <div>
             <strong>CtrlFleet</strong>
-            <span>Gestor de frotas</span>
+            <span>Administrador</span>
           </div>
         </div>
         <button aria-label="Fechar menu" className="sidebar__close" onClick={onClose} type="button">
@@ -19,7 +19,7 @@ export function Sidebar({ isOpen, onClose }) {
       </div>
 
       <nav className="sidebar__nav">
-        {navigationItems.map((item) => (
+        {adminNavigationItems.map((item) => (
           <NavLink
             className={({ isActive }) => `sidebar__link ${isActive ? 'is-active' : ''}`}
             key={item.to}
@@ -37,10 +37,12 @@ export function Sidebar({ isOpen, onClose }) {
 
       <div className="sidebar__footer">
         <div className="sidebar__profile">
-          <span className="sidebar__avatar">JD</span>
+          <span className="sidebar__avatar">
+            <span className="avatar-initials">AC</span>
+          </span>
           <div>
-            <strong>João Duarte</strong>
-            <span>Gestor de Frota</span>
+            <strong>Ana Costa</strong>
+            <span>Administrador</span>
           </div>
         </div>
         <button className="sidebar__logout" type="button">

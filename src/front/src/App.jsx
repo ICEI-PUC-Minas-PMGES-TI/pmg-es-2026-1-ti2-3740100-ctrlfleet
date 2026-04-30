@@ -1,73 +1,31 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ManagerLayout } from './components/layout/ManagerLayout';
-import { VehicleFormProvider } from './context/VehicleFormContext';
-import { DashboardPage } from './pages/DashboardPage';
-import { FleetPage } from './pages/FleetPage';
-import { ModulePlaceholderPage } from './pages/ModulePlaceholderPage';
-import { VehicleCreatePage } from './pages/VehicleCreatePage';
-import { VehicleDetailPage } from './pages/VehicleDetailPage';
-import { VehicleDocumentsPage } from './pages/VehicleDocumentsPage';
+import { AdminAuditPage } from './pages/AdminAuditPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminRolesPage } from './pages/AdminRolesPage';
+import { AdminSettingsPage } from './pages/AdminSettingsPage';
+import { AdminUserFormPage } from './pages/AdminUserFormPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <VehicleFormProvider>
-        <Routes>
-          <Route path="/" element={<ManagerLayout />}>
-            <Route index element={<Navigate replace to="/frota" />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="frota" element={<FleetPage />} />
-            <Route path="frota/novo" element={<VehicleCreatePage />} />
-            <Route path="frota/novo/documentacao" element={<VehicleDocumentsPage />} />
-            <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
-            <Route
-              path="reservas"
-              element={
-                <ModulePlaceholderPage
-                  ctaLabel="Ver veículos disponíveis"
-                  ctaTo="/frota"
-                  description="A fila de reservas, aprovações e disponibilidade pode entrar aqui na próxima etapa."
-                  title="Reservas"
-                />
-              }
-            />
-            <Route
-              path="manutencao"
-              element={
-                <ModulePlaceholderPage
-                  ctaLabel="Acompanhar frota"
-                  ctaTo="/frota"
-                  description="Esta área já está preparada na navegação para receber triagem, prioridades e ordens de serviço."
-                  title="Manutenção"
-                />
-              }
-            />
-            <Route
-              path="programacao-preventiva"
-              element={
-                <ModulePlaceholderPage
-                  ctaLabel="Cadastrar veículo"
-                  ctaTo="/frota/novo"
-                  description="Aqui podemos evoluir para um calendário preventivo com quilometragem, vencimentos e recorrências."
-                  title="Prog. Preventiva"
-                />
-              }
-            />
-            <Route
-              path="relatorios"
-              element={
-                <ModulePlaceholderPage
-                  ctaLabel="Voltar para frota"
-                  ctaTo="/frota"
-                  description="O espaço de relatórios ficou separado para encaixar indicadores, exportações e auditorias sem retrabalho."
-                  title="Relatórios"
-                />
-              }
-            />
-            <Route path="*" element={<Navigate replace to="/frota" />} />
+      <Routes>
+        <Route path="/" element={<ManagerLayout />}>
+          <Route index element={<Navigate replace to="/admin/dashboard" />} />
+          <Route path="admin">
+            <Route index element={<Navigate replace to="/admin/dashboard" />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="usuarios" element={<AdminUsersPage />} />
+            <Route path="usuarios/novo" element={<AdminUserFormPage />} />
+            <Route path="usuarios/:userId/editar" element={<AdminUserFormPage mode="edit" />} />
+            <Route path="perfis" element={<AdminRolesPage />} />
+            <Route path="auditoria" element={<AdminAuditPage />} />
+            <Route path="configuracoes" element={<AdminSettingsPage />} />
           </Route>
-        </Routes>
-      </VehicleFormProvider>
+          <Route path="*" element={<Navigate replace to="/admin/dashboard" />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }
