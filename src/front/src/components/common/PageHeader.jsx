@@ -1,6 +1,6 @@
 import { ActionButton } from './ActionButton';
 
-export function PageHeader({ actionIcon, actionLabel, actionTo, eyebrow, subtitle, title }) {
+export function PageHeader({ actionDisabled, actionIcon, actionLabel, actionTo, eyebrow, subtitle, title }) {
   return (
     <div className="page-header">
       <div className="page-header__copy">
@@ -9,7 +9,7 @@ export function PageHeader({ actionIcon, actionLabel, actionTo, eyebrow, subtitl
         {subtitle ? <p>{subtitle}</p> : null}
       </div>
       {actionLabel ? (
-        <ActionButton icon={actionIcon} to={actionTo}>
+        <ActionButton disabled={actionDisabled} icon={actionIcon} to={actionDisabled ? undefined : actionTo}>
           {actionLabel}
         </ActionButton>
       ) : null}

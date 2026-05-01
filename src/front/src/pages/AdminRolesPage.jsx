@@ -6,20 +6,20 @@ import { permissionGroups } from '../data/adminData';
 
 const roleStats = [
   { caption: 'Perfis configurados', icon: 'shield', title: 'Perfis', value: '04' },
-  { caption: 'Módulos protegidos', icon: 'dashboard', title: 'Módulos', value: '06' },
-  { caption: 'Usuários vinculados', icon: 'users', title: 'Vínculos', value: '128' },
-  { caption: 'Revisões neste mês', icon: 'reports', title: 'Revisões', value: '09' },
+  { caption: 'Modulos protegidos', icon: 'dashboard', title: 'Modulos', value: '06' },
+  { caption: 'Usuarios vinculados', icon: 'users', title: 'Vinculos', value: '128' },
+  { caption: 'Revisoes neste mes', icon: 'reports', title: 'Revisoes', value: '09' },
 ];
 
 export function AdminRolesPage() {
   return (
     <div className="page-stack">
       <PageHeader
+        actionDisabled
         actionIcon="plus"
-        actionLabel="Novo usuário"
-        actionTo="/admin/usuarios/novo"
-        subtitle="Defina quais perfis acessam cada área operacional do CtrlFleet."
-        title="Perfis e permissões"
+        actionLabel="Novo usuario"
+        subtitle="Defina quais perfis acessam cada area operacional do CtrlFleet."
+        title="Perfis e permissoes"
       />
 
       <section className="stats-grid">
@@ -28,7 +28,7 @@ export function AdminRolesPage() {
         ))}
       </section>
 
-      <SectionCard subtitle="Matriz de acesso por tipo de usuário." title="Perfis cadastrados">
+      <SectionCard subtitle="Matriz de acesso por tipo de usuario." title="Perfis cadastrados">
         <div className="role-grid">
           {permissionGroups.map((group) => (
             <article className="role-card" key={group.name}>
@@ -39,11 +39,11 @@ export function AdminRolesPage() {
               </div>
               <dl>
                 <div>
-                  <dt>Módulos</dt>
+                  <dt>Modulos</dt>
                   <dd>{group.modules}</dd>
                 </div>
                 <div>
-                  <dt>Usuários</dt>
+                  <dt>Usuarios</dt>
                   <dd>{group.users}</dd>
                 </div>
               </dl>

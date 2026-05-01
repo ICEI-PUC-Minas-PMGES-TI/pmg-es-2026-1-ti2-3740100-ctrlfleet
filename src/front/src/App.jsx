@@ -17,8 +17,7 @@ function App() {
             <Route index element={<Navigate replace to="/admin/dashboard" />} />
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="usuarios" element={<AdminUsersPage />} />
-            <Route path="usuarios/novo" element={<AdminUserFormPage />} />
-            <Route path="usuarios/:userId/editar" element={<AdminUserFormPage mode="edit" />} />
+            <Route path="usuarios/:userId/editar" element={<AdminUserFormPage />} />
             <Route path="perfis" element={<AdminRolesPage />} />
             <Route path="auditoria" element={<AdminAuditPage />} />
             <Route path="configuracoes" element={<AdminSettingsPage />} />

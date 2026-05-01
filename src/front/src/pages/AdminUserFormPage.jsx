@@ -9,12 +9,11 @@ import { adminSecretariats, adminUsers } from '../data/adminData';
 const roleOptions = ['Administrador', 'Gestor de Frota', 'Motorista', 'Servidor Solicitante'];
 const statusOptions = ['Ativo', 'Pendente', 'Bloqueado', 'Inativo'];
 
-export function AdminUserFormPage({ mode = 'create' }) {
+export function AdminUserFormPage() {
   const navigate = useNavigate();
   const { userId } = useParams();
   const user = useMemo(() => adminUsers.find((item) => item.id === userId), [userId]);
-  const isEditing = mode === 'edit';
-  const selectedUser = isEditing ? user ?? adminUsers[0] : null;
+  const selectedUser = user ?? adminUsers[0];
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -24,27 +23,23 @@ export function AdminUserFormPage({ mode = 'create' }) {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Administração"
-        subtitle={
-          isEditing
-            ? 'Atualize dados cadastrais, perfil de acesso e situação da conta.'
-            : 'Cadastre um usuário e defina o primeiro perfil de acesso.'
-        }
-        title={isEditing ? 'Editar usuário' : 'Novo usuário'}
+        eyebrow="Administracao"
+        subtitle="Atualize dados cadastrais, perfil de acesso e situacao da conta."
+        title="Editar usuario"
       />
 
       <section className="content-grid content-grid--form">
-        <SectionCard title="Dados do usuário">
+        <SectionCard title="Dados do usuario">
           <form className="form-grid" onSubmit={handleSubmit}>
             <label className="form-field">
               <span>Nome completo</span>
-              <input defaultValue={selectedUser?.name} placeholder="Ex.: Ana Costa" required type="text" />
+              <input defaultValue={selectedUser.name} placeholder="Ex.: Ana Costa" required type="text" />
             </label>
 
             <label className="form-field">
               <span>E-mail institucional</span>
               <input
-                defaultValue={selectedUser?.email}
+                defaultValue={selectedUser.email}
                 placeholder="usuario@ctrlfleet.gov.br"
                 required
                 type="email"
@@ -53,7 +48,7 @@ export function AdminUserFormPage({ mode = 'create' }) {
 
             <label className="form-field">
               <span>Perfil</span>
-              <select defaultValue={selectedUser?.role ?? 'Servidor Solicitante'}>
+              <select defaultValue={selectedUser.role}>
                 {roleOptions.map((role) => (
                   <option key={role}>{role}</option>
                 ))}
@@ -62,7 +57,7 @@ export function AdminUserFormPage({ mode = 'create' }) {
 
             <label className="form-field">
               <span>Secretaria</span>
-              <select defaultValue={selectedUser?.secretariat ?? 'Administração'}>
+              <select defaultValue={selectedUser.secretariat}>
                 {adminSecretariats.map((secretariat) => (
                   <option key={secretariat}>{secretariat}</option>
                 ))}
@@ -71,7 +66,7 @@ export function AdminUserFormPage({ mode = 'create' }) {
 
             <label className="form-field">
               <span>Status da conta</span>
-              <select defaultValue={selectedUser?.status ?? 'Pendente'}>
+              <select defaultValue={selectedUser.status}>
                 {statusOptions.map((status) => (
                   <option key={status}>{status}</option>
                 ))}
@@ -79,7 +74,7 @@ export function AdminUserFormPage({ mode = 'create' }) {
             </label>
 
             <label className="form-field">
-              <span>Matrícula</span>
+              <span>Matricula</span>
               <input placeholder="Ex.: MAT-2048" type="text" />
             </label>
 
@@ -88,38 +83,38 @@ export function AdminUserFormPage({ mode = 'create' }) {
                 Cancelar
               </ActionButton>
               <button className="action-button action-button--primary" type="submit">
-                {isEditing ? 'Salvar alterações' : 'Criar usuário'}
+                Salvar alteracoes
               </button>
             </div>
           </form>
         </SectionCard>
 
-        <SectionCard subtitle="Acesso aplicado automaticamente aos módulos permitidos." title="Resumo do acesso">
+        <SectionCard subtitle="Acesso aplicado automaticamente aos modulos permitidos." title="Resumo do acesso">
           <dl className="summary-list admin-summary">
             <div>
               <dt>Perfil</dt>
-              <dd>{selectedUser?.role ?? 'Servidor Solicitante'}</dd>
+              <dd>{selectedUser.role}</dd>
             </div>
             <div>
               <dt>Status</dt>
               <dd>
-                <StatusBadge label={selectedUser?.status ?? 'Pendente'} />
+                <StatusBadge label={selectedUser.status} />
               </dd>
             </div>
             <div>
               <dt>Secretaria</dt>
-              <dd>{selectedUser?.secretariat ?? 'A definir'}</dd>
+              <dd>{selectedUser.secretariat}</dd>
             </div>
             <div>
-              <dt>Último acesso</dt>
-              <dd>{selectedUser?.lastAccess ?? 'Ainda não acessou'}</dd>
+              <dt>Ultimo acesso</dt>
+              <dd>{selectedUser.lastAccess}</dd>
             </div>
           </dl>
 
           <div className="quick-links admin-access-links">
             <Link className="quick-link" to="/admin/perfis">
-              <strong>Revisar permissões</strong>
-              <span>Confira as regras antes de salvar perfis sensíveis.</span>
+              <strong>Revisar permissoes</strong>
+              <span>Confira as regras antes de salvar perfis sensiveis.</span>
             </Link>
           </div>
         </SectionCard>

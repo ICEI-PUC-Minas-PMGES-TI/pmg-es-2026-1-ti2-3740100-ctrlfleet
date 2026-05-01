@@ -9,10 +9,10 @@ export function AdminDashboardPage() {
   return (
     <div className="page-stack">
       <PageHeader
+        actionDisabled
         actionIcon="plus"
-        actionLabel="Novo usuário"
-        actionTo="/admin/usuarios/novo"
-        subtitle="Controle acessos, permissões e atividades do sistema."
+        actionLabel="Novo usuario"
+        subtitle="Controle acessos, permissoes e atividades do sistema."
         title="Dashboard administrativo"
       />
 
@@ -23,7 +23,7 @@ export function AdminDashboardPage() {
       </section>
 
       <section className="content-grid">
-        <SectionCard subtitle="Itens que precisam de validação administrativa." title="Alertas recentes">
+        <SectionCard subtitle="Itens que precisam de validacao administrativa." title="Alertas recentes">
           <div className="alert-list">
             {adminAlerts.map((alert) => (
               <article className="alert-item" key={alert.id}>
@@ -34,7 +34,7 @@ export function AdminDashboardPage() {
           </div>
         </SectionCard>
 
-        <SectionCard subtitle="Permissões em uso no CtrlFleet." title="Perfis ativos">
+        <SectionCard subtitle="Permissoes em uso no CtrlFleet." title="Perfis ativos">
           <div className="quick-links">
             {permissionGroups.map((group) => (
               <Link
@@ -44,7 +44,7 @@ export function AdminDashboardPage() {
               >
                 <strong>{group.name}</strong>
                 <span className="text-sm text-gray-500">{group.description}</span>
-                <small className="text-xs text-gray-400">{group.users} usuários</small>
+                <small className="text-xs text-gray-400">{group.users} usuarios</small>
               </Link>
             ))}
           </div>
