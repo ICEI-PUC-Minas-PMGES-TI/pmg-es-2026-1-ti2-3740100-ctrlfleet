@@ -1,29 +1,34 @@
-### Pré-requsito
-Instalar o docker em sua maquina via https://docs.docker.com/desktop/setup/install/windows-install/
+## Pré-requisito
 
-### PostgreSQL
+Instalar o Docker Desktop:
 
-* **Host:** `localhost`
-* **Porta:** `5432`
-* **Database:** `ctrl_fleet`
-* **Usuário:** `admin`
-* **Senha:** `admin`
+- [Docker Desktop para Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
 
-### pgAdmin (interface web)
+> Todos os comandos deste tutorial usam o arquivo `src/docker-compose.yml`.
+
+## PostgreSQL
+
+- **Host:** `localhost`
+- **Porta:** `5432`
+- **Database:** `ctrl_fleet`
+- **Usuário:** `admin`
+- **Senha:** `admin`
+
+## pgAdmin (interface web)
 Ambiente para gerenciar o banco via web
 
-* **URL:** http://localhost:5050
-* **Email:** `admin@admin.com`
-* **Senha:** `admin`
+- **URL:** http://localhost:5050
+- **Email:** `admin@admin.com`
+- **Senha:** `admin`
 
 ---
 
-## 🚀 Como rodar o ambiente
+## Como rodar o ambiente
 
 ### 1. Subir os containers
 
 ```bash
-docker compose up -d
+docker compose -f src/docker-compose.yml up -d
 ```
 
 ---
@@ -31,7 +36,7 @@ docker compose up -d
 ### 2. Parar os containers
 
 ```bash
-docker compose down
+docker compose -f src/docker-compose.yml down
 ```
 
 ---
@@ -39,8 +44,44 @@ docker compose down
 ### 3. Parar e remover tudo (incluindo dados)
 
 ```bash
-docker compose down -v
+docker compose -f src/docker-compose.yml down -v
 ```
+
+---
+
+### 4. Ver logs dos serviços (recomendado)
+
+```bash
+docker compose -f src/docker-compose.yml logs -f frontend
+docker compose -f src/docker-compose.yml logs -f backend
+docker compose -f src/docker-compose.yml logs -f postgres
+```
+
+---
+
+### 5. Reiniciar um serviço específico
+
+```bash
+docker compose -f src/docker-compose.yml restart frontend
+docker compose -f src/docker-compose.yml restart backend
+```
+
+---
+
+## Autoatualização do código (sem `--build`)
+
+Este ambiente foi configurado para desenvolvimento:
+
+- `frontend` roda `npm run dev` com hot reload (Vite)
+- `backend` roda `mvn spring-boot:run`
+- código local é montado via volume (`./front` e `./back`)
+
+Isso significa que, no dia a dia, você **não precisa** rodar `docker compose up --build -d` para cada alteração de código.
+
+Quando reiniciar:
+
+- Mudou só código `.jsx/.js/.java/.css`: normalmente atualiza sozinho
+- Mudou dependências (`package.json` ou `pom.xml`): reinicie o serviço correspondente
 
 ---
 
@@ -71,14 +112,14 @@ Dentro do Docker, o host **não é `localhost`**, é `postgres` (nome do serviç
 
 **General**
 
-* Name: `ctrl-fleet-db`
+- Name: `ctrl-fleet-db`
 
 **Connection**
 
-* Host: `postgres`
-* Port: `5432`
-* Username: `admin`
-* Password: `admin`
+- Host: `postgres`
+- Port: `5432`
+- Username: `admin`
+- Password: `admin`
 
 ---
 
@@ -87,13 +128,13 @@ Dentro do Docker, o host **não é `localhost`**, é `postgres` (nome do serviç
 Os dados do banco são armazenados em um volume Docker:
 
 ```
-postgres_data
+src_postgres_data
 ```
 
 Isso significa que:
 
-* Os dados **não são perdidos** ao parar os containers
-* Só são apagados se usar: `docker compose down -v`
+- Os dados **não são perdidos** ao parar os containers
+- Só são apagados se usar: `docker compose -f src/docker-compose.yml down -v`
 
 ---
 
@@ -101,7 +142,7 @@ Isso significa que:
 
 ### Porta 5432 já em uso
 
-Altere no `docker-compose.yml`:
+Altere no `src/docker-compose.yml`:
 
 ```yaml
 ports:
@@ -112,9 +153,35 @@ ports:
 
 ### Não consegue conectar no banco
 
-* Verifique se usou `postgres` como host (não `localhost`)
-* Confirme se os containers estão rodando:
+- Verifique se usou `postgres` como host (não `localhost`)
+- Confirme se os containers estão rodando:
 
 ```bash
-docker ps
+docker compose -f src/docker-compose.yml ps
+```
+
+---
+
+### Frontend não atualiza após salvar
+
+- Verifique se o serviço `frontend` está rodando:
+
+```bash
+docker compose -f src/docker-compose.yml logs -f frontend
+```
+
+- Se necessário, reinicie:
+
+```bash
+docker compose -f src/docker-compose.yml restart frontend
+```
+
+---
+
+### Backend não sobe
+
+- Verifique logs do backend:
+
+```bash
+docker compose -f src/docker-compose.yml logs -f backend
 ```

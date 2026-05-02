@@ -150,6 +150,12 @@ a {
   padding: 0 14px;
 }
 
+.sidebar__divider {
+  height: 1px;
+  background: rgba(148, 163, 184, 0.25);
+  margin: 10px 0;
+}
+
 .sidebar__link {
   display: flex;
   align-items: center;

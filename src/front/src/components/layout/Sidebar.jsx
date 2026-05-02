@@ -1,8 +1,14 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
+import { fleetNavigationItems } from '../../data/fleetData';
 
 export function Sidebar({ isOpen, onClose }) {
+  const location = useLocation();
+  const isAdminArea = location.pathname.startsWith('/admin');
+  const navigationItems = isAdminArea ? adminNavigationItems : fleetNavigationItems;
+  const navigationLabel = isAdminArea ? 'Administração' : 'Gestor de Frotas';
+
   return (
     <aside className={`sidebar ${isOpen ? 'is-open' : ''}`}>
       <div className="sidebar__header">
@@ -10,7 +16,7 @@ export function Sidebar({ isOpen, onClose }) {
           <img alt="CtrlFleet" className="sidebar__logo" src="/ctrlfleet-logo-icon.png" />
           <div>
             <strong>CtrlFleet</strong>
-            <span>Administrador</span>
+            <span>{navigationLabel}</span>
           </div>
         </div>
         <button aria-label="Fechar menu" className="sidebar__close" onClick={onClose} type="button">
@@ -19,7 +25,7 @@ export function Sidebar({ isOpen, onClose }) {
       </div>
 
       <nav className="sidebar__nav">
-        {adminNavigationItems.map((item) => (
+        {navigationItems.map((item) => (
           <NavLink
             className={({ isActive }) => `sidebar__link ${isActive ? 'is-active' : ''}`}
             key={item.to}
@@ -42,7 +48,7 @@ export function Sidebar({ isOpen, onClose }) {
           </span>
           <div>
             <strong>Ana Costa</strong>
-            <span>Administrador</span>
+            <span>{navigationLabel}</span>
           </div>
         </div>
         <button className="sidebar__logout" type="button">
