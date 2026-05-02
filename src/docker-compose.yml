@@ -40,6 +40,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ctrl_fleet
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+    volumes:
+      - ./back:/app
+    working_dir: /app
+    command: ./mvnw spring-boot:run
 
   frontend:
     build:
@@ -50,6 +54,11 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm run dev -- --host
 
 volumes:
   postgres_data:
