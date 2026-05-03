@@ -209,6 +209,26 @@ const iconMap = {
       <path d="M8.5 15.5h7M8.5 12h7M8.5 8.5h4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </>
   ),
+  refresh: (
+    <>
+      <path
+        d="M20.8 13.9A8 8 0 0 1 12 21a8 8 0 0 1-8-8 8 8 0 0 1 3.5-6.6M3.6 11.9A8 8 0 0 1 12 4a8 8 0 0 1 8 8 8 8 0 0 1-3.8 6.8"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M20 4.5v5.3h-5.3M4 19.5v-5.3h5.3"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </>
+  ),
   reservations: (
     <>
       <path

@@ -9,9 +9,9 @@ export function AdminDashboardPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        actionDisabled
         actionIcon="plus"
         actionLabel="Novo usuario"
+        actionTo="/admin/usuarios/novo"
         subtitle="Controle acessos, permissoes e atividades do sistema."
         title="Dashboard administrativo"
       />

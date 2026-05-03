@@ -15,9 +15,9 @@ export function AdminRolesPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        actionDisabled
         actionIcon="plus"
         actionLabel="Novo usuario"
+        actionTo="/admin/usuarios/novo"
         subtitle="Defina quais perfis acessam cada area operacional do CtrlFleet."
         title="Perfis e permissoes"
       />

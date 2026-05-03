@@ -79,9 +79,9 @@ export function AdminUsersPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        actionDisabled
         actionIcon="plus"
         actionLabel="Novo usuario"
+        actionTo="/admin/usuarios/novo"
         subtitle="Crie, edite, bloqueie e acompanhe usuários por perfil de acesso."
         title="Usuários"
       />

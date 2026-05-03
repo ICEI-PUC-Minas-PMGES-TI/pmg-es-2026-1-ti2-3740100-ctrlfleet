@@ -44,11 +44,11 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">AC</span>
+            <span className="avatar-initials">{isAdminArea ? 'AS' : 'AC'}</span>
           </span>
           <div>
-            <strong>Ana Costa</strong>
-            <span>{navigationLabel}</span>
+            <strong>{isAdminArea ? 'Ana Souza' : 'Ana Costa'}</strong>
+            <span>{isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
           </div>
         </div>
         <button className="sidebar__logout" type="button">

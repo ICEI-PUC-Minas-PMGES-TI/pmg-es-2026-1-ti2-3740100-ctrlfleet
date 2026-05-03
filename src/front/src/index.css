@@ -19,8 +19,12 @@
   --card-strong: #ffffff;
   --foreground: #182033;
   --muted: #697288;
-  --sidebar: #111315;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  /* Sidebar: base escura alinhada ao vermelho/terracota da marca da logo */
+  --sidebar: #151210;
+  --sidebar-border: rgba(207, 78, 54, 0.16);
+  --sidebar-accent-dim: rgba(207, 78, 54, 0.14);
+  --sidebar-glow-strong: rgba(238, 94, 68, 0.2);
+  --sidebar-glow-soft: rgba(207, 78, 54, 0.1);
   --success: #2d8b57;
   --success-soft: rgba(45, 139, 87, 0.12);
   --warning: #d58d21;
@@ -87,7 +91,10 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(180deg, #151719 0%, #0f1012 100%);
+  background:
+    radial-gradient(ellipse 110% 55% at 18% -8%, var(--sidebar-glow-strong), transparent 52%),
+    radial-gradient(ellipse 90% 45% at 108% 96%, var(--sidebar-glow-soft), transparent 48%),
+    linear-gradient(168deg, #1e1917 0%, #161311 38%, #0f0d0c 100%);
   color: rgba(255, 255, 255, 0.94);
   border-right: 1px solid var(--sidebar-border);
   z-index: 20;
@@ -152,7 +159,7 @@ a {
 
 .sidebar__divider {
   height: 1px;
-  background: rgba(148, 163, 184, 0.25);
+  background: linear-gradient(90deg, transparent, rgba(207, 78, 54, 0.22), transparent);
   margin: 10px 0;
 }
 
@@ -163,14 +170,22 @@ a {
   gap: 16px;
   padding: 14px 16px;
   border-radius: 16px;
-  color: rgba(255, 255, 255, 0.78);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  color: rgba(255, 252, 250, 0.78);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .sidebar__link:hover,
 .sidebar__link.is-active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sidebar-accent-dim);
+  box-shadow: inset 0 0 0 1px rgba(207, 78, 54, 0.22);
   color: #fff;
+}
+
+.sidebar__link.is-active .sidebar__link-copy svg {
+  color: #f0806a;
 }
 
 .sidebar__link-copy {
@@ -975,6 +990,304 @@ a {
   grid-template-columns: 1fr;
 }
 
+/* Admin: criar usuário (layout referência painel) */
+.page-stack--admin-create-user {
+  margin: -40px;
+  padding: 40px;
+  min-height: calc(100vh - 0px);
+  background: #f8f9fa;
+  gap: 28px;
+}
+
+.admin-user-create__page-title h1 {
+  margin: 0;
+  font-size: clamp(1.65rem, 2vw, 2rem);
+  font-weight: 800;
+  color: #1a1d24;
+  letter-spacing: -0.02em;
+}
+
+.admin-user-create__page-title p {
+  margin: 8px 0 0;
+  font-size: 1rem;
+  color: #6b7280;
+  max-width: 520px;
+}
+
+.admin-user-create-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eceef2;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  padding: 28px 32px 32px;
+  max-width: 920px;
+}
+
+.admin-user-create__segment {
+  display: flex;
+  gap: 0;
+  padding: 5px;
+  margin: 0 0 28px;
+  max-width: 360px;
+  border-radius: 10px;
+  background: #eceef2;
+}
+
+.admin-user-create__segment button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #6b7280;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.admin-user-create__segment button:hover {
+  color: #374151;
+}
+
+.admin-user-create__segment button.is-active {
+  background: #fff;
+  color: #1a1d24;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.admin-user-create__form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 24px;
+}
+
+.admin-user-create__form-grid .admin-form-field--full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-form-field__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.admin-form-field__req {
+  color: var(--accent);
+  margin-left: 2px;
+  font-weight: 800;
+}
+
+.admin-form-field__input,
+.admin-form-field__select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.admin-form-field__input::placeholder {
+  color: #b4b9c5;
+}
+
+.admin-form-field__input:focus,
+.admin-form-field__select:focus {
+  border-color: rgba(207, 78, 54, 0.45);
+  box-shadow: 0 0 0 3px rgba(207, 78, 54, 0.12);
+}
+
+.admin-form-field--date .admin-form-field__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-form-field--date .admin-form-field__input {
+  padding-right: 42px;
+}
+
+.admin-form-field__date-icon {
+  position: absolute;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.admin-form-field__select-wrap {
+  position: relative;
+}
+
+.admin-form-field__select-wrap select {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.admin-form-field__chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.admin-user-create__security {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #eceef2;
+}
+
+.admin-user-create__security-heading {
+  margin: 0 0 16px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.admin-user-create__password-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  max-width: 480px;
+}
+
+.admin-user-create__password-row .admin-form-field__input {
+  flex: 1;
+  font-family:
+    ui-monospace,
+    "Cascadia Code",
+    "Segoe UI Mono",
+    monospace;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+}
+
+.admin-user-create__password-refresh {
+  flex-shrink: 0;
+  width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  color: #6b7280;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.admin-user-create__password-refresh:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+  color: var(--accent);
+}
+
+.admin-user-create__password-refresh svg {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-user-create__email-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.94rem;
+  color: #4b5563;
+}
+
+.admin-user-create__email-opt input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.admin-user-create__email-opt-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid #d1d5db;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.admin-user-create__email-opt input:checked + .admin-user-create__email-opt-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.admin-user-create__email-opt-box::after {
+  content: '';
+  width: 6px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) translateY(-1px);
+  opacity: 0;
+}
+
+.admin-user-create__email-opt input:checked + .admin-user-create__email-opt-box::after {
+  opacity: 1;
+}
+
+.admin-user-create__actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #eceef2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-user-create__actions .action-button--secondary {
+  border-color: #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+}
+
+@media (max-width: 920px) {
+  .page-stack--admin-create-user {
+    margin: -24px -20px;
+    padding: 24px 20px 32px;
+  }
+}
+
 .shell-backdrop {
   display: none;
 }
@@ -1054,6 +1367,18 @@ a {
   .form-grid,
   .step-progress {
     grid-template-columns: 1fr;
+  }
+
+  .admin-user-create__form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-create-card {
+    padding: 22px 20px 26px;
+  }
+
+  .admin-user-create__password-row {
+    max-width: none;
   }
 
   .table-wrapper {
