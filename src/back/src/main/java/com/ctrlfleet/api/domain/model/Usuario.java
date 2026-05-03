@@ -20,13 +20,17 @@ public class Usuario {
 
     @Column(nullable = false, unique = true)
     private String email;
+    
+    @Column(nullable = false, unique = true)
+    private String senha;
 
     public Usuario() {
     }
 
-    public Usuario(String nome, String email) {
+    public Usuario(String nome, String email, String senha) {
         this.nome = nome;
         this.email = email;
+        this.senha = senha;
     }
 
     public Long getId() {
