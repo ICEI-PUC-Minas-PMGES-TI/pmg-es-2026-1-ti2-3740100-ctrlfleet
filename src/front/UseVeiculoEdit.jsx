@@ -1,0 +1,66 @@
+import { useState, useCallback } from "react";
+
+const BASE = "http://localhost:8080/api/veiculos";
+
+export function useVeiculoEdit() {
+  const [loading, setLoading]   = useState(false);
+  const [erro, setErro]         = useState(null);     
+  const [errosCampo, setErrosCampo] = useState({});  
+  const [sucesso, setSucesso]   = useState(false);
+
+  const resetFeedback = () => {
+    setErro(null);
+    setErrosCampo({});
+    setSucesso(false);
+  };
+
+  const buscar = useCallback(async (id) => {
+    setLoading(true);
+    resetFeedback();
+    try {
+      const res = await fetch(`${BASE}/${id}`);
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.erro ?? "Erro ao buscar veículo.");
+      }
+      return await res.json();
+    } catch (e) {
+      setErro(e.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const salvar = useCallback(async (id, payload) => {
+    setLoading(true);
+    resetFeedback();
+    try {
+      const res = await fetch(`${BASE}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        if (body.campos) {
+          setErrosCampo(body.campos);
+          return null;
+        }
+        throw new Error(body.erro ?? "Erro ao salvar veículo.");
+      }
+      setSucesso(true);
+      return body;
+    } catch (e) {
+      setErro(e.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const limparCampoErro = (campo) =>
+    setErrosCampo((prev) => ({ ...prev, [campo]: undefined }));
+
+  return { buscar, salvar, loading, erro, errosCampo, sucesso, limparCampoErro, resetFeedback };
+}
