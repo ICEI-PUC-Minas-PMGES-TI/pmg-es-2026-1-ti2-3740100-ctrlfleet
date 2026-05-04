@@ -1,8 +1,9 @@
-package com.ctrlfleet.api;
+package com.ctrlfleet.api.domain.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 
 @Entity
 @Table(name = "Veiculos")
@@ -31,6 +32,8 @@ public class Veiculo {
     @Column(nullable = false)
     private StatusVeiculo status = StatusVeiculo.DISPONIVEL; // Define DISPONIVEL como valor padrão
 
+    protected Veiculo() {
+    }
 
     public Veiculo(String placa, String modelo, String marca, int ano) {
         this.placa = placa;

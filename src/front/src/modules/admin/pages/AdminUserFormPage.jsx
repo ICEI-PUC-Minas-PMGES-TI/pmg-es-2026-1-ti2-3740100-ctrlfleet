@@ -6,6 +6,7 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { adminSecretariats, adminUsers } from '../../../data/adminData';
+import { criarUsuario } from '../../../services/usuarioApi';
 
 const roleOptions = ['Administrador', 'Gestor de Frota', 'Motorista', 'Servidor Solicitante'];
 const statusOptions = ['Ativo', 'Pendente', 'Bloqueado', 'Inativo'];
@@ -36,8 +37,48 @@ export function AdminUserFormPage() {
   const [personKind, setPersonKind] = useState('usuario');
   const [tempPassword, setTempPassword] = useState('F1eet@2024!');
   const [sendCredentialsByEmail, setSendCredentialsByEmail] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  function handleSubmit(event) {
+  async function handleCreateSubmit(event) {
+    event.preventDefault();
+    setSubmitError('');
+    const form = event.currentTarget;
+    const fd = new FormData(form);
+
+    const jobTitle = String(fd.get('jobTitle') ?? '').trim();
+    const admissionDate = String(fd.get('admissionDate') ?? '').trim();
+    const isMotorista = personKind === 'motorista';
+
+    const payload = {
+      nome: String(fd.get('fullName') ?? '').trim(),
+      email: String(fd.get('email') ?? '').trim(),
+      senha: tempPassword,
+      matricula: String(fd.get('registration') ?? '').trim(),
+      departamento: String(fd.get('department') ?? '').trim(),
+      perfilAcesso: String(fd.get('accessProfile') ?? '').trim(),
+      cargo: jobTitle.length > 0 ? jobTitle : null,
+      dataAdmissao: admissionDate.length > 0 ? admissionDate : null,
+      tipoCadastro: personKind,
+      numeroCnh: isMotorista ? String(fd.get('cnh') ?? '').trim() : null,
+      cnhValidade: isMotorista ? String(fd.get('cnhExpiry') ?? '').trim() : null,
+      enviarCredenciaisEmail: sendCredentialsByEmail,
+    };
+
+    setSubmitting(true);
+    try {
+      await criarUsuario(payload);
+      window.alert('Usuário cadastrado com sucesso!');
+      navigate('/admin/usuarios');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao cadastrar usuário.';
+      setSubmitError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleSubmitEdit(event) {
     event.preventDefault();
     navigate('/admin/usuarios');
   }
@@ -72,7 +113,12 @@ export function AdminUserFormPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleCreateSubmit}>
+            {submitError ? (
+              <p className="admin-user-create__error" role="alert">
+                {submitError}
+              </p>
+            ) : null}
             <div className="admin-user-create__form-grid">
               <label className="admin-form-field admin-form-field--full">
                 <span className="admin-form-field__label">
@@ -172,7 +218,13 @@ export function AdminUserFormPage() {
                       CNH
                       <span className="admin-form-field__req">*</span>
                     </span>
-                    <input className="admin-form-field__input" name="cnh" placeholder="Número da CNH" type="text" />
+                    <input
+                      className="admin-form-field__input"
+                      name="cnh"
+                      placeholder="Número da CNH"
+                      required
+                      type="text"
+                    />
                   </label>
                   <label className="admin-form-field admin-form-field--date">
                     <span className="admin-form-field__label">
@@ -184,6 +236,7 @@ export function AdminUserFormPage() {
                         className="admin-form-field__input"
                         name="cnhExpiry"
                         placeholder="dd/mm/aaaa"
+                        required
                         type="text"
                       />
                       <Icon className="admin-form-field__date-icon" name="calendar" />
@@ -234,8 +287,8 @@ export function AdminUserFormPage() {
               <ActionButton className="action-button--secondary" to="/admin/usuarios" variant="secondary">
                 Cancelar
               </ActionButton>
-              <button className="action-button action-button--primary" type="submit">
-                Cadastrar usuário
+              <button className="action-button action-button--primary" disabled={submitting} type="submit">
+                {submitting ? 'Salvando…' : 'Cadastrar usuário'}
               </button>
             </div>
           </form>
@@ -254,7 +307,7 @@ export function AdminUserFormPage() {
 
       <section className="content-grid content-grid--form">
         <SectionCard title="Dados do usuario">
-          <form className="form-grid" onSubmit={handleSubmit}>
+          <form className="form-grid" onSubmit={handleSubmitEdit}>
             <label className="form-field">
               <span>Nome completo</span>
               <input defaultValue={selectedUser.name} placeholder="Ex.: Ana Costa" required type="text" />

@@ -1,4 +1,4 @@
-package com.ctrlfleet.api;
+package com.ctrlfleet.api.domain.enums;
 
 public enum StatusVeiculo {
     DISPONIVEL,

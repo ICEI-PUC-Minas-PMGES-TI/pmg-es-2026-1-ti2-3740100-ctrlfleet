@@ -1023,6 +1023,16 @@ a {
   max-width: 920px;
 }
 
+.admin-user-create__error {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(209, 79, 74, 0.1);
+  border: 1px solid rgba(209, 79, 74, 0.25);
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
 .admin-user-create__segment {
   display: flex;
   gap: 0;
