@@ -1078,6 +1078,84 @@ a {
   grid-column: 1 / -1;
 }
 
+.admin-user-create__form-grid--nested {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.admin-user-create__field-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #6b7280;
+}
+
+.admin-user-create__field-hint strong {
+  color: #374151;
+  font-weight: 700;
+}
+
+.admin-user-create__context-note {
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid #e8eaef;
+  background: #f9fafb;
+}
+
+.admin-user-create__context-note strong {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.admin-user-create__context-note p {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.admin-user-create__context-code {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a1d24;
+}
+
+.admin-user-create__motorista-block {
+  padding: 20px 20px 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(207, 78, 54, 0.22);
+  background: linear-gradient(135deg, rgba(255, 252, 251, 1) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.admin-user-create__motorista-title {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.admin-user-create__motorista-lead {
+  margin: 0 0 18px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #4b5563;
+  max-width: 640px;
+}
+
 .admin-form-field {
   display: flex;
   flex-direction: column;
