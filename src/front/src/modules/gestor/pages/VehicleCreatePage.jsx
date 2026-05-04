@@ -38,6 +38,16 @@ export function VehicleCreatePage() {
             </label>
 
             <label className="form-field">
+              <span>Marca</span>
+              <input
+                onChange={(event) => updateForm({ brand: event.target.value })}
+                placeholder="Ex.: Toyota, Fiat, VW"
+                required
+                value={formState.brand || ''}
+              />
+            </label>
+
+            <label className="form-field">
               <span>Modelo</span>
               <input
                 onChange={(event) => updateForm({ model: event.target.value })}

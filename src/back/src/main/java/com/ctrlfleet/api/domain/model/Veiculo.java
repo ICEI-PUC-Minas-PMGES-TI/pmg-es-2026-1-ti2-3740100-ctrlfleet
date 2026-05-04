@@ -25,56 +25,46 @@ public class Veiculo {
     @Column(nullable = false)
     private String marca;
 
+    @NotBlank(message = "A secretaria é obrigatória")
+    @Column(nullable = false)
+    private String secretaria;
+
     @NotNull(message = "O ano é obrigatório")
     private int ano;
 
-    @Enumerated(EnumType.STRING) //Salva o nome do status no banco
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusVeiculo status = StatusVeiculo.DISPONIVEL; // Define DISPONIVEL como valor padrão
+    private StatusVeiculo status = StatusVeiculo.DISPONIVEL;
 
-    protected Veiculo() {
-    }
+    protected Veiculo() {}
 
-    public Veiculo(String placa, String modelo, String marca, int ano) {
+    public Veiculo(String placa, String modelo, String marca, int ano, String secretaria) {
         this.placa = placa;
         this.modelo = modelo;
         this.marca = marca;
         this.ano = ano;
+        this.secretaria = secretaria;
     }
 
-    //ID
-    public Long getId() { 
-        return id; }
-    public void setId(Long id) { 
-        this.id = id; }
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    //PLACA
-    public String getPlaca() { 
-        return placa; }
-    public void setPlaca(String placa) { 
-        this.placa = placa; }
+    public String getPlaca() { return placa; }
+    public void setPlaca(String placa) { this.placa = placa; }
 
-    //MODELO
-    public String getModelo() { 
-        return modelo; }
-    public void setModelo(String modelo) { 
-        this.modelo = modelo; }
+    public String getModelo() { return modelo; }
+    public void setModelo(String modelo) { this.modelo = modelo; }
 
-    //MARCA
-    public String getMarca() { 
-        return marca; }
-    public void setMarca(String marca) { 
-        this.marca = marca; }
+    public String getMarca() { return marca; }
+    public void setMarca(String marca) { this.marca = marca; }
 
-    //ANO
-    public int getAno() { 
-        return ano; }
-    public void setAno(int ano) { 
-        this.ano = ano; }
+    public String getSecretaria() { return secretaria; }
+    public void setSecretaria(String secretaria) { this.secretaria = secretaria; }
 
-    //STATUS
-    public StatusVeiculo getStatus() { 
-        return status; }
-    public void setStatus(StatusVeiculo status) { 
-        this.status = status; }
+    public int getAno() { return ano; }
+    public void setAno(int ano) { this.ano = ano; }
+
+    public StatusVeiculo getStatus() { return status; }
+    public void setStatus(StatusVeiculo status) { this.status = status; }
 }
