@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/veiculos")
-@CrossOrigin(origins = "http://localhost:5173") 
+@CrossOrigin(origins = "http://localhost:5173")
 public class VeiculoController {
 
     private final VeiculoService service;
@@ -28,5 +28,11 @@ public class VeiculoController {
             @PathVariable Long id,
             @Valid @RequestBody VeiculoEditDTO dto) {
         return ResponseEntity.ok(service.editar(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        service.inativar(id);
+        return ResponseEntity.noContent().build();
     }
 }

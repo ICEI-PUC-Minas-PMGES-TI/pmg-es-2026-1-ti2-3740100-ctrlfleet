@@ -1,5 +1,6 @@
 package com.ctrlfleet.api.service;
 
+import com.ctrlfleet.api.StatusVeiculo;
 import com.ctrlfleet.api.Veiculo;
 import com.ctrlfleet.api.dto.VeiculoEditDTO;
 import com.ctrlfleet.api.dto.VeiculoResponseDTO;
@@ -13,6 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class VeiculoService {
 
     private final VeiculoRepository repository;
+
+    @Transactional
+    public void inativar(Long id) {
+        Veiculo veiculo = repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado"));
+        veiculo.setStatus(StatusVeiculo.DESATIVADO); // Checklist: Atualizar status corretamente
+        repository.save(veiculo);
+    }
 
     public VeiculoService(VeiculoRepository repository) {
         this.repository = repository;

@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { useVeiculoEdit } from "../hooks/useVeiculoEdit";
-import VeiculoEditForm from "../../../components/gestor/VeiculoEditForm";
+import { useVeiculoEdit } from "./UseVeiculoEdit.jsx";
+import VeiculoEditForm from "./VeiculoEditForm.jsx";
 
 const FORM_VAZIO = {
   placa:  "",

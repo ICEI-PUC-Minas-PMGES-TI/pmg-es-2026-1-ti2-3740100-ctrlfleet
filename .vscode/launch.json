@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Main<back>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.ctrlfleet.api.Main",
+            "projectName": "back",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
