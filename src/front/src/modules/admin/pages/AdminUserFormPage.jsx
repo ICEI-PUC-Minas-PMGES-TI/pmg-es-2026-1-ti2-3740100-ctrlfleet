@@ -13,6 +13,16 @@ const statusOptions = ['Ativo', 'Pendente', 'Bloqueado', 'Inativo'];
 
 const accessProfileOptions = ['Solicitante', 'Administrador', 'Gestor de Frota', 'Motorista'];
 
+/** Valor enviado à API: no produto real virá do contexto do tenant; aqui é exemplo fixo. */
+const DEPARTAMENTO_CONTEXTO_EXEMPLO = 'Secretaria Municipal de Mobilidade Urbana';
+
+const cargoPorPerfilAcesso = {
+  Solicitante: 'Servidor Solicitante',
+  Administrador: 'Administrador',
+  'Gestor de Frota': 'Gestor de Frota',
+  Motorista: 'Motorista',
+};
+
 function generateTemporaryPassword() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
   const symbols = '!@#$%&*';
@@ -34,7 +44,7 @@ export function AdminUserFormPage() {
   const user = useMemo(() => adminUsers.find((item) => item.id === userId), [userId]);
   const selectedUser = user ?? adminUsers[0];
 
-  const [personKind, setPersonKind] = useState('usuario');
+  const [accessProfile, setAccessProfile] = useState('Solicitante');
   const [tempPassword, setTempPassword] = useState('F1eet@2024!');
   const [sendCredentialsByEmail, setSendCredentialsByEmail] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -46,20 +56,20 @@ export function AdminUserFormPage() {
     const form = event.currentTarget;
     const fd = new FormData(form);
 
-    const jobTitle = String(fd.get('jobTitle') ?? '').trim();
     const admissionDate = String(fd.get('admissionDate') ?? '').trim();
-    const isMotorista = personKind === 'motorista';
+    const isMotorista = accessProfile === 'Motorista';
+    const cargoAutomatico = cargoPorPerfilAcesso[accessProfile] ?? accessProfile;
 
     const payload = {
       nome: String(fd.get('fullName') ?? '').trim(),
       email: String(fd.get('email') ?? '').trim(),
       senha: tempPassword,
       matricula: String(fd.get('registration') ?? '').trim(),
-      departamento: String(fd.get('department') ?? '').trim(),
-      perfilAcesso: String(fd.get('accessProfile') ?? '').trim(),
-      cargo: jobTitle.length > 0 ? jobTitle : null,
+      departamento: DEPARTAMENTO_CONTEXTO_EXEMPLO,
+      perfilAcesso: accessProfile,
+      cargo: cargoAutomatico,
       dataAdmissao: admissionDate.length > 0 ? admissionDate : null,
-      tipoCadastro: personKind,
+      tipoCadastro: isMotorista ? 'motorista' : 'usuario',
       numeroCnh: isMotorista ? String(fd.get('cnh') ?? '').trim() : null,
       cnhValidade: isMotorista ? String(fd.get('cnhExpiry') ?? '').trim() : null,
       enviarCredenciaisEmail: sendCredentialsByEmail,
@@ -88,31 +98,13 @@ export function AdminUserFormPage() {
       <div className="page-stack page-stack--admin-create-user">
         <header className="admin-user-create__page-title">
           <h1>Criar Novo Usuário</h1>
-          <p>Cadastre um novo usuário ou motorista no sistema</p>
+          <p>
+            Defina o perfil de acesso (papel no sistema). Para motoristas, informe também a CNH e a validade — os
+            demais perfis compartilham a mesma ficha de usuário, sem dados de habilitação.
+          </p>
         </header>
 
         <div className="admin-user-create-card">
-          <div aria-label="Tipo de cadastro" className="admin-user-create__segment" role="tablist">
-            <button
-              aria-selected={personKind === 'usuario'}
-              className={personKind === 'usuario' ? 'is-active' : ''}
-              onClick={() => setPersonKind('usuario')}
-              role="tab"
-              type="button"
-            >
-              Usuário
-            </button>
-            <button
-              aria-selected={personKind === 'motorista'}
-              className={personKind === 'motorista' ? 'is-active' : ''}
-              onClick={() => setPersonKind('motorista')}
-              role="tab"
-              type="button"
-            >
-              Motorista
-            </button>
-          </div>
-
           <form onSubmit={handleCreateSubmit}>
             {submitError ? (
               <p className="admin-user-create__error" role="alert">
@@ -166,23 +158,18 @@ export function AdminUserFormPage() {
               </label>
 
               <div className="admin-form-field">
-                <span className="admin-form-field__label">Departamento</span>
+                <span className="admin-form-field__label">
+                  Perfil de acesso
+                  <span className="admin-form-field__req">*</span>
+                </span>
                 <div className="admin-form-field__select-wrap">
-                  <select className="admin-form-field__select" defaultValue="Saúde" name="department">
-                    {adminSecretariats.map((dep) => (
-                      <option key={dep} value={dep}>
-                        {dep}
-                      </option>
-                    ))}
-                  </select>
-                  <Icon className="admin-form-field__chevron" name="chevronDown" />
-                </div>
-              </div>
-
-              <div className="admin-form-field">
-                <span className="admin-form-field__label">Perfil de acesso</span>
-                <div className="admin-form-field__select-wrap">
-                  <select className="admin-form-field__select" defaultValue="Solicitante" name="accessProfile">
+                  <select
+                    aria-describedby="access-profile-hint"
+                    className="admin-form-field__select"
+                    name="accessProfile"
+                    onChange={(e) => setAccessProfile(e.target.value)}
+                    value={accessProfile}
+                  >
                     {accessProfileOptions.map((profile) => (
                       <option key={profile} value={profile}>
                         {profile}
@@ -191,17 +178,11 @@ export function AdminUserFormPage() {
                   </select>
                   <Icon className="admin-form-field__chevron" name="chevronDown" />
                 </div>
+                <p className="admin-user-create__field-hint" id="access-profile-hint">
+                  O cargo enviado ao cadastro segue automaticamente este perfil:{' '}
+                  <strong>{cargoPorPerfilAcesso[accessProfile]}</strong>.
+                </p>
               </div>
-
-              <label className="admin-form-field">
-                <span className="admin-form-field__label">Cargo</span>
-                <input
-                  className="admin-form-field__input"
-                  name="jobTitle"
-                  placeholder="Ex.: Analista de sistemas"
-                  type="text"
-                />
-              </label>
 
               <label className="admin-form-field admin-form-field--date">
                 <span className="admin-form-field__label">Data admissão</span>
@@ -211,38 +192,55 @@ export function AdminUserFormPage() {
                 </div>
               </label>
 
-              {personKind === 'motorista' ? (
-                <>
-                  <label className="admin-form-field">
-                    <span className="admin-form-field__label">
-                      CNH
-                      <span className="admin-form-field__req">*</span>
-                    </span>
-                    <input
-                      className="admin-form-field__input"
-                      name="cnh"
-                      placeholder="Número da CNH"
-                      required
-                      type="text"
-                    />
-                  </label>
-                  <label className="admin-form-field admin-form-field--date">
-                    <span className="admin-form-field__label">
-                      Validade CNH
-                      <span className="admin-form-field__req">*</span>
-                    </span>
-                    <div className="admin-form-field__input-wrap">
+              <div className="admin-user-create__context-note admin-form-field--full">
+                <strong>Departamento (contexto do sistema)</strong>
+                <p>
+                  Cada secretaria ou departamento opera como um espaço isolado, com seus próprios administradores,
+                  gestores, solicitantes e motoristas. Quem cadastra não escolhe o departamento aqui — ele corresponde
+                  ao contexto já vinculado à sessão. Nesta tela usamos um valor fixo de exemplo para integração:
+                </p>
+                <code className="admin-user-create__context-code">{DEPARTAMENTO_CONTEXTO_EXEMPLO}</code>
+              </div>
+
+              {accessProfile === 'Motorista' ? (
+                <div className="admin-user-create__motorista-block admin-form-field--full">
+                  <h2 className="admin-user-create__motorista-title">Dados do motorista</h2>
+                  <p className="admin-user-create__motorista-lead">
+                    Obrigatório para perfil Motorista: habilitação e validade, armazenados como dados específicos de
+                    domínio (entidade motorista), separados da conta de usuário.
+                  </p>
+                  <div className="admin-user-create__form-grid admin-user-create__form-grid--nested">
+                    <label className="admin-form-field">
+                      <span className="admin-form-field__label">
+                        Número da CNH
+                        <span className="admin-form-field__req">*</span>
+                      </span>
                       <input
                         className="admin-form-field__input"
-                        name="cnhExpiry"
-                        placeholder="dd/mm/aaaa"
+                        name="cnh"
+                        placeholder="Ex.: 00000000000"
                         required
                         type="text"
                       />
-                      <Icon className="admin-form-field__date-icon" name="calendar" />
-                    </div>
-                  </label>
-                </>
+                    </label>
+                    <label className="admin-form-field admin-form-field--date">
+                      <span className="admin-form-field__label">
+                        Validade da CNH
+                        <span className="admin-form-field__req">*</span>
+                      </span>
+                      <div className="admin-form-field__input-wrap">
+                        <input
+                          className="admin-form-field__input"
+                          name="cnhExpiry"
+                          placeholder="dd/mm/aaaa"
+                          required
+                          type="text"
+                        />
+                        <Icon className="admin-form-field__date-icon" name="calendar" />
+                      </div>
+                    </label>
+                  </div>
+                </div>
               ) : null}
             </div>
 
