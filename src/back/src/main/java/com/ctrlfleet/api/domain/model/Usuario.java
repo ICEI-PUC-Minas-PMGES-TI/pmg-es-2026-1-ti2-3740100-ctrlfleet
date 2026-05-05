@@ -1,5 +1,6 @@
 package com.ctrlfleet.api.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -74,6 +75,7 @@ public class Usuario {
         return email;
     }
 
+    @JsonIgnore
     public String getSenha() {
         return senha;
     }
