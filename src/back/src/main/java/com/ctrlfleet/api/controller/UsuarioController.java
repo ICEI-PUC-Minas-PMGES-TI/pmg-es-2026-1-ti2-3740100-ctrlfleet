@@ -1,5 +1,6 @@
 package com.ctrlfleet.api.controller;
 
+import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.dto.usuario.UsuarioRequestDTO;
 import com.ctrlfleet.api.dto.usuario.UsuarioResponseDTO;
 import com.ctrlfleet.api.service.UsuarioService;
@@ -35,6 +36,6 @@ public class UsuarioController {
 
     @GetMapping
     public List<Usuario> listar() {
-        return usuarioRepository.findAll();
+        return usuarioService.listarTodos();
     }
 }
