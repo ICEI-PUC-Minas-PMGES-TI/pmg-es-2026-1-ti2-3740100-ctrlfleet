@@ -28,18 +28,13 @@ export const dashboardAlerts = [
   {
     id: 'a3',
     status: 'Ativo',
-    text: '3 cadastros novos aguardam complementação documental.',
+    text: '3 cadastros novos aguardam validação documental.',
   },
 ];
 
 export const secretariats = ['Secretaria (Todas)', 'Gabinete', 'Saúde', 'Educação', 'Obras', 'Administração'];
 
 export const statusTabs = ['Todos', 'Ativo', 'Manutenção', 'Bloqueado'];
-
-export const registrationSteps = [
-  { description: 'Placa, modelo, secretaria e perfil operacional.', label: 'Dados do veículo' },
-  { description: 'Validades e regularização documental.', label: 'Documentação' },
-];
 
 export const fleetVehicles = [
   {
@@ -48,6 +43,15 @@ export const fleetVehicles = [
       { dueDate: '28/11/2026', label: 'Seguro', shortLabel: 'SG', state: 'ok' },
       { dueDate: '17/09/2026', label: 'Licenciamento', shortLabel: 'LC', state: 'ok' },
     ],
+    driver: {
+      cnh: '05891234765',
+      cnhExpiry: '21/02/2029',
+      cpf: '703.554.192-14',
+      email: 'leandro.sousa@ctrlfleet.gov.br',
+      id: 'leandro-sousa',
+      name: 'Leandro Sousa',
+      status: 'Ativo',
+    },
     history: [
       { date: '28/04/2026', label: 'Reserva concluída para agenda institucional.' },
       { date: '20/04/2026', label: 'Checklist revisado e documento validado.' },
@@ -67,6 +71,15 @@ export const fleetVehicles = [
       { dueDate: '22/08/2026', label: 'Seguro', shortLabel: 'SG', state: 'ok' },
       { dueDate: '15/01/2026', label: 'Licenciamento', shortLabel: 'LC', state: 'expired' },
     ],
+    driver: {
+      cnh: '03124567890',
+      cnhExpiry: '18/11/2027',
+      cpf: '456.789.012-43',
+      email: 'carlos.rocha@ctrlfleet.gov.br',
+      id: 'carlos-rocha',
+      name: 'Carlos Rocha',
+      status: 'Bloqueado',
+    },
     history: [
       { date: '27/04/2026', label: 'Bloqueado automaticamente por documento vencido.' },
       { date: '11/04/2026', label: 'Solicitada atualização de licenciamento.' },
@@ -86,6 +99,15 @@ export const fleetVehicles = [
       { dueDate: '18/08/2026', label: 'Seguro', shortLabel: 'SG', state: 'ok' },
       { dueDate: '30/08/2026', label: 'Licenciamento', shortLabel: 'LC', state: 'ok' },
     ],
+    driver: {
+      cnh: '03124567890',
+      cnhExpiry: '18/11/2027',
+      cpf: '456.789.012-43',
+      email: 'carlos.rocha@ctrlfleet.gov.br',
+      id: 'carlos-rocha',
+      name: 'Carlos Rocha',
+      status: 'Bloqueado',
+    },
     history: [
       { date: '26/04/2026', label: 'Retorno da manutenção preventiva concluído.' },
       { date: '17/04/2026', label: 'Troca de pneus dianteiros.' },
@@ -105,6 +127,15 @@ export const fleetVehicles = [
       { dueDate: '03/12/2026', label: 'Seguro', shortLabel: 'SG', state: 'ok' },
       { dueDate: '22/10/2026', label: 'Licenciamento', shortLabel: 'LC', state: 'ok' },
     ],
+    driver: {
+      cnh: '04567891234',
+      cnhExpiry: '09/08/2028',
+      cpf: '612.443.981-02',
+      email: 'patricia.melo@ctrlfleet.gov.br',
+      id: 'patricia-melo',
+      name: 'Patrícia Melo',
+      status: 'Ativo',
+    },
     history: [
       { date: '24/04/2026', label: 'Veículo alocado para rota da educação.' },
       { date: '05/04/2026', label: 'Cadastro revisado pelo gestor.' },
