@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { DocumentPills } from '../../../components/gestor/DocumentPills';
+import { RegistroUsoSection } from '../../../components/fleet/RegistroUsoSection';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
@@ -123,6 +124,8 @@ export function VehicleDetailPage() {
           ))}
         </div>
       </SectionCard>
+
+      <RegistroUsoSection veiculoId={vehicleId} />
     </div>
   );
 }
