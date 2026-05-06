@@ -1964,3 +1964,207 @@ a {
     width: 100%;
   }
 }
+
+/* ===================================================
+   REGISTRO DE USO — Seção de detalhes do veículo
+   =================================================== */
+
+.registro-uso-resumo {
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Tabela desktop */
+.registro-uso-table-wrapper {
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.registro-uso-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.registro-uso-table th,
+.registro-uso-table td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(231, 230, 235, 0.9);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.registro-uso-table th {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(249, 250, 252, 0.8);
+}
+
+.registro-uso-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.registro-uso-table tbody tr:hover {
+  background: rgba(207, 78, 54, 0.04);
+}
+
+.registro-uso-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.registro-uso-obs {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.registro-uso-km-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* Loading skeleton */
+.registro-uso-loading {
+  display: grid;
+  gap: 12px;
+}
+
+.registro-uso-skeleton {
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    rgba(231, 230, 235, 0.5) 25%,
+    rgba(231, 230, 235, 0.8) 50%,
+    rgba(231, 230, 235, 0.5) 75%
+  );
+  background-size: 200% 100%;
+  animation: registro-uso-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes registro-uso-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Empty state */
+.registro-uso-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.registro-uso-vazio svg {
+  opacity: 0.35;
+}
+
+.registro-uso-vazio p {
+  margin: 0;
+  font-size: 0.94rem;
+  max-width: 340px;
+}
+
+/* Error state */
+.registro-uso-erro {
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid rgba(209, 79, 74, 0.2);
+  font-weight: 600;
+}
+
+.registro-uso-erro p {
+  margin: 0;
+}
+
+/* Mobile cards (hidden by default) */
+.registro-uso-card-list {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .registro-uso-table-wrapper {
+    display: none;
+  }
+
+  .registro-uso-card-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .registro-uso-card {
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(231, 230, 235, 0.9);
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .registro-uso-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .registro-uso-card__header strong {
+    font-size: 0.94rem;
+  }
+
+  .registro-uso-card__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .registro-uso-card__meta dt {
+    color: var(--muted);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .registro-uso-card__meta dd {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+
+  .registro-uso-card__obs {
+    grid-column: 1 / -1;
+  }
+
+  .registro-uso-card__obs dd {
+    font-weight: 500;
+    color: var(--muted);
+  }
+}

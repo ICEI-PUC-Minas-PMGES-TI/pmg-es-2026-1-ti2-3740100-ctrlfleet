@@ -4,8 +4,10 @@ import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.dto.usuario.UsuarioRequestDTO;
 import com.ctrlfleet.api.dto.usuario.UsuarioResponseDTO;
 import com.ctrlfleet.api.service.UsuarioService;
-import java.util.List;
+import com.ctrlfleet.api.domain.model.Usuario;
+import com.ctrlfleet.api.repository.UsuarioRepository;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
         this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping
