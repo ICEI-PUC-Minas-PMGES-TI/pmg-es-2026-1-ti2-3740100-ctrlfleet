@@ -62,7 +62,43 @@ export function VehicleDetailPage() {
           </dl>
         </SectionCard>
 
-        <SectionCard subtitle="Situação dos vencimentos monitorados." title="Documentação">
+        <SectionCard subtitle="Responsável fixo associado ao veículo." title="Motorista vinculado">
+          {vehicle.driver ? (
+            <dl className="summary-list">
+              <div>
+                <dt>Nome</dt>
+                <dd>{vehicle.driver.name}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>
+                  <StatusBadge label={vehicle.driver.status} />
+                </dd>
+              </div>
+              <div>
+                <dt>CPF</dt>
+                <dd>{vehicle.driver.cpf}</dd>
+              </div>
+              <div>
+                <dt>E-mail</dt>
+                <dd>{vehicle.driver.email}</dd>
+              </div>
+              <div>
+                <dt>CNH</dt>
+                <dd>{vehicle.driver.cnh}</dd>
+              </div>
+              <div>
+                <dt>Validade da CNH</dt>
+                <dd>{vehicle.driver.cnhExpiry}</dd>
+              </div>
+            </dl>
+          ) : (
+            <p>Nenhum motorista vinculado a este veículo.</p>
+          )}
+        </SectionCard>
+      </div>
+
+      <SectionCard subtitle="Situação dos vencimentos monitorados." title="Documentação">
           <DocumentPills documents={vehicle.documents} />
           <div className="documents-list">
             {vehicle.documents.map((item) => (
@@ -72,11 +108,10 @@ export function VehicleDetailPage() {
               </div>
             ))}
           </div>
-          <Link className="text-link" to="/gestor/frota/novo/documentacao">
-            Atualizar documentação
+          <Link className="text-link" to="/gestor/frota/novo">
+            Editar cadastro e documentação
           </Link>
-        </SectionCard>
-      </div>
+      </SectionCard>
 
       <SectionCard subtitle="Rastreabilidade das movimentações do bem." title="Histórico recente">
         <div className="history-list">

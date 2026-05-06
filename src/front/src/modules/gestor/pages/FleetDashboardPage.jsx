@@ -44,7 +44,7 @@ export function FleetDashboardPage() {
             </Link>
             <Link className="quick-link" to="/gestor/frota/novo">
               <strong>Novo cadastro</strong>
-              <span>Iniciar o fluxo de cadastro em duas etapas.</span>
+              <span>Preencher dados do veículo e documentação em uma única tela.</span>
             </Link>
             <Link className="quick-link" to="/gestor/programacao-preventiva">
               <strong>Agenda preventiva</strong>

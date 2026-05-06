@@ -728,6 +728,76 @@ a {
   gap: 18px;
 }
 
+.form-section-title {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(207, 78, 54, 0.16);
+  background: rgba(207, 78, 54, 0.06);
+}
+
+.form-section-title strong {
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.form-section-title span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.driver-association-card {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.driver-association-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.driver-association-card__header strong {
+  font-size: 1rem;
+}
+
+.driver-association-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+
+.driver-association-card__grid div {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.driver-association-card__grid dt {
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.driver-association-card__grid dd,
+.driver-association-card__empty {
+  margin: 0;
+  font-weight: 700;
+}
+
 .form-field {
   display: flex;
   flex-direction: column;
@@ -1453,7 +1523,8 @@ a {
   .role-grid,
   .summary-list,
   .form-grid,
-  .step-progress {
+  .step-progress,
+  .driver-association-card__grid {
     grid-template-columns: 1fr;
   }
 

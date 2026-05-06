@@ -7,6 +7,7 @@ const initialFormState = {
   secretariat: 'Gabinete',
   status: 'Ativo',
   licenseCategory: 'B',
+  driverId: '',
   ipvaDueDate: '',
   insuranceDueDate: '',
   licenseDueDate: '',

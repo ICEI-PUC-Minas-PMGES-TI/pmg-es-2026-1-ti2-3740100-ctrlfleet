@@ -12,7 +12,6 @@ import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
-import { VehicleDocumentsPage } from './modules/gestor/pages/VehicleDocumentsPage';
 
 function App() {
   return (
@@ -27,7 +26,7 @@ function App() {
             <Route path="dashboard" element={<FleetDashboardPage />} />
             <Route path="frota" element={<FleetPage />} />
             <Route path="frota/novo" element={<VehicleCreatePage />} />
-            <Route path="frota/novo/documentacao" element={<VehicleDocumentsPage />} />
+            <Route path="frota/novo/documentacao" element={<Navigate replace to="/gestor/frota/novo" />} />
             <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
             <Route
               path="reservas"
