@@ -18,7 +18,9 @@ function App() {
     <BrowserRouter>
       <VehicleFormProvider>
         <Routes>
-          <Route index element={<Navigate replace to="/gestor/dashboard" />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
 
           <Route path="gestor" element={<ManagerLayout />}>
             <Route index element={<Navigate replace to="dashboard" />} />
@@ -85,7 +87,7 @@ function App() {
             <Route path="configuracoes" element={<AdminSettingsPage />} />
           </Route>
 
-          <Route path="*" element={<Navigate replace to="/gestor/dashboard" />} />
+          <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </VehicleFormProvider>
     </BrowserRouter>

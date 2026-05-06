@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +41,11 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Usuario> listarTodos() {
+        return usuarioRepository.findAll();
     }
 
     @Transactional
