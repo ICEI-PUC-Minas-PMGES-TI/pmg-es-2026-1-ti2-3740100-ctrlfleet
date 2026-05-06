@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
 import { fleetNavigationItems } from '../../data/fleetData';
@@ -51,10 +51,10 @@ export function Sidebar({ isOpen, onClose }) {
             <span>{isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
           </div>
         </div>
-        <button className="sidebar__logout" type="button">
+        <Link className="sidebar__logout" to="/login">
           <Icon name="logout" />
           <span>Sair</span>
-        </button>
+        </Link>
       </div>
     </aside>
   );
