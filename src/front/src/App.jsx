@@ -12,14 +12,15 @@ import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
-import { VehicleDocumentsPage } from './modules/gestor/pages/VehicleDocumentsPage';
 
 function App() {
   return (
     <BrowserRouter>
       <VehicleFormProvider>
         <Routes>
-          <Route index element={<Navigate replace to="/gestor/dashboard" />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
 
           <Route path="gestor" element={<ManagerLayout />}>
             <Route index element={<Navigate replace to="dashboard" />} />
@@ -27,7 +28,7 @@ function App() {
             <Route path="dashboard" element={<FleetDashboardPage />} />
             <Route path="frota" element={<FleetPage />} />
             <Route path="frota/novo" element={<VehicleCreatePage />} />
-            <Route path="frota/novo/documentacao" element={<VehicleDocumentsPage />} />
+            <Route path="frota/novo/documentacao" element={<Navigate replace to="/gestor/frota/novo" />} />
             <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
             <Route
               path="reservas"
@@ -86,7 +87,7 @@ function App() {
             <Route path="configuracoes" element={<AdminSettingsPage />} />
           </Route>
 
-          <Route path="*" element={<Navigate replace to="/gestor/dashboard" />} />
+          <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </VehicleFormProvider>
     </BrowserRouter>
