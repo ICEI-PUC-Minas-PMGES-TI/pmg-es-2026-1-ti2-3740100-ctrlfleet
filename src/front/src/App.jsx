@@ -12,6 +12,8 @@ import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
+import { HomePage } from './modules/public/pages/HomePage';
+import { LoginPage } from './modules/public/pages/LoginPage';
 
 function App() {
   return (
