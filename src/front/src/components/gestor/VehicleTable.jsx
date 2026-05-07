@@ -11,6 +11,7 @@ export function VehicleTable({ vehicles }) {
           <thead>
             <tr>
               <th>Placa</th>
+              <th>Marca</th>
               <th>Modelo</th>
               <th>Secretaria</th>
               <th>CNH</th>
@@ -25,6 +26,7 @@ export function VehicleTable({ vehicles }) {
                 <td>
                   <span className="plate-chip">{vehicle.plate}</span>
                 </td>
+                <td>{vehicle.marca}</td>
                 <td>{vehicle.model}</td>
                 <td>{vehicle.secretariat}</td>
                 <td>{vehicle.licenseCategory}</td>
@@ -56,7 +58,7 @@ export function VehicleTable({ vehicles }) {
             <div className="vehicle-card__header">
               <div>
                 <span className="plate-chip">{vehicle.plate}</span>
-                <h3>{vehicle.model}</h3>
+                <h3>{vehicle.marca} {vehicle.model}</h3>
               </div>
               <StatusBadge label={vehicle.status} />
             </div>
