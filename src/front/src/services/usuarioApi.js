@@ -1,57 +1,49 @@
-/**
- * Em desenvolvimento usa URL direta do Spring Boot (evita 502 do proxy quando o
- * backend não está acessível via `localhost` ou está desligado).
- * Em produção: defina `VITE_API_BASE_URL` no build ou use `/api` com reverse proxy.
- */
-function getApiBaseUrl() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (typeof fromEnv === 'string' && fromEnv.trim() !== '') {
-    return fromEnv.replace(/\/$/, '');
-  }
-  if (import.meta.env.DEV) {
-    return 'http://127.0.0.1:8080';
-  }
-  return '';
+import { apiRequest } from './apiClient';
+
+const roleLabels = {
+  ROLE_ADMINISTRADOR: 'Administrador',
+  ROLE_GESTOR_FROTA: 'Gestor de Frota',
+  ROLE_MOTORISTA: 'Motorista',
+  ROLE_SOLICITANTE: 'Servidor Solicitante',
+};
+
+function formatDateBr(date) {
+  if (!date) return '';
+  const [year, month, day] = date.split('-');
+  return `${day}/${month}/${year}`;
 }
 
-function requestUrl(path) {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  if (base) {
-    return `${base}${p}`;
-  }
-  return `/api${p}`;
+function getPrimaryRole(usuario) {
+  const roles = Array.isArray(usuario.roles) ? usuario.roles : [];
+  return roles[0]?.nome;
 }
 
-function parseJsonSafely(text) {
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { mensagem: text };
-  }
+function mapUsuario(usuario) {
+  const role = roleLabels[getPrimaryRole(usuario)] ?? 'Servidor Solicitante';
+
+  return {
+    cnh: usuario.numeroCnh ?? '',
+    cnhExpiry: formatDateBr(usuario.validadeCnh),
+    cpf: usuario.matricula ?? '',
+    email: usuario.email,
+    id: String(usuario.id),
+    lastAccess: 'Persistido no banco',
+    name: usuario.nome,
+    role,
+    secretariat: usuario.departamento ?? 'Administracao',
+    status: 'Ativo',
+  };
 }
 
-/**
- * @param {Record<string, unknown>} payload corpo alinhado ao `UsuarioRequestDTO` do backend
- * @returns {Promise<{ id: number, nome: string, email: string }>}
- */
 export async function criarUsuario(payload) {
-  const res = await fetch(requestUrl('/usuarios'), {
+  return apiRequest('/usuarios', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
 
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Não foi possível cadastrar (${res.status})`;
-    throw new Error(msg);
-  }
-
-  return data;
+export async function listarUsuarios() {
+  const data = await apiRequest('/usuarios');
+  return (data || []).map(mapUsuario);
 }

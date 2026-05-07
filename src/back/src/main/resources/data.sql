@@ -1,92 +1,83 @@
--- ==========================================
--- USUARIOS (BASE)
--- ==========================================
-INSERT INTO usuarios (id, nome, email, senha) VALUES
-(1, 'João Silva', 'joao.silva@ctrlfleet.com', '123456'),
-(2, 'Maria Santos', 'maria.santos@ctrlfleet.com', '123456'),
-(3, 'Pedro Oliveira', 'pedro.oliveira@ctrlfleet.com', '123456'),
-(4, 'Ana Costa', 'ana.costa@ctrlfleet.com', '123456'),
-(5, 'Carlos Souza', 'carlos.souza@ctrlfleet.com', '123456'),
-(6, 'Fernanda Lima', 'fernanda.lima@ctrlfleet.com', '123456'),
-(7, 'Roberto Alves', 'roberto.alves@ctrlfleet.com', '123456'),
-(8, 'Juliana Martins', 'juliana.martins@ctrlfleet.com', '123456'),
-(9, 'Lucas Ferreira', 'lucas.ferreira@ctrlfleet.com', '123456'),
-(10, 'Patricia Rocha', 'patricia.rocha@ctrlfleet.com', '123456')
+-- Seed inicial do CtrlFleet.
+-- O Hibernate cria/atualiza as tabelas e este arquivo popula dados de exemplo.
+
+INSERT INTO roles (id, nome) VALUES
+(1, 'ROLE_SOLICITANTE'),
+(2, 'ROLE_ADMINISTRADOR'),
+(3, 'ROLE_GESTOR_FROTA'),
+(4, 'ROLE_MOTORISTA')
+ON CONFLICT (id) DO UPDATE SET
+    nome = EXCLUDED.nome;
+
+INSERT INTO usuarios (
+    id, nome, email, senha, matricula, departamento, cargo, data_admissao,
+    tipo_cadastro, numero_cnh, validade_cnh
+) VALUES
+(1, 'Ana Costa', 'ana.costa@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'ADM-0001', 'Administracao', 'Administrador', '2024-01-08', 'usuario', NULL, NULL),
+(2, 'Joao Duarte', 'joao.duarte@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'GES-0002', 'Gabinete', 'Gestor de Frota', '2024-02-12', 'usuario', NULL, NULL),
+(3, 'Marina Silva', 'marina.silva@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'SOL-0003', 'Saude', 'Servidor Solicitante', '2024-03-18', 'usuario', NULL, NULL),
+(4, 'Carlos Rocha', 'carlos.rocha@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'MOT-0004', 'Obras', 'Motorista', '2023-11-20', 'motorista', '03124567890', '2027-11-18'),
+(5, 'Patricia Melo', 'patricia.melo@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'MOT-0005', 'Saude', 'Motorista', '2023-09-14', 'motorista', '04567891234', '2028-08-09'),
+(6, 'Leandro Sousa', 'leandro.sousa@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'MOT-0006', 'Gabinete', 'Motorista', '2022-06-06', 'motorista', '05891234765', '2029-02-21'),
+(7, 'Beatriz Lima', 'beatriz.lima@ctrlfleet.gov.br', '$2a$10$oy4vI2x.rVcsgHc3y.HWxOwYML5z0tJmkrBBtOHfdxzaRwByaS88K', 'GES-0007', 'Educacao', 'Gestor de Frota', '2022-10-03', 'usuario', NULL, NULL)
+ON CONFLICT (id) DO UPDATE SET
+    nome = EXCLUDED.nome,
+    email = EXCLUDED.email,
+    matricula = EXCLUDED.matricula,
+    departamento = EXCLUDED.departamento,
+    cargo = EXCLUDED.cargo,
+    data_admissao = EXCLUDED.data_admissao,
+    tipo_cadastro = EXCLUDED.tipo_cadastro,
+    numero_cnh = EXCLUDED.numero_cnh,
+    validade_cnh = EXCLUDED.validade_cnh;
+
+DELETE FROM usuario_roles WHERE usuario_id IN (1, 2, 3, 4, 5, 6, 7);
+
+INSERT INTO usuario_roles (usuario_id, role_id) VALUES
+(1, 2),
+(2, 3),
+(3, 1),
+(4, 4),
+(5, 4),
+(6, 4),
+(7, 3)
 ON CONFLICT DO NOTHING;
 
+INSERT INTO veiculos (
+    id, placa, modelo, marca, ano, secretaria, categoria_cnh, quilometragem,
+    vencimento_ipva, vencimento_seguro, vencimento_licenciamento, motorista_id, status
+) VALUES
+(1, 'RBC-4E21', 'Toyota Hilux SW4', 'Toyota', 2024, 'Gabinete', 'B', 48230.0, '2026-05-12', '2026-11-28', '2026-09-17', 6, 'DISPONIVEL'),
+(2, 'KMS-8812', 'Fiat Ducato Maxxi', 'Fiat', 2021, 'Saude', 'D', 126100.0, '2026-02-10', '2026-08-22', '2026-01-15', 4, 'DESATIVADO'),
+(3, 'RVA-3021', 'Renault Oroch', 'Renault', 2023, 'Obras', 'B', 62455.0, '2026-08-18', '2026-08-18', '2026-08-30', 4, 'MANUTENCAO'),
+(4, 'MTA-9011', 'Mercedes Sprinter', 'Mercedes-Benz', 2022, 'Educacao', 'D', 84020.0, '2026-10-12', '2026-12-03', '2026-10-22', 5, 'DISPONIVEL'),
+(5, 'ABC-1D23', 'Chevrolet Onix LT', 'Chevrolet', 2022, 'Administracao', 'B', 15340.0, '2026-07-04', '2026-09-09', '2026-07-30', 6, 'EM_USO')
+ON CONFLICT (id) DO UPDATE SET
+    placa = EXCLUDED.placa,
+    modelo = EXCLUDED.modelo,
+    marca = EXCLUDED.marca,
+    ano = EXCLUDED.ano,
+    secretaria = EXCLUDED.secretaria,
+    categoria_cnh = EXCLUDED.categoria_cnh,
+    quilometragem = EXCLUDED.quilometragem,
+    vencimento_ipva = EXCLUDED.vencimento_ipva,
+    vencimento_seguro = EXCLUDED.vencimento_seguro,
+    vencimento_licenciamento = EXCLUDED.vencimento_licenciamento,
+    motorista_id = EXCLUDED.motorista_id,
+    status = EXCLUDED.status;
 
--- ==========================================
--- MOTORISTAS
--- ==========================================
-INSERT INTO motoristas (usuario_id, cnh, validade_cnh) VALUES
-(1, '12345678900', '2027-05-10'),
-(3, '98765432100', '2026-11-20'),
-(6, '45612378900', '2028-01-15'),
-(9, '78945612300', '2025-09-30')
-ON CONFLICT DO NOTHING;
+INSERT INTO registros_uso (
+    id_uso, id_veiculo, id_motorista, id_reserva, data_saida,
+    quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo
+) VALUES
+(1, 1, 6, NULL, '2026-04-10T08:00:00', 48090.0, '2026-04-10T17:30:00', 48160.0, 'Agenda institucional no gabinete.'),
+(2, 1, 6, NULL, '2026-04-28T07:30:00', 48160.0, '2026-04-28T12:45:00', 48230.0, 'Reserva concluida para agenda institucional.'),
+(3, 3, 4, NULL, '2026-04-17T09:00:00', 62320.0, '2026-04-17T18:00:00', 62455.0, 'Troca de pneus dianteiros.'),
+(4, 4, 5, NULL, '2026-04-24T06:45:00', 83810.0, '2026-04-24T14:00:00', 84020.0, 'Veiculo alocado para rota da educacao.'),
+(5, 5, 6, NULL, '2026-04-18T10:00:00', 15200.0, '2026-04-18T16:30:00', 15340.0, 'Deslocamento administrativo.')
+ON CONFLICT (id_uso) DO NOTHING;
 
-
--- ==========================================
--- SOLICITANTES
--- ==========================================
-INSERT INTO solicitantes (usuario_id) VALUES
-(2),
-(4),
-(8),
-(10)
-ON CONFLICT DO NOTHING;
-
-
--- ==========================================
--- GESTORES
--- ==========================================
-INSERT INTO gestores (usuario_id) VALUES
-(5),
-(7)
-ON CONFLICT DO NOTHING;
-
-
--- ==========================================
--- VEICULOS
--- ==========================================
-INSERT INTO veiculos (placa, modelo, marca, ano, status) VALUES
-
--- DISPONÍVEIS
-('ABC1A23', 'Onix', 'Chevrolet', 2022, 'DISPONIVEL'),
-('XYZ5B67', 'HB20', 'Hyundai', 2023, 'DISPONIVEL'),
-('LMN9C12', 'Corsa', 'Chevrolet', 2021, 'DISPONIVEL'),
-('VXY8D01', 'March', 'Nissan', 2023, 'DISPONIVEL'),
-
--- EM USO
-('DEF3E56', 'Prisma', 'Chevrolet', 2020, 'EM_USO'),
-('GHI7F90', 'Gol', 'Volkswagen', 2022, 'EM_USO'),
-
--- MANUTENÇÃO
-('JKL2G45', 'Celta', 'Chevrolet', 2019, 'MANUTENCAO'),
-('OPQ6H89', 'Fit', 'Honda', 2021, 'MANUTENCAO'),
-
--- DESATIVADOS
-('RST0I23', 'Palio', 'Fiat', 2015, 'DESATIVADO')
-ON CONFLICT DO NOTHING;
-
-
--- ==========================================
--- REGISTROS DE USO
--- ==========================================
-INSERT INTO registros_uso (id_uso, id_veiculo, id_motorista, id_reserva, data_saida, quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo) VALUES
-
--- Veículo 1 (Onix ABC1A23) — motorista João Silva (id 1)
-(1, 1, 1, NULL, '2026-04-10T08:00:00', 15200.0, '2026-04-10T17:30:00', 15340.0, 'Viagem para vistoria na regional norte.'),
-(2, 1, 1, NULL, '2026-04-18T07:30:00', 15340.0, '2026-04-18T12:45:00', 15410.0, NULL),
-(3, 1, 3, NULL, '2026-04-25T09:00:00', 15410.0, '2026-04-25T18:00:00', 15580.0, 'Transporte de materiais para evento.'),
-
--- Veículo 2 (HB20 XYZ5B67) — motorista Pedro Oliveira (id 3)
-(4, 2, 3, NULL, '2026-04-05T06:45:00', 32100.0, '2026-04-05T14:00:00', 32250.0, 'Deslocamento à secretaria de educação.'),
-(5, 2, 6, NULL, '2026-04-22T10:00:00', 32250.0, '2026-04-22T16:30:00', 32390.0, NULL),
-
--- Veículo 5 (Prisma DEF3E56) — motorista Fernanda Lima (id 6)
-(6, 5, 6, NULL, '2026-04-02T08:15:00', 48000.0, '2026-04-02T17:00:00', 48180.0, 'Fiscalização de obras na zona sul.'),
-(7, 5, 9, NULL, '2026-04-15T07:00:00', 48180.0, '2026-04-15T11:30:00', 48260.0, 'Entrega de documentos no fórum.'),
-(8, 5, 1, NULL, '2026-04-28T13:00:00', 48260.0, '2026-04-28T18:45:00', 48420.0, NULL)
-
-ON CONFLICT DO NOTHING;
+SELECT setval(pg_get_serial_sequence('roles', 'id'), COALESCE((SELECT MAX(id) FROM roles), 1), true);
+SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE((SELECT MAX(id) FROM usuarios), 1), true);
+SELECT setval(pg_get_serial_sequence('veiculos', 'id'), COALESCE((SELECT MAX(id) FROM veiculos), 1), true);
+SELECT setval(pg_get_serial_sequence('registros_uso', 'id_uso'), COALESCE((SELECT MAX(id_uso) FROM registros_uso), 1), true);

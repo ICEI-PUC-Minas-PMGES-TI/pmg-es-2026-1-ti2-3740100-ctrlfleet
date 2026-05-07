@@ -1,17 +1,37 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { adminUsers } from '../../../data/adminData';
 import { vehicleFormOptions } from '../../../data/fleetData';
+import { listarUsuarios } from '../../../services/usuarioApi';
 import { useVehicleForm } from '../context/useVehicleForm';
 
 export function VehicleCreatePage() {
   const navigate = useNavigate();
   const { formState, resetForm, updateForm } = useVehicleForm();
-  const drivers = adminUsers.filter((user) => user.role === 'Motorista');
+  const [users, setUsers] = useState([]);
+  const drivers = users.filter((user) => user.role === 'Motorista');
   const selectedDriver = drivers.find((driver) => driver.id === formState.driverId) ?? null;
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadUsers() {
+      try {
+        const data = await listarUsuarios();
+        if (active) setUsers(data);
+      } catch {
+        if (active) setUsers([]);
+      }
+    }
+
+    loadUsers();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function handleSubmit(event) {
     event.preventDefault();

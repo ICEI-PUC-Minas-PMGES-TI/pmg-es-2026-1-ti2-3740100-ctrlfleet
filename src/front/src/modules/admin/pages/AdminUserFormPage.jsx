@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { adminSecretariats, adminUsers } from '../../../data/adminData';
-import { criarUsuario } from '../../../services/usuarioApi';
+import { adminSecretariats } from '../../../data/adminData';
+import { criarUsuario, listarUsuarios } from '../../../services/usuarioApi';
 
 const roleOptions = ['Administrador', 'Gestor de Frota', 'Motorista', 'Servidor Solicitante'];
 const statusOptions = ['Ativo', 'Pendente', 'Bloqueado', 'Inativo'];
@@ -41,14 +41,34 @@ export function AdminUserFormPage() {
   const navigate = useNavigate();
   const { userId } = useParams();
   const isCreateMode = !userId;
-  const user = useMemo(() => adminUsers.find((item) => item.id === userId), [userId]);
-  const selectedUser = user ?? adminUsers[0];
+  const [users, setUsers] = useState([]);
+  const user = useMemo(() => users.find((item) => item.id === userId), [userId, users]);
+  const selectedUser = user ?? users[0];
 
   const [accessProfile, setAccessProfile] = useState('Solicitante');
   const [tempPassword, setTempPassword] = useState('F1eet@2024!');
   const [sendCredentialsByEmail, setSendCredentialsByEmail] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  useEffect(() => {
+    if (isCreateMode) return undefined;
+    let active = true;
+
+    async function loadUsers() {
+      try {
+        const data = await listarUsuarios();
+        if (active) setUsers(data);
+      } catch {
+        if (active) setUsers([]);
+      }
+    }
+
+    loadUsers();
+    return () => {
+      active = false;
+    };
+  }, [isCreateMode]);
 
   async function handleCreateSubmit(event) {
     event.preventDefault();
@@ -291,6 +311,17 @@ export function AdminUserFormPage() {
             </div>
           </form>
         </div>
+      </div>
+    );
+  }
+
+  if (!selectedUser) {
+    return (
+      <div className="page-stack">
+        <PageHeader subtitle="Nao encontramos o usuario solicitado." title="Usuario nao encontrado" />
+        <ActionButton to="/admin/usuarios" variant="secondary">
+          Voltar para usuarios
+        </ActionButton>
       </div>
     );
   }
