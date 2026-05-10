@@ -2,11 +2,8 @@ import { Icon } from '../common/Icon';
 
 export function FleetFilters({
   onSearchChange,
-  onSecretariatChange,
   onStatusChange,
   search,
-  secretariat,
-  secretariats,
   selectedStatus,
   statusTabs,
 }) {
@@ -36,17 +33,6 @@ export function FleetFilters({
           </button>
         ))}
       </div>
-
-      <label className="select-field" htmlFor="fleet-secretariat">
-        <span className="sr-only">Secretaria</span>
-        <select id="fleet-secretariat" onChange={(event) => onSecretariatChange(event.target.value)} value={secretariat}>
-          {secretariats.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </label>
     </div>
   );
 }

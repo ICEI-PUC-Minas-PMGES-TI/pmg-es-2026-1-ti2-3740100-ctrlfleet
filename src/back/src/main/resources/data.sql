@@ -15,21 +15,123 @@
 
 -- =====================================================================
 -- 1. USUARIOS
+--   Mapeamento de colunas (entidade Usuario.java):
+--    id (PK) | nome | email | senha (BCrypt) | matricula
+--    cargo | data_admissao | tipo_cadastro | numero_cnh | validade_cnh
+--    + campos novos do diagrama: perfil_acesso | role | data_desligamento | status
+--   A senha "$2a$10$N9qo8uLOickgx2..." é o hash BCrypt de "123456"
+--   (somente para mocks/dev — nunca usar em produção).
 -- =====================================================================
-INSERT INTO usuarios (id_usuario, nome, email, senha_hash, perfil_acesso, matricula, role, cargo, data_admissao, data_desligamento, status) VALUES
-(1,  'Ana Costa',           'ana.costa@ctrlfleet.gov.br',           '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN',                'MAT-0001', 'ADMINISTRADOR',       'Coordenadora Administrativa', '2018-03-12', NULL, 'ATIVO'),
-(2,  'João Duarte',          'joao.duarte@ctrlfleet.gov.br',         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'GESTOR_FROTA',         'MAT-0002', 'GESTOR_FROTA',        'Gestor de Frota',             '2019-06-20', NULL, 'ATIVO'),
-(3,  'Marina Silva',         'marina.silva@ctrlfleet.gov.br',        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'SERVIDOR_SOLICITANTE', 'MAT-0003', 'SOLICITANTE',         'Assistente Administrativa',   '2024-02-01', NULL, 'PENDENTE'),
-(4,  'Carlos Rocha',         'carlos.rocha@ctrlfleet.gov.br',        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MOTORISTA',            'MAT-0004', 'MOTORISTA',           'Motorista Pleno',             '2020-09-15', NULL, 'BLOQUEADO'),
-(5,  'Patrícia Melo',        'patricia.melo@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MOTORISTA',            'MAT-0005', 'MOTORISTA',           'Motorista Sênior',            '2017-11-04', NULL, 'ATIVO'),
-(6,  'Leandro Sousa',        'leandro.sousa@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MOTORISTA',            'MAT-0006', 'MOTORISTA',           'Motorista Pleno',             '2021-01-22', NULL, 'ATIVO'),
-(7,  'Beatriz Lima',         'beatriz.lima@ctrlfleet.gov.br',        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'GESTOR_FROTA',         'MAT-0007', 'GESTOR_FROTA',        'Gestora de Frota',            '2016-04-18', '2025-12-30', 'INATIVO'),
-(8,  'Rafael Menezes',       'rafael.menezes@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MOTORISTA',            'MAT-0008', 'MOTORISTA',           'Motorista Júnior',            '2025-08-05', NULL, 'PENDENTE'),
-(9,  'Lúcia Albuquerque',    'lucia.albuquerque@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'GESTOR_FROTA',         'MAT-0009', 'GESTOR_FROTA',        'Gestora de Frota',            '2022-07-19', NULL, 'ATIVO'),
-(10, 'Fernando Tavares',     'fernando.tavares@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'SERVIDOR_SOLICITANTE', 'MAT-0010', 'SOLICITANTE',         'Servidor Público',            '2023-03-08', NULL, 'ATIVO'),
-(11, 'Juliana Martins',      'juliana.martins@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'SERVIDOR_SOLICITANTE', 'MAT-0011', 'SOLICITANTE',         'Servidora Pública',           '2019-10-14', NULL, 'ATIVO'),
-(12, 'Roberto Alves',        'roberto.alves@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN',                'MAT-0012', 'ADMINISTRADOR',       'Auditor de Sistemas',         '2015-02-26', NULL, 'ATIVO')
+-- Em bancos antigos a coluna `departamento` ainda pode existir (ddl-auto=update
+-- não dropa colunas removidas do entity). Como o conceito foi removido, dropamos
+-- aqui em definitivo. `IF EXISTS` mantém o comando idempotente / seguro em
+-- bancos novos onde a coluna nunca foi criada.
+ALTER TABLE usuarios DROP COLUMN IF EXISTS departamento;
+
+INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, numero_cnh, validade_cnh, perfil_acesso, role, data_desligamento, status) VALUES
+(1,  'Ana Costa',         'ana.costa@ctrlfleet.gov.br',         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0001', 'Coordenadora Administrativa', '2018-03-12', 'usuario',   NULL,          NULL,         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
+(2,  'João Duarte',       'joao.duarte@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0002', 'Gestor de Frota',             '2019-06-20', 'usuario',   NULL,          NULL,         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
+(3,  'Marina Silva',      'marina.silva@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0003', 'Assistente Administrativa',   '2024-02-01', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'PENDENTE'),
+(4,  'Carlos Rocha',      'carlos.rocha@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0004', 'Motorista Pleno',             '2020-09-15', 'motorista', '03124567890', '2027-11-18', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'BLOQUEADO'),
+(5,  'Patrícia Melo',     'patricia.melo@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0005', 'Motorista Sênior',            '2017-11-04', 'motorista', '04567891234', '2028-08-09', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
+(6,  'Leandro Sousa',     'leandro.sousa@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0006', 'Motorista Pleno',             '2021-01-22', 'motorista', '05891234765', '2029-02-21', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
+(7,  'Beatriz Lima',      'beatriz.lima@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0007', 'Gestora de Frota',            '2016-04-18', 'usuario',   NULL,          NULL,         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  '2025-12-30', 'INATIVO'),
+(8,  'Rafael Menezes',    'rafael.menezes@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0008', 'Motorista Júnior',            '2025-08-05', 'motorista', '06234587190', '2026-12-05', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'PENDENTE'),
+(9,  'Lúcia Albuquerque', 'lucia.albuquerque@ctrlfleet.gov.br', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0009', 'Gestora de Frota',            '2022-07-19', 'usuario',   NULL,          NULL,         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
+(10, 'Fernando Tavares',  'fernando.tavares@ctrlfleet.gov.br',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0010', 'Servidor Público',            '2023-03-08', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(11, 'Juliana Martins',   'juliana.martins@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0011', 'Servidora Pública',           '2019-10-14', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(12, 'Roberto Alves',     'roberto.alves@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0012', 'Auditor de Sistemas',         '2015-02-26', 'usuario',   NULL,          NULL,         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
+(13, 'Camila Reis',       'camila.reis@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0013', 'Servidora Pública',           '2021-05-17', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(14, 'Eduardo Pereira',   'eduardo.pereira@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0014', 'Servidor Público',            '2020-08-23', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(15, 'Tatiane Cardoso',   'tatiane.cardoso@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0015', 'Servidora Pública',           '2024-11-04', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO')
 ON CONFLICT DO NOTHING;
+
+-- Avança a sequence do IDENTITY para evitar colisão de PK ao criar novos usuários via POST.
+SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE((SELECT MAX(id) FROM usuarios), 0));
+
+
+-- =====================================================================
+-- 1.1 ROLES (idempotente — coluna `nome` é UNIQUE)
+--   O RoleBootstrap do Spring já popula essas roles na primeira inicialização,
+--   mas garantimos aqui também para que o INSERT em `usuario_roles` abaixo
+--   (que roda ANTES do CommandLineRunner) tenha as roles disponíveis.
+-- =====================================================================
+INSERT INTO roles (nome) VALUES
+('ROLE_ADMINISTRADOR'),
+('ROLE_GESTOR_FROTA'),
+('ROLE_MOTORISTA'),
+('ROLE_SOLICITANTE')
+ON CONFLICT (nome) DO NOTHING;
+
+
+-- =====================================================================
+-- 1.2 USUARIO_ROLES (relacionamento ManyToMany)
+--   Cria os vínculos para os 12 usuários do mock. Usa JOIN com `roles`
+--   pelo nome, para não depender dos IDs gerados pelo IDENTITY.
+-- =====================================================================
+INSERT INTO usuario_roles (usuario_id, role_id)
+SELECT v.usuario_id, r.id
+FROM (VALUES
+  (1,  'ROLE_ADMINISTRADOR'),
+  (2,  'ROLE_GESTOR_FROTA'),
+  (3,  'ROLE_SOLICITANTE'),
+  (4,  'ROLE_MOTORISTA'),
+  (5,  'ROLE_MOTORISTA'),
+  (6,  'ROLE_MOTORISTA'),
+  (7,  'ROLE_GESTOR_FROTA'),
+  (8,  'ROLE_MOTORISTA'),
+  (9,  'ROLE_GESTOR_FROTA'),
+  (10, 'ROLE_SOLICITANTE'),
+  (11, 'ROLE_SOLICITANTE'),
+  (12, 'ROLE_ADMINISTRADOR'),
+  (13, 'ROLE_SOLICITANTE'),
+  (14, 'ROLE_SOLICITANTE'),
+  (15, 'ROLE_SOLICITANTE')
+) AS v(usuario_id, role_nome)
+JOIN roles r ON r.nome = v.role_nome
+WHERE EXISTS (SELECT 1 FROM usuarios u WHERE u.id = v.usuario_id)
+ON CONFLICT DO NOTHING;
+
+
+-- =====================================================================
+-- 1.3 BACKFILL — preenche perfil_acesso/role/status dos usuários antigos
+--   Para usuários criados antes da introdução das colunas novas
+--   (perfil_acesso, role, status), deriva os valores a partir do
+--   relacionamento existente em usuario_roles. Roda apenas em linhas
+--   que ainda têm esses campos nulos, então é idempotente.
+-- =====================================================================
+UPDATE usuarios u
+SET
+  role = COALESCE(u.role, sub.role_nome),
+  perfil_acesso = COALESCE(
+    u.perfil_acesso,
+    CASE sub.role_nome
+      WHEN 'ROLE_ADMINISTRADOR' THEN 'Administrador'
+      WHEN 'ROLE_GESTOR_FROTA'  THEN 'Gestor de Frota'
+      WHEN 'ROLE_MOTORISTA'     THEN 'Motorista'
+      WHEN 'ROLE_SOLICITANTE'   THEN 'Solicitante'
+    END
+  ),
+  status = COALESCE(u.status, 'ATIVO')
+FROM (
+  SELECT ur.usuario_id, MIN(r.nome) AS role_nome
+  FROM usuario_roles ur
+  JOIN roles r ON r.id = ur.role_id
+  GROUP BY ur.usuario_id
+) AS sub
+WHERE u.id = sub.usuario_id
+  AND (u.role IS NULL OR u.perfil_acesso IS NULL OR u.status IS NULL);
+
+
+-- =====================================================================
+-- 1.4 NORMALIZAÇÃO DE MATRÍCULAS
+--   Padroniza todas as matrículas no formato MAT-XXXX (zero-padded em
+--   4 dígitos a partir do id do usuário). Usuários antigos que tinham
+--   prefixos como SOL-0003 / MOT-0004 / ADM-0001 / GES-0002 passam a
+--   seguir o mesmo padrão dos novos. Idempotente: linhas já no formato
+--   MAT-XXXX não sofrem alteração efetiva.
+-- =====================================================================
+UPDATE usuarios SET matricula = 'MAT-' || LPAD(id::text, 4, '0');
 
 
 -- =====================================================================

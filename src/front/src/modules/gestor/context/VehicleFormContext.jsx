@@ -4,7 +4,6 @@ const initialFormState = {
   plate: '',
   model: '',
   year: '',
-  secretariat: 'Gabinete',
   status: 'Ativo',
   licenseCategory: 'B',
   driverId: '',

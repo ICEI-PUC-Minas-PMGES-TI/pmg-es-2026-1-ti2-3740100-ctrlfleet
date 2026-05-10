@@ -18,9 +18,6 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "Matrícula é obrigatória")
     private String matricula;
 
-    @NotBlank(message = "Departamento é obrigatório")
-    private String departamento;
-
     @NotBlank(message = "Perfil de acesso é obrigatório")
     private String perfilAcesso;
 
@@ -69,14 +66,6 @@ public class UsuarioRequestDTO {
 
     public void setMatricula(String matricula) {
         this.matricula = matricula;
-    }
-
-    public String getDepartamento() {
-        return departamento;
-    }
-
-    public void setDepartamento(String departamento) {
-        this.departamento = departamento;
     }
 
     public String getPerfilAcesso() {

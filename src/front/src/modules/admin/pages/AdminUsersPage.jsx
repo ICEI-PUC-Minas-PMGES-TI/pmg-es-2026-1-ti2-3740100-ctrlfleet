@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { UserFilters } from '../../../components/admin/UserFilters';
 import { UserTable } from '../../../components/admin/UserTable';
+import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { adminSecretariats, adminUsers, userRoleOptions, userStatusTabs } from '../../../data/adminData';
+import { userRoleOptions, userStatusTabs } from '../../../data/adminData';
+import { listarUsuarios } from '../../../services/usuarioApi';
+import { mapBackendUserToView, pad2 } from '../../../services/usuarioMappers';
 
 function filterByStatus(user, status) {
   return status === 'Todos' || user.status === status;
@@ -14,70 +17,95 @@ function filterByRole(user, role) {
   return role === 'Perfil (Todos)' || user.role === role;
 }
 
-function onlyDigits(value) {
-  return value.replace(/\D/g, '');
-}
-
 export function AdminUsersPage() {
   const [nameSearch, setNameSearch] = useState('');
-  const [cpfSearch, setCpfSearch] = useState('');
-  const [selectedSecretariat, setSelectedSecretariat] = useState('Secretaria (Todas)');
+  const [matriculaSearch, setMatriculaSearch] = useState('');
   const [selectedRole, setSelectedRole] = useState('Perfil (Todos)');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
 
-  const filteredUsers = useMemo(() => {
-    const normalizedNameSearch = nameSearch.trim().toLowerCase();
-    const cpfSearchDigits = onlyDigits(cpfSearch);
+  const [usersData, setUsersData] = useState({
+    loading: true,
+    error: null,
+    items: [],
+  });
 
-    return adminUsers.filter((user) => {
+  useEffect(() => {
+    const controller = new AbortController();
+
+    setUsersData((current) => ({ ...current, loading: true, error: null }));
+    listarUsuarios({ signal: controller.signal })
+      .then((items) => {
+        setUsersData({
+          loading: false,
+          error: null,
+          items: items.map(mapBackendUserToView),
+        });
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setUsersData({
+          loading: false,
+          error: error.message || 'Falha ao carregar usuários.',
+          items: [],
+        });
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const filteredUsers = useMemo(() => {
+    const normalizedName = nameSearch.trim().toLowerCase();
+    const normalizedMatricula = matriculaSearch.trim().toLowerCase();
+
+    return usersData.items.filter((user) => {
       const matchesName =
-        normalizedNameSearch.length === 0 || user.name.toLowerCase().includes(normalizedNameSearch);
-      const matchesCpf = cpfSearchDigits.length === 0 || onlyDigits(user.cpf).includes(cpfSearchDigits);
-      const matchesSecretariat =
-        selectedSecretariat === 'Secretaria (Todas)' || user.secretariat === selectedSecretariat;
+        normalizedName.length === 0 || user.name.toLowerCase().includes(normalizedName);
+      const matchesMatricula =
+        normalizedMatricula.length === 0 ||
+        (user.matricula || '').toLowerCase().includes(normalizedMatricula);
 
       return (
         matchesName &&
-        matchesCpf &&
-        matchesSecretariat &&
+        matchesMatricula &&
         filterByStatus(user, selectedStatus) &&
         filterByRole(user, selectedRole)
       );
     });
-  }, [cpfSearch, nameSearch, selectedRole, selectedSecretariat, selectedStatus]);
+  }, [matriculaSearch, nameSearch, selectedRole, selectedStatus, usersData.items]);
 
-  const summaryCards = useMemo(
-    () => [
+  const summaryCards = useMemo(() => {
+    const items = usersData.items;
+    const count = (predicate) => items.filter(predicate).length;
+    return [
       {
         caption: 'Total cadastradas',
         icon: 'users',
         title: 'Contas',
-        value: String(adminUsers.length).padStart(2, '0'),
+        value: pad2(items.length),
       },
       {
         caption: 'Com acesso liberado',
         icon: 'check',
         title: 'Ativos',
-        value: String(adminUsers.filter((user) => user.status === 'Ativo').length).padStart(2, '0'),
+        value: pad2(count((user) => user.status === 'Ativo')),
       },
       {
         caption: 'Aguardando aprovação',
         icon: 'alert',
         title: 'Pendentes',
-        value: String(adminUsers.filter((user) => user.status === 'Pendente').length).padStart(2, '0'),
+        value: pad2(count((user) => user.status === 'Pendente')),
       },
       {
         caption: 'Com restrição de acesso',
         icon: 'shield',
         title: 'Bloqueados',
-        value: String(adminUsers.filter((user) => user.status === 'Bloqueado').length).padStart(2, '0'),
+        value: pad2(count((user) => user.status === 'Bloqueado')),
       },
-    ],
-    [],
-  );
+    ];
+  }, [usersData.items]);
 
   return (
-    <div className="page-stack">
+    <div className="page-stack admin-dashboard">
       <PageHeader
         actionIcon="plus"
         actionLabel="Novo usuario"
@@ -94,29 +122,48 @@ export function AdminUsersPage() {
 
       <SectionCard>
         <UserFilters
-          cpfSearch={cpfSearch}
+          matriculaSearch={matriculaSearch}
           nameSearch={nameSearch}
-          onCpfSearchChange={setCpfSearch}
+          onMatriculaSearchChange={setMatriculaSearch}
           onNameSearchChange={setNameSearch}
           onRoleChange={setSelectedRole}
-          onSecretariatChange={setSelectedSecretariat}
           onStatusChange={setSelectedStatus}
           role={selectedRole}
           roleOptions={userRoleOptions}
-          secretariat={selectedSecretariat}
-          secretariats={['Secretaria (Todas)', ...adminSecretariats]}
           selectedStatus={selectedStatus}
           statusTabs={userStatusTabs}
         />
 
-        <div className="table-summary">
-          <span>
-            Mostrando {filteredUsers.length} de {adminUsers.length} usuários
-          </span>
-          <span>Permissões, status e dados cadastrais disponíveis em cada linha.</span>
-        </div>
+        {usersData.loading ? (
+          <div className="admin-dashboard__loading">
+            <span className="admin-dashboard__spinner" aria-hidden="true" />
+            <p>Carregando usuários...</p>
+          </div>
+        ) : usersData.error ? (
+          <div className="admin-dashboard__error">
+            <Icon name="alert" />
+            <div>
+              <strong>Falha ao carregar usuários</strong>
+              <p>{usersData.error}</p>
+            </div>
+          </div>
+        ) : usersData.items.length === 0 ? (
+          <div className="admin-empty">
+            <Icon name="users" />
+            <p>Nenhum usuário cadastrado ainda.</p>
+          </div>
+        ) : (
+          <>
+            <div className="table-summary">
+              <span>
+                Mostrando {filteredUsers.length} de {usersData.items.length} usuários
+              </span>
+              <span>Permissões, status e dados cadastrais disponíveis em cada linha.</span>
+            </div>
 
-        <UserTable users={filteredUsers} />
+            <UserTable users={filteredUsers} />
+          </>
+        )}
       </SectionCard>
     </div>
   );

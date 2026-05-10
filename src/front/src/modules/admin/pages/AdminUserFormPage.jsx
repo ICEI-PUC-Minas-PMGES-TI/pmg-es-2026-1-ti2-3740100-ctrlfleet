@@ -5,16 +5,13 @@ import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { adminSecretariats, adminUsers } from '../../../data/adminData';
+import { adminUsers } from '../../../data/adminData';
 import { criarUsuario } from '../../../services/usuarioApi';
 
 const roleOptions = ['Administrador', 'Gestor de Frota', 'Motorista', 'Servidor Solicitante'];
 const statusOptions = ['Ativo', 'Pendente', 'Bloqueado', 'Inativo'];
 
 const accessProfileOptions = ['Solicitante', 'Administrador', 'Gestor de Frota', 'Motorista'];
-
-/** Valor enviado à API: no produto real virá do contexto do tenant; aqui é exemplo fixo. */
-const DEPARTAMENTO_CONTEXTO_EXEMPLO = 'Secretaria Municipal de Mobilidade Urbana';
 
 const cargoPorPerfilAcesso = {
   Solicitante: 'Servidor Solicitante',
@@ -65,7 +62,6 @@ export function AdminUserFormPage() {
       email: String(fd.get('email') ?? '').trim(),
       senha: tempPassword,
       matricula: String(fd.get('registration') ?? '').trim(),
-      departamento: DEPARTAMENTO_CONTEXTO_EXEMPLO,
       perfilAcesso: accessProfile,
       cargo: cargoAutomatico,
       dataAdmissao: admissionDate.length > 0 ? admissionDate : null,
@@ -191,16 +187,6 @@ export function AdminUserFormPage() {
                   <Icon className="admin-form-field__date-icon" name="calendar" />
                 </div>
               </label>
-
-              <div className="admin-user-create__context-note admin-form-field--full">
-                <strong>Departamento (contexto do sistema)</strong>
-                <p>
-                  Cada secretaria ou departamento opera como um espaço isolado, com seus próprios administradores,
-                  gestores, solicitantes e motoristas. Quem cadastra não escolhe o departamento aqui — ele corresponde
-                  ao contexto já vinculado à sessão. Nesta tela usamos um valor fixo de exemplo para integração:
-                </p>
-                <code className="admin-user-create__context-code">{DEPARTAMENTO_CONTEXTO_EXEMPLO}</code>
-              </div>
 
               {accessProfile === 'Motorista' ? (
                 <div className="admin-user-create__motorista-block admin-form-field--full">
@@ -331,15 +317,6 @@ export function AdminUserFormPage() {
             </label>
 
             <label className="form-field">
-              <span>Secretaria</span>
-              <select defaultValue={selectedUser.secretariat}>
-                {adminSecretariats.map((secretariat) => (
-                  <option key={secretariat}>{secretariat}</option>
-                ))}
-              </select>
-            </label>
-
-            <label className="form-field">
               <span>Status da conta</span>
               <select defaultValue={selectedUser.status}>
                 {statusOptions.map((status) => (
@@ -375,10 +352,6 @@ export function AdminUserFormPage() {
               <dd>
                 <StatusBadge label={selectedUser.status} />
               </dd>
-            </div>
-            <div>
-              <dt>Secretaria</dt>
-              <dd>{selectedUser.secretariat}</dd>
             </div>
             <div>
               <dt>Ultimo acesso</dt>

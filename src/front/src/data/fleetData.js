@@ -32,8 +32,6 @@ export const dashboardAlerts = [
   },
 ];
 
-export const secretariats = ['Secretaria (Todas)', 'Gabinete', 'Saúde', 'Educação', 'Obras', 'Administração'];
-
 export const statusTabs = ['Todos', 'Ativo', 'Manutenção', 'Bloqueado'];
 
 export const fleetVehicles = [
@@ -61,7 +59,6 @@ export const fleetVehicles = [
     mileage: '48.230 km',
     model: 'Toyota Hilux SW4',
     plate: 'RBC-4E21',
-    secretariat: 'Gabinete',
     status: 'Ativo',
     year: '2024',
   },
@@ -89,7 +86,6 @@ export const fleetVehicles = [
     mileage: '126.100 km',
     model: 'Fiat Ducato Maxxi',
     plate: 'KMS-8812',
-    secretariat: 'Saúde',
     status: 'Bloqueado',
     year: '2021',
   },
@@ -117,7 +113,6 @@ export const fleetVehicles = [
     mileage: '62.455 km',
     model: 'Renault Oroch',
     plate: 'RVA-3021',
-    secretariat: 'Obras',
     status: 'Manutenção',
     year: '2023',
   },
@@ -145,7 +140,6 @@ export const fleetVehicles = [
     mileage: '84.020 km',
     model: 'Mercedes Sprinter',
     plate: 'MTA-9011',
-    secretariat: 'Educação',
     status: 'Ativo',
     year: '2022',
   },
@@ -153,6 +147,5 @@ export const fleetVehicles = [
 
 export const vehicleFormOptions = {
   licenseCategories: ['A', 'B', 'C', 'D', 'E'],
-  secretariats: ['Gabinete', 'Saúde', 'Educação', 'Obras', 'Administração'],
   statuses: ['Ativo', 'Manutenção', 'Reservado', 'Inativo'],
 };

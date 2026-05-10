@@ -55,3 +55,38 @@ export async function criarUsuario(payload) {
 
   return data;
 }
+
+/**
+ * Busca todos os usuários cadastrados.
+ * @returns {Promise<Array<{
+ *   id: number,
+ *   nome: string,
+ *   email: string,
+ *   matricula: string | null,
+ *   cargo: string | null,
+ *   perfilAcesso: string | null,
+ *   tipoConta: string | null,
+ *   status: string | null,
+ *   dataAdmissao: string | null,
+ *   dataDesligamento: string | null,
+ * }>>}
+ */
+export async function listarUsuarios({ signal } = {}) {
+  const res = await fetch(requestUrl('/usuarios'), {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    signal,
+  });
+
+  const data = parseJsonSafely(await res.text());
+
+  if (!res.ok) {
+    const msg =
+      (data && typeof data.mensagem === 'string' && data.mensagem) ||
+      (data && typeof data.message === 'string' && data.message) ||
+      `Não foi possível carregar a lista de usuários (${res.status})`;
+    throw new Error(msg);
+  }
+
+  return Array.isArray(data) ? data : [];
+}

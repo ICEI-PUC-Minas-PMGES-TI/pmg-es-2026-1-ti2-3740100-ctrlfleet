@@ -1,17 +1,14 @@
 import { Icon } from '../common/Icon';
 
 export function UserFilters({
-  cpfSearch,
+  matriculaSearch,
   nameSearch,
-  onCpfSearchChange,
+  onMatriculaSearchChange,
   onNameSearchChange,
   onRoleChange,
-  onSecretariatChange,
   onStatusChange,
   role,
   roleOptions,
-  secretariat,
-  secretariats,
   selectedStatus,
   statusTabs,
 }) {
@@ -30,23 +27,13 @@ export function UserFilters({
 
       <label className="search-field">
         <Icon className="search-field__icon" name="document" />
-        <span className="sr-only">Buscar por CPF</span>
+        <span className="sr-only">Buscar por matrícula</span>
         <input
-          inputMode="numeric"
-          onChange={(event) => onCpfSearchChange(event.target.value)}
-          placeholder="Buscar por CPF"
+          onChange={(event) => onMatriculaSearchChange(event.target.value)}
+          placeholder="Buscar por matrícula"
           type="search"
-          value={cpfSearch}
+          value={matriculaSearch}
         />
-      </label>
-
-      <label className="select-field admin-user-filters__secretariat">
-        <span className="sr-only">Filtrar por secretaria</span>
-        <select onChange={(event) => onSecretariatChange(event.target.value)} value={secretariat}>
-          {secretariats.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
-        </select>
       </label>
 
       <div className="filter-tabs" role="tablist">

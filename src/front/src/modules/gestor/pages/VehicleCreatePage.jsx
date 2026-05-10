@@ -64,17 +64,6 @@ export function VehicleCreatePage() {
             </label>
 
             <label className="form-field">
-              <span>Secretaria responsável</span>
-              <select onChange={(event) => updateForm({ secretariat: event.target.value })} value={formState.secretariat}>
-                {vehicleFormOptions.secretariats.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="form-field">
               <span>Status inicial</span>
               <select onChange={(event) => updateForm({ status: event.target.value })} value={formState.status}>
                 {vehicleFormOptions.statuses.map((option) => (
@@ -131,10 +120,6 @@ export function VehicleCreatePage() {
                     <div>
                       <dt>E-mail</dt>
                       <dd>{selectedDriver.email}</dd>
-                    </div>
-                    <div>
-                      <dt>Secretaria</dt>
-                      <dd>{selectedDriver.secretariat}</dd>
                     </div>
                     <div>
                       <dt>CPF</dt>
@@ -220,10 +205,6 @@ export function VehicleCreatePage() {
             <div>
               <dt>Ano</dt>
               <dd>{formState.year || 'Não informado'}</dd>
-            </div>
-            <div>
-              <dt>Secretaria</dt>
-              <dd>{formState.secretariat}</dd>
             </div>
             <div>
               <dt>Status</dt>

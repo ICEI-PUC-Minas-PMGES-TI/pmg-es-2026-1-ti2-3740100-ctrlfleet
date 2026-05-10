@@ -5,7 +5,7 @@ import { VehicleTable } from '../../../components/gestor/VehicleTable';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { fleetVehicles, secretariats, statusTabs } from '../../../data/fleetData';
+import { fleetVehicles, statusTabs } from '../../../data/fleetData';
 
 function filterByStatus(vehicle, status) {
   if (status === 'Todos') {
@@ -19,19 +19,10 @@ function filterByStatus(vehicle, status) {
   return vehicle.status === status;
 }
 
-function filterBySecretariat(vehicle, secretariat) {
-  if (secretariat === 'Secretaria (Todas)') {
-    return true;
-  }
-
-  return vehicle.secretariat === secretariat;
-}
-
 export function FleetPage() {
   const location = useLocation();
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
-  const [selectedSecretariat, setSelectedSecretariat] = useState('Secretaria (Todas)');
 
   const filteredVehicles = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -42,13 +33,9 @@ export function FleetPage() {
         vehicle.plate.toLowerCase().includes(normalizedSearch) ||
         vehicle.model.toLowerCase().includes(normalizedSearch);
 
-      return (
-        matchesSearch &&
-        filterByStatus(vehicle, selectedStatus) &&
-        filterBySecretariat(vehicle, selectedSecretariat)
-      );
+      return matchesSearch && filterByStatus(vehicle, selectedStatus);
     });
-  }, [search, selectedSecretariat, selectedStatus]);
+  }, [search, selectedStatus]);
 
   const summaryCards = useMemo(
     () => [
@@ -101,11 +88,8 @@ export function FleetPage() {
       <SectionCard>
         <FleetFilters
           onSearchChange={setSearch}
-          onSecretariatChange={setSelectedSecretariat}
           onStatusChange={setSelectedStatus}
           search={search}
-          secretariat={selectedSecretariat}
-          secretariats={secretariats}
           selectedStatus={selectedStatus}
           statusTabs={statusTabs}
         />

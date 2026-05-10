@@ -1,11 +1,8 @@
 package com.ctrlfleet.api.controller;
 
-import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.dto.usuario.UsuarioRequestDTO;
 import com.ctrlfleet.api.dto.usuario.UsuarioResponseDTO;
 import com.ctrlfleet.api.service.UsuarioService;
-import com.ctrlfleet.api.domain.model.Usuario;
-import com.ctrlfleet.api.repository.UsuarioRepository;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -21,11 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping
@@ -35,7 +30,7 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<Usuario> listar() {
-        return usuarioService.listarTodos();
+    public List<UsuarioResponseDTO> listar() {
+        return usuarioService.listarTodos().stream().map(UsuarioResponseDTO::fromEntity).toList();
     }
 }

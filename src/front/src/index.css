@@ -806,11 +806,7 @@ a {
 }
 
 .admin-user-filters {
-  grid-template-columns: repeat(3, minmax(220px, 1fr)) 220px;
-}
-
-.admin-user-filters__secretariat {
-  grid-column: 4;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
 }
 
 .admin-user-filters .filter-tabs {
@@ -1521,41 +1517,6 @@ a {
 .admin-user-create__field-hint strong {
   color: #374151;
   font-weight: 700;
-}
-
-.admin-user-create__context-note {
-  padding: 16px 18px;
-  border-radius: 10px;
-  border: 1px solid #e8eaef;
-  background: #f9fafb;
-}
-
-.admin-user-create__context-note strong {
-  display: block;
-  margin: 0 0 8px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b7280;
-}
-
-.admin-user-create__context-note p {
-  margin: 0 0 12px;
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: #4b5563;
-}
-
-.admin-user-create__context-code {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1a1d24;
 }
 
 .admin-user-create__motorista-block {
@@ -2288,6 +2249,62 @@ a {
   display: flex;
   justify-content: flex-end;
   margin-top: 14px;
+}
+
+.admin-dashboard__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 36px 16px;
+  color: var(--muted);
+}
+
+.admin-dashboard__loading p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.admin-dashboard__spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid rgba(207, 78, 54, 0.18);
+  border-top-color: var(--accent);
+  animation: admin-spin 0.8s linear infinite;
+}
+
+@keyframes admin-spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-dashboard__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--danger-soft);
+  border: 1px solid rgba(209, 79, 74, 0.22);
+  color: var(--danger);
+}
+
+.admin-dashboard__error svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.admin-dashboard__error strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.admin-dashboard__error p {
+  margin: 0;
+  color: #7a3835;
+  font-size: 0.9rem;
 }
 
 .admin-empty {

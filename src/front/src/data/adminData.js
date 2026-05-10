@@ -16,8 +16,6 @@ export const userRoleOptions = [
   'Servidor Solicitante',
 ];
 
-export const adminSecretariats = ['Gabinete', 'Saúde', 'Educação', 'Obras', 'Administração'];
-
 export const adminUsers = [
   {
     cpf: '123.456.789-10',
@@ -26,7 +24,6 @@ export const adminUsers = [
     lastAccess: 'Hoje, 09:42',
     name: 'Ana Costa',
     role: 'Administrador',
-    secretariat: 'Administração',
     status: 'Ativo',
   },
   {
@@ -36,7 +33,6 @@ export const adminUsers = [
     lastAccess: 'Ontem, 17:15',
     name: 'João Duarte',
     role: 'Gestor de Frota',
-    secretariat: 'Gabinete',
     status: 'Ativo',
   },
   {
@@ -46,7 +42,6 @@ export const adminUsers = [
     lastAccess: 'Aguardando primeiro acesso',
     name: 'Marina Silva',
     role: 'Servidor Solicitante',
-    secretariat: 'Saúde',
     status: 'Pendente',
   },
   {
@@ -58,7 +53,6 @@ export const adminUsers = [
     lastAccess: '25/04/2026, 11:03',
     name: 'Carlos Rocha',
     role: 'Motorista',
-    secretariat: 'Obras',
     status: 'Bloqueado',
   },
   {
@@ -70,7 +64,6 @@ export const adminUsers = [
     lastAccess: 'Hoje, 08:14',
     name: 'Patrícia Melo',
     role: 'Motorista',
-    secretariat: 'Saúde',
     status: 'Ativo',
   },
   {
@@ -82,7 +75,6 @@ export const adminUsers = [
     lastAccess: 'Hoje, 07:41',
     name: 'Leandro Sousa',
     role: 'Motorista',
-    secretariat: 'Gabinete',
     status: 'Ativo',
   },
   {
@@ -92,7 +84,6 @@ export const adminUsers = [
     lastAccess: '18/04/2026, 08:21',
     name: 'Beatriz Lima',
     role: 'Gestor de Frota',
-    secretariat: 'Educação',
     status: 'Inativo',
   },
 ];
@@ -108,7 +99,7 @@ export const adminAlerts = [
   {
     id: 'ad1',
     status: 'Pendente',
-    text: '4 novos usuários aguardam aprovação de perfil e secretaria.',
+    text: '4 novos usuários aguardam aprovação de perfil de acesso.',
   },
   {
     id: 'ad2',
@@ -158,7 +149,6 @@ export const adminPendingApprovals = [
     requestedAt: 'Hoje, 09:14',
     requestedBy: 'Ana Costa',
     role: 'Servidor Solicitante',
-    secretariat: 'Saúde',
     type: 'Novo cadastro',
   },
   {
@@ -169,7 +159,6 @@ export const adminPendingApprovals = [
     requestedAt: 'Hoje, 08:42',
     requestedBy: 'Sistema',
     role: 'Motorista',
-    secretariat: 'Obras',
     type: 'Novo cadastro',
   },
   {
@@ -180,7 +169,6 @@ export const adminPendingApprovals = [
     requestedAt: 'Ontem, 17:08',
     requestedBy: 'Joana Pires',
     role: 'Gestor de Frota',
-    secretariat: 'Educação',
     type: 'Mudança de perfil',
   },
   {
@@ -191,7 +179,6 @@ export const adminPendingApprovals = [
     requestedAt: 'Ontem, 14:32',
     requestedBy: 'Ana Costa',
     role: 'Servidor Solicitante',
-    secretariat: 'Gabinete',
     type: 'Reativação de conta',
   },
 ];
