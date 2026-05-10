@@ -35,7 +35,7 @@ export function VehicleDetailPage() {
       <div className="detail-hero">
         <div>
           <span className="plate-chip">{vehicle.plate}</span>
-          <h2>{vehicle.secretariat}</h2>
+          <h2>{vehicle.model}</h2>
           <p>{vehicle.mileage}</p>
         </div>
         <StatusBadge label={vehicle.status} />
@@ -55,10 +55,6 @@ export function VehicleDetailPage() {
             <div>
               <dt>CNH mínima</dt>
               <dd>{vehicle.licenseCategory}</dd>
-            </div>
-            <div>
-              <dt>Secretaria</dt>
-              <dd>{vehicle.secretariat}</dd>
             </div>
           </dl>
         </SectionCard>

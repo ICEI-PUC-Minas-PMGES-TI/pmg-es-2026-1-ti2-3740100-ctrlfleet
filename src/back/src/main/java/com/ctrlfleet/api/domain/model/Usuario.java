@@ -26,9 +26,6 @@ public class Usuario {
     @Column(nullable = false)
     private String matricula;
 
-    @Column(nullable = false)
-    private String departamento;
-
     @Column(length = 160)
     private String cargo;
 
@@ -41,6 +38,27 @@ public class Usuario {
     private String numeroCnh;
 
     private LocalDate validadeCnh;
+
+    // ========================================================
+    // Campos novos do diagrama ER (todos nullable para não quebrar
+    // ddl-auto=update em tabelas pré-existentes; defaults aplicados
+    // pelo UsuarioService no momento da criação).
+    // ========================================================
+
+    /** Tipo de conta canônico (ex.: ROLE_ADMINISTRADOR, ROLE_MOTORISTA). */
+    @Column(name = "role", length = 40)
+    private String tipoConta;
+
+    /** Perfil de acesso amigável escolhido no cadastro (ex.: Administrador). */
+    @Column(name = "perfil_acesso", length = 60)
+    private String perfilAcesso;
+
+    @Column(name = "data_desligamento")
+    private LocalDate dataDesligamento;
+
+    /** Estado da conta: ATIVO, INATIVO, BLOQUEADO, PENDENTE. */
+    @Column(length = 20)
+    private String status;
 
     // RELAÇÃO COM ROLES (muitos pra muitos)
     @ManyToMany(fetch = FetchType.EAGER)
@@ -88,10 +106,6 @@ public class Usuario {
         return matricula;
     }
 
-    public String getDepartamento() {
-        return departamento;
-    }
-
     public String getCargo() {
         return cargo;
     }
@@ -110,6 +124,22 @@ public class Usuario {
 
     public LocalDate getValidadeCnh() {
         return validadeCnh;
+    }
+
+    public String getTipoConta() {
+        return tipoConta;
+    }
+
+    public String getPerfilAcesso() {
+        return perfilAcesso;
+    }
+
+    public LocalDate getDataDesligamento() {
+        return dataDesligamento;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public void setId(Long id) {
@@ -132,10 +162,6 @@ public class Usuario {
         this.matricula = matricula;
     }
 
-    public void setDepartamento(String departamento) {
-        this.departamento = departamento;
-    }
-
     public void setCargo(String cargo) {
         this.cargo = cargo;
     }
@@ -154,6 +180,22 @@ public class Usuario {
 
     public void setValidadeCnh(LocalDate validadeCnh) {
         this.validadeCnh = validadeCnh;
+    }
+
+    public void setTipoConta(String tipoConta) {
+        this.tipoConta = tipoConta;
+    }
+
+    public void setPerfilAcesso(String perfilAcesso) {
+        this.perfilAcesso = perfilAcesso;
+    }
+
+    public void setDataDesligamento(LocalDate dataDesligamento) {
+        this.dataDesligamento = dataDesligamento;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setRoles(Set<Role> roles) {

@@ -13,6 +13,7 @@ import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,7 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public List<Usuario> listarTodos() {
-        return usuarioRepository.findAll();
+        return usuarioRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     @Transactional
@@ -88,10 +89,15 @@ public class UsuarioService {
         usuario.setEmail(emailNorm);
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
         usuario.setMatricula(dto.getMatricula().trim());
-        usuario.setDepartamento(dto.getDepartamento().trim());
         usuario.setCargo(dto.getCargo() != null ? dto.getCargo().trim() : null);
         usuario.setDataAdmissao(parseDataOpcional(dto.getDataAdmissao(), "dataAdmissao"));
         usuario.setTipoCadastro(tipoCadastro);
+
+        // Campos novos do diagrama
+        usuario.setPerfilAcesso(dto.getPerfilAcesso().trim());
+        usuario.setTipoConta(nomeRole);
+        usuario.setStatus("ATIVO");
+        usuario.setDataDesligamento(null);
 
         if (tipoCadastro.equals("motorista")) {
             usuario.setNumeroCnh(dto.getNumeroCnh().trim());

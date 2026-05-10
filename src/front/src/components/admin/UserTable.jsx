@@ -10,11 +10,9 @@ export function UserTable({ users }) {
           <thead>
             <tr>
               <th>Usuario</th>
-              <th>CPF</th>
+              <th>Matrícula</th>
               <th>Perfil</th>
-              <th>Secretaria</th>
               <th>Status</th>
-              <th>Ultimo acesso</th>
               <th>Acoes</th>
             </tr>
           </thead>
@@ -32,13 +30,11 @@ export function UserTable({ users }) {
                     </div>
                   </div>
                 </td>
-                <td>{user.cpf}</td>
+                <td>{user.matricula}</td>
                 <td>{user.role}</td>
-                <td>{user.secretariat}</td>
                 <td>
                   <StatusBadge label={user.status} />
                 </td>
-                <td>{user.lastAccess}</td>
                 <td>
                   <div className="table-actions">
                     <Link aria-label={`Editar ${user.name}`} className="icon-button" to={`/admin/usuarios/${user.id}/editar`}>
@@ -70,20 +66,12 @@ export function UserTable({ users }) {
             </div>
             <dl className="vehicle-card__meta">
               <div>
-                <dt>CPF</dt>
-                <dd>{user.cpf}</dd>
+                <dt>Matrícula</dt>
+                <dd>{user.matricula}</dd>
               </div>
               <div>
                 <dt>Perfil</dt>
                 <dd>{user.role}</dd>
-              </div>
-              <div>
-                <dt>Secretaria</dt>
-                <dd>{user.secretariat}</dd>
-              </div>
-              <div>
-                <dt>Ultimo acesso</dt>
-                <dd>{user.lastAccess}</dd>
               </div>
             </dl>
             <div className="table-actions">
@@ -104,6 +92,7 @@ export function UserTable({ users }) {
 }
 
 function getInitials(name) {
+  if (!name) return '?';
   return name
     .split(' ')
     .filter(Boolean)
