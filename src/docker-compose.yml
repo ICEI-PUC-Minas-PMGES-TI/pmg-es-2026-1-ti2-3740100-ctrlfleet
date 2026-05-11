@@ -50,14 +50,22 @@ services:
       - maven_repo:/root/.m2
     working_dir: /app
     command: mvn -DskipTests spring-boot:run
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
 
   frontend:
     image: node:20
     container_name: ctrl-fleet-frontend
+    restart: unless-stopped
     ports:
       - "5173:5173"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     environment:
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
