@@ -8,7 +8,7 @@ import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { adminRecentActivity, permissionGroups } from '../../../data/adminData';
-import { listarUsuarios } from '../../../services/usuarioApi';
+import { aprovarUsuario, listarUsuarios, recusarUsuario } from '../../../services/usuarioApi';
 import {
   formatBrDate,
   mapBackendUserToView,
@@ -62,8 +62,6 @@ export function AdminDashboardPage() {
     items: [],
   });
 
-  // IDs de pendentes que o admin já aprovou/recusou nesta sessão.
-  // Quando o backend tiver endpoint de aprovação, troca isso por uma chamada real.
   const [dismissedPendingIds, setDismissedPendingIds] = useState(() => new Set());
 
   function fetchUsuarios(signal) {
@@ -162,26 +160,44 @@ export function AdminDashboardPage() {
     setApprovalModal((current) => ({ ...current, open: false }));
   }
 
-  function confirmApproval() {
+  async function confirmApproval() {
     if (!approvalModal.item) {
       closeApprovalModal();
       return;
     }
     const { item, intent } = approvalModal;
-    setDismissedPendingIds((current) => {
-      const next = new Set(current);
-      next.add(item.id);
-      return next;
-    });
-    setFeedback({
-      tone: intent === 'approve' ? 'success' : 'danger',
-      message:
+    try {
+      const updated =
         intent === 'approve'
-          ? `${item.name} aprovado com sucesso. Convite reenviado.`
-          : `${item.name} foi recusado e removido da fila.`,
-    });
-    closeApprovalModal();
-    setTimeout(() => setFeedback(null), 4000);
+          ? await aprovarUsuario(item.id)
+          : await recusarUsuario(item.id);
+      const updatedView = mapBackendUserToView(updated);
+      setUsersData((current) => ({
+        ...current,
+        items: current.items.map((user) => (user.id === item.id ? updatedView : user)),
+      }));
+      setDismissedPendingIds((current) => {
+        const next = new Set(current);
+        next.add(item.id);
+        return next;
+      });
+      window.dispatchEvent(new Event('ctrlfleet:usuarios-updated'));
+      setFeedback({
+        tone: intent === 'approve' ? 'success' : 'danger',
+        message:
+          intent === 'approve'
+            ? `${item.name} aprovado com sucesso.`
+            : `${item.name} foi recusado e inativado.`,
+      });
+      closeApprovalModal();
+      setTimeout(() => setFeedback(null), 4000);
+    } catch (error) {
+      setFeedback({
+        tone: 'danger',
+        message: error instanceof Error ? error.message : 'Não foi possível concluir a ação.',
+      });
+      setTimeout(() => setFeedback(null), 4000);
+    }
   }
 
   function handleRefresh() {

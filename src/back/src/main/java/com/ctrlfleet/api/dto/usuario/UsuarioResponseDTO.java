@@ -1,19 +1,11 @@
 package com.ctrlfleet.api.dto.usuario;
 
-import com.ctrlfleet.api.domain.model.Role;
 import com.ctrlfleet.api.domain.model.Usuario;
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Set;
 
 public class UsuarioResponseDTO {
 
-    /**
-     * Mapeamento canônico ROLE_* → rótulo amigável de perfil.
-     * Usado como fallback para usuários antigos no banco que ainda não tinham
-     * `perfilAcesso` / `tipoConta` populados (campos adicionados depois pelo
-     * ddl-auto=update e que não retroagem em linhas existentes).
-     */
     private static final Map<String, String> ROLE_TO_PERFIL =
             Map.of(
                     "ROLE_ADMINISTRADOR", "Administrador",
@@ -29,8 +21,13 @@ public class UsuarioResponseDTO {
     private String perfilAcesso;
     private String tipoConta;
     private String status;
+    private String tipoCadastro;
+    private String numeroCnh;
+    private LocalDate validadeCnh;
     private LocalDate dataAdmissao;
     private LocalDate dataDesligamento;
+    private String numeroCnh;
+    private LocalDate validadeCnh;
 
     public UsuarioResponseDTO() {}
 
@@ -48,33 +45,27 @@ public class UsuarioResponseDTO {
         dto.matricula = usuario.getMatricula();
         dto.cargo = usuario.getCargo();
         dto.status = usuario.getStatus();
+        dto.tipoCadastro = usuario.getTipoCadastro();
+        dto.numeroCnh = usuario.getNumeroCnh();
+        dto.validadeCnh = usuario.getValidadeCnh();
         dto.dataAdmissao = usuario.getDataAdmissao();
         dto.dataDesligamento = usuario.getDataDesligamento();
 
-        // tipoConta efetivo: usa a coluna `role` se existir, senão pega da
-        // primeira role associada via tabela usuario_roles.
-        String tipoConta = usuario.getTipoConta();
-        if (tipoConta == null) {
-            tipoConta = primeiraRoleNome(usuario.getRoles());
-        }
+        String tipoConta = usuario.getPapel() != null ? usuario.getPapel().name() : null;
         dto.tipoConta = tipoConta;
 
-        // perfilAcesso efetivo: usa a coluna `perfil_acesso` se existir, senão
-        // deriva do tipoConta (rótulo amigável).
         String perfilAcesso = usuario.getPerfilAcesso();
         if (perfilAcesso == null && tipoConta != null) {
             perfilAcesso = ROLE_TO_PERFIL.get(tipoConta);
         }
         dto.perfilAcesso = perfilAcesso;
 
-        return dto;
-    }
-
-    private static String primeiraRoleNome(Set<Role> roles) {
-        if (roles == null || roles.isEmpty()) {
-            return null;
+        if (usuario.getMotorista() != null) {
+            dto.numeroCnh = usuario.getMotorista().getNumeroCnh();
+            dto.validadeCnh = usuario.getMotorista().getValidadeCnh();
         }
-        return roles.iterator().next().getNome();
+
+        return dto;
     }
 
     public Long getId() {
@@ -109,11 +100,31 @@ public class UsuarioResponseDTO {
         return status;
     }
 
+    public String getTipoCadastro() {
+        return tipoCadastro;
+    }
+
+    public String getNumeroCnh() {
+        return numeroCnh;
+    }
+
+    public LocalDate getValidadeCnh() {
+        return validadeCnh;
+    }
+
     public LocalDate getDataAdmissao() {
         return dataAdmissao;
     }
 
     public LocalDate getDataDesligamento() {
         return dataDesligamento;
+    }
+
+    public String getNumeroCnh() {
+        return numeroCnh;
+    }
+
+    public LocalDate getValidadeCnh() {
+        return validadeCnh;
     }
 }

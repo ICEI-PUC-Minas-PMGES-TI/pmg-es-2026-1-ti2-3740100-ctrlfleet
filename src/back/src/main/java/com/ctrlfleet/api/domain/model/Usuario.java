@@ -1,10 +1,9 @@
 package com.ctrlfleet.api.domain.model;
 
+import com.ctrlfleet.api.domain.enums.PapelUsuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "usuarios")
@@ -34,20 +33,9 @@ public class Usuario {
     @Column(nullable = false, length = 24)
     private String tipoCadastro;
 
-    @Column(length = 40)
-    private String numeroCnh;
-
-    private LocalDate validadeCnh;
-
-    // ========================================================
-    // Campos novos do diagrama ER (todos nullable para não quebrar
-    // ddl-auto=update em tabelas pré-existentes; defaults aplicados
-    // pelo UsuarioService no momento da criação).
-    // ========================================================
-
-    /** Tipo de conta canônico (ex.: ROLE_ADMINISTRADOR, ROLE_MOTORISTA). */
-    @Column(name = "role", length = 40)
-    private String tipoConta;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 40)
+    private PapelUsuario papel;
 
     /** Perfil de acesso amigável escolhido no cadastro (ex.: Administrador). */
     @Column(name = "perfil_acesso", length = 60)
@@ -60,16 +48,9 @@ public class Usuario {
     @Column(length = 20)
     private String status;
 
-    // RELAÇÃO COM ROLES (muitos pra muitos)
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "usuario_roles",
-            joinColumns = @JoinColumn(name = "usuario_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Motorista motorista;
 
-    // CONSTRUTORES
     public Usuario() {}
 
     public Usuario(Long id, String nome, String email, String senha) {
@@ -78,8 +59,6 @@ public class Usuario {
         this.email = email;
         this.senha = senha;
     }
-
-    // GETTERS E SETTERS
 
     public Long getId() {
         return id;
@@ -98,10 +77,6 @@ public class Usuario {
         return senha;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
     public String getMatricula() {
         return matricula;
     }
@@ -118,16 +93,8 @@ public class Usuario {
         return tipoCadastro;
     }
 
-    public String getNumeroCnh() {
-        return numeroCnh;
-    }
-
-    public LocalDate getValidadeCnh() {
-        return validadeCnh;
-    }
-
-    public String getTipoConta() {
-        return tipoConta;
+    public PapelUsuario getPapel() {
+        return papel;
     }
 
     public String getPerfilAcesso() {
@@ -140,6 +107,10 @@ public class Usuario {
 
     public String getStatus() {
         return status;
+    }
+
+    public Motorista getMotorista() {
+        return motorista;
     }
 
     public void setId(Long id) {
@@ -174,16 +145,8 @@ public class Usuario {
         this.tipoCadastro = tipoCadastro;
     }
 
-    public void setNumeroCnh(String numeroCnh) {
-        this.numeroCnh = numeroCnh;
-    }
-
-    public void setValidadeCnh(LocalDate validadeCnh) {
-        this.validadeCnh = validadeCnh;
-    }
-
-    public void setTipoConta(String tipoConta) {
-        this.tipoConta = tipoConta;
+    public void setPapel(PapelUsuario papel) {
+        this.papel = papel;
     }
 
     public void setPerfilAcesso(String perfilAcesso) {
@@ -198,12 +161,7 @@ public class Usuario {
         this.status = status;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    // MÉTODO AUXILIAR (muito útil)
-    public void addRole(Role role) {
-        this.roles.add(role);
+    public void setMotorista(Motorista motorista) {
+        this.motorista = motorista;
     }
 }

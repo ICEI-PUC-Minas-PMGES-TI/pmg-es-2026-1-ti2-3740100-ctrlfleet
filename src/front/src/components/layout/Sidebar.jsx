@@ -1,13 +1,56 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
 import { fleetNavigationItems } from '../../data/fleetData';
+import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const isAdminArea = location.pathname.startsWith('/admin');
-  const navigationItems = isAdminArea ? adminNavigationItems : fleetNavigationItems;
+  const [pendingUsersCount, setPendingUsersCount] = useState(0);
+  const navigationItems = useMemo(() => {
+    if (!isAdminArea) return fleetNavigationItems;
+
+    return adminNavigationItems.map((item) => {
+      if (item.to !== '/admin/usuarios') return item;
+      return {
+        ...item,
+        badge: pendingUsersCount > 0 ? pendingUsersCount : null,
+      };
+    });
+  }, [isAdminArea, pendingUsersCount]);
   const navigationLabel = isAdminArea ? 'Administração' : 'Gestor de Frotas';
+
+  useEffect(() => {
+    if (!isAdminArea) {
+      setPendingUsersCount(0);
+      return undefined;
+    }
+
+    let ignore = false;
+
+    async function refreshPendingUsersCount() {
+      try {
+        const usuarios = await listarUsuarios();
+        if (ignore) return;
+        const pendingCount = usuarios.filter((usuario) => usuario.status === 'PENDENTE').length;
+        setPendingUsersCount(pendingCount);
+      } catch {
+        if (!ignore) setPendingUsersCount(0);
+      }
+    }
+
+    refreshPendingUsersCount();
+    window.addEventListener('focus', refreshPendingUsersCount);
+    window.addEventListener('ctrlfleet:usuarios-updated', refreshPendingUsersCount);
+
+    return () => {
+      ignore = true;
+      window.removeEventListener('focus', refreshPendingUsersCount);
+      window.removeEventListener('ctrlfleet:usuarios-updated', refreshPendingUsersCount);
+    };
+  }, [isAdminArea]);
 
   return (
     <aside className={`sidebar ${isOpen ? 'is-open' : ''}`}>
