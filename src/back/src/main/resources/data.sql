@@ -129,13 +129,30 @@ ON CONFLICT DO NOTHING;
 
 -- =====================================================================
 -- 3. VEICULOS
---   Mapeamento de colunas (entidade Veiculo.java / @Table("Veiculos")):
+--   Mapeamento de colunas (entidade Veiculo.java / @Table("veiculos")):
 --    id (PK, IDENTITY) | placa (UNIQUE) | modelo | marca | ano | status
 --   `status` é o enum StatusVeiculo persistido como STRING:
 --    DISPONIVEL | EM_USO | MANUTENCAO | DESATIVADO
 --   Quando a entidade evoluir (chassi, renavam, quilometragem, combustível,
 --   etc.) basta acrescentar as novas colunas no INSERT abaixo.
 -- =====================================================================
+-- Migração: versões antigas do Hibernate criavam a tabela citada "Veiculos";
+-- a entidade usa `veiculos` (minúsculas). Copia dados e remove a tabela legada.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relname = 'Veiculos'
+  ) THEN
+    INSERT INTO veiculos (id, placa, modelo, marca, ano, status)
+    SELECT v.id, v.placa, v.modelo, v.marca, v.ano, v.status
+    FROM "Veiculos" v
+    ON CONFLICT (id) DO NOTHING;
+    DROP TABLE "Veiculos" CASCADE;
+  END IF;
+END $$;
+
 INSERT INTO veiculos (id, placa, modelo, marca, ano, status) VALUES
 (1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL'),
 (2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL'),
@@ -149,8 +166,24 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status) VALUES
 (10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL')
 ON CONFLICT DO NOTHING;
 
--- Avança a sequence do IDENTITY para evitar colisão de PK em POSTs futuros.
-SELECT setval(pg_get_serial_sequence('veiculos', 'id'), COALESCE((SELECT MAX(id) FROM veiculos), 0));
+-- Avança a sequence do IDENTITY (só se existir; evita erro se pg_get_serial_sequence for NULL).
+DO $$
+DECLARE
+  seq_name text;
+  max_id bigint;
+  has_rows boolean;
+BEGIN
+  seq_name := pg_get_serial_sequence('veiculos', 'id');
+  IF seq_name IS NOT NULL THEN
+    SELECT COALESCE(MAX(id), 0) INTO max_id FROM veiculos;
+    SELECT EXISTS (SELECT 1 FROM veiculos) INTO has_rows;
+    IF has_rows THEN
+      PERFORM setval(seq_name::regclass, max_id, true);
+    ELSE
+      PERFORM setval(seq_name::regclass, 1, false);
+    END IF;
+  END IF;
+END $$;
 
 
 -- =====================================================================
@@ -295,14 +328,16 @@ ON CONFLICT DO NOTHING;
 
 -- =====================================================================
 -- 12. REGISTROS_USO
+--   id_veiculo / id_motorista são NOT NULL na entidade; alinhar com reservas (id_veiculo)
+--   e usuários motoristas existentes (id_motorista).
 -- =====================================================================
-INSERT INTO registros_uso (id_uso, id_reserva, data_saida, quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo) VALUES
-(1, 1, '2026-04-10 08:00:00', 15200.00, '2026-04-10 17:30:00', 15340.00, 'Viagem para vistoria na regional norte. Veículo entregue em ordem.'),
-(2, 2, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
-(3, 3, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
-(4, 4, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
-(5, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
-(6, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
+INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_saida, quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo) VALUES
+(1, 1, 1, 5, '2026-04-10 08:00:00', 15200.00, '2026-04-10 17:30:00', 15340.00, 'Viagem para vistoria na regional norte. Veículo entregue em ordem.'),
+(2, 2, 2, 6, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
+(3, 3, 5, 4, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
+(4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
+(5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
+(6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
 ON CONFLICT DO NOTHING;
 
 

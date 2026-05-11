@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 
 @Entity
-@Table(name = "Veiculos")
+@Table(name = "veiculos")
 public class Veiculo {
 
     @Id
