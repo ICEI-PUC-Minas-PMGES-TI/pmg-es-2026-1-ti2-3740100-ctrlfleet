@@ -73,7 +73,7 @@ export function mapBackendUserToView(dto) {
     status: resolveStatus(dto),
     cargo: dto.cargo || null,
     cnh: dto.numeroCnh || null,
-    cnhExpiry: null,
+    cnhExpiry: dto.validadeCnh || null,
     lastAccess: '—',
     dataAdmissao: dto.dataAdmissao || null,
   };

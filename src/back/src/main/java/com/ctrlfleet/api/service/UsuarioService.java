@@ -1,10 +1,10 @@
 package com.ctrlfleet.api.service;
 
-import com.ctrlfleet.api.domain.model.Role;
+import com.ctrlfleet.api.domain.enums.PapelUsuario;
+import com.ctrlfleet.api.domain.model.Motorista;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.dto.usuario.UsuarioRequestDTO;
 import com.ctrlfleet.api.dto.usuario.UsuarioResponseDTO;
-import com.ctrlfleet.api.repository.RoleRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -13,7 +13,6 @@ import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,29 +23,26 @@ public class UsuarioService {
     private static final DateTimeFormatter DATA_BR =
             DateTimeFormatter.ofPattern("d/M/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
-    private static final Map<String, String> PERFIL_PARA_ROLE =
+    private static final Map<String, PapelUsuario> PERFIL_PARA_PAPEL =
             Map.of(
-                    "Solicitante", "ROLE_SOLICITANTE",
-                    "Administrador", "ROLE_ADMINISTRADOR",
-                    "Gestor de Frota", "ROLE_GESTOR_FROTA",
-                    "Motorista", "ROLE_MOTORISTA");
+                    "Solicitante", PapelUsuario.ROLE_SOLICITANTE,
+                    "Administrador", PapelUsuario.ROLE_ADMINISTRADOR,
+                    "Gestor de Frota", PapelUsuario.ROLE_GESTOR_FROTA,
+                    "Motorista", PapelUsuario.ROLE_MOTORISTA);
 
     private final UsuarioRepository usuarioRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(
             UsuarioRepository usuarioRepository,
-            RoleRepository roleRepository,
             PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
     public List<Usuario> listarTodos() {
-        return usuarioRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return usuarioRepository.findAllWithMotorista();
     }
 
     @Transactional
@@ -71,18 +67,13 @@ public class UsuarioService {
             }
         }
 
-        String nomeRole =
-                Optional.ofNullable(PERFIL_PARA_ROLE.get(dto.getPerfilAcesso().trim()))
+        PapelUsuario papel =
+                Optional.ofNullable(PERFIL_PARA_PAPEL.get(dto.getPerfilAcesso().trim()))
                         .orElseThrow(
                                 () ->
                                         new IllegalArgumentException(
                                                 "Perfil inválido: use Solicitante, Administrador,"
                                                         + " Gestor de Frota ou Motorista"));
-
-        Role role =
-                roleRepository
-                        .findByNome(nomeRole)
-                        .orElseThrow(() -> new IllegalArgumentException("Perfil não encontrado no sistema: " + nomeRole));
 
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome().trim());
@@ -93,22 +84,17 @@ public class UsuarioService {
         usuario.setDataAdmissao(parseDataOpcional(dto.getDataAdmissao(), "dataAdmissao"));
         usuario.setTipoCadastro(tipoCadastro);
 
-        // Campos novos do diagrama
         usuario.setPerfilAcesso(dto.getPerfilAcesso().trim());
-        usuario.setTipoConta(nomeRole);
+        usuario.setPapel(papel);
         usuario.setStatus("ATIVO");
         usuario.setDataDesligamento(null);
 
         if (tipoCadastro.equals("motorista")) {
-            usuario.setNumeroCnh(dto.getNumeroCnh().trim());
-            usuario.setValidadeCnh(parseDataObrigatoria(dto.getCnhValidade(), "cnhValidade"));
-        } else {
-            usuario.setNumeroCnh(null);
-            usuario.setValidadeCnh(null);
+            LocalDate validade = parseDataObrigatoria(dto.getCnhValidade(), "cnhValidade");
+            Motorista motorista =
+                    new Motorista(usuario, dto.getNumeroCnh().trim(), validade);
+            usuario.setMotorista(motorista);
         }
-
-        usuario.getRoles().clear();
-        usuario.addRole(role);
 
         Usuario salvo = usuarioRepository.save(usuario);
 
