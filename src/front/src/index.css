@@ -1588,6 +1588,40 @@ a {
   box-shadow: 0 0 0 3px rgba(207, 78, 54, 0.12);
 }
 
+.matricula-input {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.matricula-input__prefix {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.form-field .matricula-input__prefix {
+  min-height: 54px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.matricula-input input,
+.matricula-input .admin-form-field__input {
+  border-radius: 0 6px 6px 0;
+}
+
 .admin-form-field--date .admin-form-field__input-wrap {
   position: relative;
   display: flex;
