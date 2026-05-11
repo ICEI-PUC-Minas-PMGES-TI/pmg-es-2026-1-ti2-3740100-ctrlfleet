@@ -2,20 +2,18 @@ import { Link } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { StatusBadge } from '../common/StatusBadge';
 
-export function UserTable({ users }) {
+export function UserTable({ onUserAction, users }) {
   return (
     <>
       <div className="table-wrapper">
         <table className="fleet-table admin-table">
           <thead>
             <tr>
-              <th>Usuario</th>
-              <th>CPF</th>
+              <th>Usuário</th>
+              <th>Matrícula</th>
               <th>Perfil</th>
-              <th>Secretaria</th>
               <th>Status</th>
-              <th>Ultimo acesso</th>
-              <th>Acoes</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -32,21 +30,14 @@ export function UserTable({ users }) {
                     </div>
                   </div>
                 </td>
-                <td>{user.cpf}</td>
+                <td>{user.matricula}</td>
                 <td>{user.role}</td>
-                <td>{user.secretariat}</td>
                 <td>
                   <StatusBadge label={user.status} />
                 </td>
-                <td>{user.lastAccess}</td>
                 <td>
                   <div className="table-actions">
-                    <Link aria-label={`Editar ${user.name}`} className="icon-button" to={`/admin/usuarios/${user.id}/editar`}>
-                      <Icon name="edit" />
-                    </Link>
-                    <button aria-label={`Inativar ${user.name}`} className="icon-button icon-button--danger" type="button">
-                      <Icon name="close" />
-                    </button>
+                    <ActionButtons onUserAction={onUserAction} user={user} />
                   </div>
                 </td>
               </tr>
@@ -70,31 +61,16 @@ export function UserTable({ users }) {
             </div>
             <dl className="vehicle-card__meta">
               <div>
-                <dt>CPF</dt>
-                <dd>{user.cpf}</dd>
+                <dt>Matrícula</dt>
+                <dd>{user.matricula}</dd>
               </div>
               <div>
                 <dt>Perfil</dt>
                 <dd>{user.role}</dd>
               </div>
-              <div>
-                <dt>Secretaria</dt>
-                <dd>{user.secretariat}</dd>
-              </div>
-              <div>
-                <dt>Ultimo acesso</dt>
-                <dd>{user.lastAccess}</dd>
-              </div>
             </dl>
             <div className="table-actions">
-              <Link className="icon-button icon-button--label" to={`/admin/usuarios/${user.id}/editar`}>
-                <Icon name="edit" />
-                <span>Editar usuario</span>
-              </Link>
-              <button className="icon-button icon-button--label icon-button--danger" type="button">
-                <Icon name="close" />
-                <span>Inativar</span>
-              </button>
+              <ActionButtons labels onUserAction={onUserAction} user={user} />
             </div>
           </article>
         ))}
@@ -103,7 +79,102 @@ export function UserTable({ users }) {
   );
 }
 
+function ActionButtons({ labels = false, onUserAction, user }) {
+  const buttonClass = labels ? 'icon-button icon-button--label' : 'icon-button';
+
+  return (
+    <>
+      <Link
+        aria-label={`Editar ${user.name}`}
+        className={buttonClass}
+        title="Editar usuário"
+        to={`/admin/usuarios/${user.id}/editar`}
+      >
+        <Icon name="edit" />
+        {labels ? <span>Editar</span> : null}
+      </Link>
+
+      {user.status === 'Pendente' ? (
+        <>
+          <button
+            className={buttonClass}
+            onClick={() => onUserAction?.('approve', user)}
+            title="Aprovar usuário"
+            type="button"
+          >
+            <Icon name="check" />
+            {labels ? <span>Aprovar</span> : null}
+          </button>
+          <button
+            className={`${buttonClass} icon-button--danger`}
+            onClick={() => onUserAction?.('reject', user)}
+            title="Recusar solicitação"
+            type="button"
+          >
+            <Icon name="close" />
+            {labels ? <span>Recusar</span> : null}
+          </button>
+          <button
+            className={buttonClass}
+            onClick={() => onUserAction?.('invite', user)}
+            title="Reenviar convite"
+            type="button"
+          >
+            <Icon name="mail" />
+            {labels ? <span>Convite</span> : null}
+          </button>
+        </>
+      ) : null}
+
+      {user.status === 'Ativo' ? (
+        <>
+          <button
+            className={buttonClass}
+            onClick={() => onUserAction?.('resetPassword', user)}
+            title="Redefinir senha"
+            type="button"
+          >
+            <Icon name="shield" />
+            {labels ? <span>Senha</span> : null}
+          </button>
+          <button
+            className={`${buttonClass} icon-button--danger`}
+            onClick={() => onUserAction?.('block', user)}
+            title="Bloquear usuário"
+            type="button"
+          >
+            <Icon name="alert" />
+            {labels ? <span>Bloquear</span> : null}
+          </button>
+          <button
+            className={`${buttonClass} icon-button--danger`}
+            onClick={() => onUserAction?.('deactivate', user)}
+            title="Inativar usuário"
+            type="button"
+          >
+            <Icon name="close" />
+            {labels ? <span>Inativar</span> : null}
+          </button>
+        </>
+      ) : null}
+
+      {user.status === 'Bloqueado' || user.status === 'Inativo' ? (
+        <button
+          className={buttonClass}
+          onClick={() => onUserAction?.('reactivate', user)}
+          title="Reativar usuário"
+          type="button"
+        >
+          <Icon name="check" />
+          {labels ? <span>Reativar</span> : null}
+        </button>
+      ) : null}
+    </>
+  );
+}
+
 function getInitials(name) {
+  if (!name) return '?';
   return name
     .split(' ')
     .filter(Boolean)

@@ -3,7 +3,6 @@ import { ManagerLayout } from './components/layout/ManagerLayout';
 import { AdminAuditPage } from './modules/admin/pages/AdminAuditPage';
 import { AdminDashboardPage } from './modules/admin/pages/AdminDashboardPage';
 import { AdminRolesPage } from './modules/admin/pages/AdminRolesPage';
-import { AdminSettingsPage } from './modules/admin/pages/AdminSettingsPage';
 import { AdminUserFormPage } from './modules/admin/pages/AdminUserFormPage';
 import { AdminUsersPage } from './modules/admin/pages/AdminUsersPage';
 import { VehicleFormProvider } from './modules/gestor/context/VehicleFormContext';
@@ -12,7 +11,8 @@ import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
-import { VehicleDocumentsPage } from './modules/gestor/pages/VehicleDocumentsPage';
+import { HomePage } from './modules/public/pages/HomePage';
+import { LoginPage } from './modules/public/pages/LoginPage';
 
 
 function App() {
@@ -20,7 +20,9 @@ function App() {
     <BrowserRouter>
       <VehicleFormProvider>
         <Routes>
-          <Route index element={<Navigate replace to="/gestor/dashboard" />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
 
           <Route path="gestor" element={<ManagerLayout />}>
             <Route index element={<Navigate replace to="dashboard" />} />
@@ -28,7 +30,7 @@ function App() {
             <Route path="dashboard" element={<FleetDashboardPage />} />
             <Route path="frota" element={<FleetPage />} />
             <Route path="frota/novo" element={<VehicleCreatePage />} />
-            <Route path="frota/novo/documentacao" element={<VehicleDocumentsPage />} />
+            <Route path="frota/novo/documentacao" element={<Navigate replace to="/gestor/frota/novo" />} />
             <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
             <Route
               path="reservas"
@@ -84,10 +86,9 @@ function App() {
             <Route path="usuarios/:userId/editar" element={<AdminUserFormPage />} />
             <Route path="perfis" element={<AdminRolesPage />} />
             <Route path="auditoria" element={<AdminAuditPage />} />
-            <Route path="configuracoes" element={<AdminSettingsPage />} />
           </Route>
 
-          <Route path="*" element={<Navigate replace to="/gestor/dashboard" />} />
+          <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </VehicleFormProvider>
     </BrowserRouter>

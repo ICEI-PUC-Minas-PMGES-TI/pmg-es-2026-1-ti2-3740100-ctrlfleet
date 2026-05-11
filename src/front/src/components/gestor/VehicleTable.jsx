@@ -13,7 +13,6 @@ export function VehicleTable({ vehicles }) {
               <th>Placa</th>
               <th>Marca</th>
               <th>Modelo</th>
-              <th>Secretaria</th>
               <th>CNH</th>
               <th>Status</th>
               <th>Documentos</th>
@@ -28,7 +27,6 @@ export function VehicleTable({ vehicles }) {
                 </td>
                 <td>{vehicle.marca}</td>
                 <td>{vehicle.model}</td>
-                <td>{vehicle.secretariat}</td>
                 <td>{vehicle.licenseCategory}</td>
                 <td>
                   <StatusBadge label={vehicle.status} />
@@ -63,10 +61,6 @@ export function VehicleTable({ vehicles }) {
               <StatusBadge label={vehicle.status} />
             </div>
             <dl className="vehicle-card__meta">
-              <div>
-                <dt>Secretaria</dt>
-                <dd>{vehicle.secretariat}</dd>
-              </div>
               <div>
                 <dt>CNH</dt>
                 <dd>{vehicle.licenseCategory}</dd>

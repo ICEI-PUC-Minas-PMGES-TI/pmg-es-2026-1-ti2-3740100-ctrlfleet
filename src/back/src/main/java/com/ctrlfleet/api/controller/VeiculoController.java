@@ -1,5 +1,6 @@
 package com.ctrlfleet.api.controller;
 
+<<<<<<< HEAD
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.service.VeiculoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,3 +28,27 @@ public class VeiculoController {
         }
     }
 }
+=======
+import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
+import com.ctrlfleet.api.service.VeiculoService;
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/veiculos")
+public class VeiculoController {
+
+    private final VeiculoService veiculoService;
+
+    public VeiculoController(VeiculoService veiculoService) {
+        this.veiculoService = veiculoService;
+    }
+
+    @GetMapping
+    public List<VeiculoResponseDTO> listar() {
+        return veiculoService.listarTodos().stream().map(VeiculoResponseDTO::fromEntity).toList();
+    }
+}
+>>>>>>> 8b9b9f01c412e9f7fea8bb088b2835eb369de4cd

@@ -1,9 +1,9 @@
 package com.ctrlfleet.api.domain.model;
 
+import com.ctrlfleet.api.domain.enums.PapelUsuario;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "usuarios")
@@ -25,9 +25,6 @@ public class Usuario {
     @Column(nullable = false)
     private String matricula;
 
-    @Column(nullable = false)
-    private String departamento;
-
     @Column(length = 160)
     private String cargo;
 
@@ -36,21 +33,24 @@ public class Usuario {
     @Column(nullable = false, length = 24)
     private String tipoCadastro;
 
-    @Column(length = 40)
-    private String numeroCnh;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 40)
+    private PapelUsuario papel;
 
-    private LocalDate validadeCnh;
+    /** Perfil de acesso amigável escolhido no cadastro (ex.: Administrador). */
+    @Column(name = "perfil_acesso", length = 60)
+    private String perfilAcesso;
 
-    // RELAÇÃO COM ROLES (muitos pra muitos)
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "usuario_roles",
-            joinColumns = @JoinColumn(name = "usuario_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @Column(name = "data_desligamento")
+    private LocalDate dataDesligamento;
 
-    // CONSTRUTORES
+    /** Estado da conta: ATIVO, INATIVO, BLOQUEADO, PENDENTE. */
+    @Column(length = 20)
+    private String status;
+
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Motorista motorista;
+
     public Usuario() {}
 
     public Usuario(Long id, String nome, String email, String senha) {
@@ -59,8 +59,6 @@ public class Usuario {
         this.email = email;
         this.senha = senha;
     }
-
-    // GETTERS E SETTERS
 
     public Long getId() {
         return id;
@@ -74,20 +72,13 @@ public class Usuario {
         return email;
     }
 
+    @JsonIgnore
     public String getSenha() {
         return senha;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
     public String getMatricula() {
         return matricula;
-    }
-
-    public String getDepartamento() {
-        return departamento;
     }
 
     public String getCargo() {
@@ -102,12 +93,24 @@ public class Usuario {
         return tipoCadastro;
     }
 
-    public String getNumeroCnh() {
-        return numeroCnh;
+    public PapelUsuario getPapel() {
+        return papel;
     }
 
-    public LocalDate getValidadeCnh() {
-        return validadeCnh;
+    public String getPerfilAcesso() {
+        return perfilAcesso;
+    }
+
+    public LocalDate getDataDesligamento() {
+        return dataDesligamento;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Motorista getMotorista() {
+        return motorista;
     }
 
     public void setId(Long id) {
@@ -130,10 +133,6 @@ public class Usuario {
         this.matricula = matricula;
     }
 
-    public void setDepartamento(String departamento) {
-        this.departamento = departamento;
-    }
-
     public void setCargo(String cargo) {
         this.cargo = cargo;
     }
@@ -146,20 +145,23 @@ public class Usuario {
         this.tipoCadastro = tipoCadastro;
     }
 
-    public void setNumeroCnh(String numeroCnh) {
-        this.numeroCnh = numeroCnh;
+    public void setPapel(PapelUsuario papel) {
+        this.papel = papel;
     }
 
-    public void setValidadeCnh(LocalDate validadeCnh) {
-        this.validadeCnh = validadeCnh;
+    public void setPerfilAcesso(String perfilAcesso) {
+        this.perfilAcesso = perfilAcesso;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setDataDesligamento(LocalDate dataDesligamento) {
+        this.dataDesligamento = dataDesligamento;
     }
 
-    // MÉTODO AUXILIAR (muito útil)
-    public void addRole(Role role) {
-        this.roles.add(role);
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setMotorista(Motorista motorista) {
+        this.motorista = motorista;
     }
 }
