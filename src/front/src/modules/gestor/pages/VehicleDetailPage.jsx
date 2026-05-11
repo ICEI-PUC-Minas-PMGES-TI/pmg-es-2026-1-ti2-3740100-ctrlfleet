@@ -1,20 +1,78 @@
-import { Link, useParams } from 'react-router-dom';
-import { DocumentPills } from '../../../components/gestor/DocumentPills';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { RegistroUsoSection } from '../../../components/fleet/RegistroUsoSection';
+import { DocumentPills } from '../../../components/gestor/DocumentPills';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { fleetVehicles } from '../../../data/fleetData';
+import { buscarVeiculo, editarDocumentacaoVeiculo } from '../../../services/veiculoApi';
+import { mapBackendVehicleToView } from '../../../services/veiculoMappers';
 
 export function VehicleDetailPage() {
   const { vehicleId } = useParams();
-  const vehicle = fleetVehicles.find((item) => item.id === vehicleId);
+  const [vehicleState, setVehicleState] = useState({ loading: true, error: null, item: null });
+  const [editingDocs, setEditingDocs] = useState({});
 
-  if (!vehicle) {
+  function loadVehicle(signal) {
+    setVehicleState((current) => ({ ...current, loading: true, error: null }));
+    return buscarVeiculo(vehicleId, { signal })
+      .then((dto) => {
+        const item = mapBackendVehicleToView(dto);
+        setVehicleState({ loading: false, error: null, item });
+        setEditingDocs(
+          Object.fromEntries(
+            item.documents
+              .filter((doc) => typeof doc.id === 'number')
+              .map((doc) => [
+                doc.id,
+                {
+                  dataVencimento: doc.dataVencimento,
+                  statusPagamento: doc.statusPagamento,
+                  tipoDocumento: doc.tipoDocumento,
+                  valorPago: doc.valorPago ?? '',
+                },
+              ]),
+          ),
+        );
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setVehicleState({ loading: false, error: error.message || 'Falha ao carregar veiculo.', item: null });
+      });
+  }
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadVehicle(controller.signal);
+    return () => controller.abort();
+  }, [vehicleId]);
+
+  async function handleSaveDocument(documento) {
+    const form = editingDocs[documento.id];
+    if (!form) return;
+
+    await editarDocumentacaoVeiculo(vehicleId, documento.id, {
+      tipoDocumento: form.tipoDocumento,
+      dataVencimento: form.dataVencimento,
+      statusPagamento: form.statusPagamento,
+      valorPago: form.valorPago === '' ? null : Number(form.valorPago),
+    });
+    await loadVehicle();
+  }
+
+  if (vehicleState.loading) {
     return (
       <div className="page-stack">
-        <PageHeader subtitle="Não encontramos o veículo solicitado." title="Veículo não encontrado" />
+        <PageHeader subtitle="Carregando dados do cadastro." title="Veiculo" />
+      </div>
+    );
+  }
+
+  if (vehicleState.error || !vehicleState.item) {
+    return (
+      <div className="page-stack">
+        <PageHeader subtitle={vehicleState.error || 'Nao encontramos o veiculo solicitado.'} title="Veiculo nao encontrado" />
         <ActionButton to="/gestor/frota" variant="secondary">
           Voltar para a frota
         </ActionButton>
@@ -22,13 +80,15 @@ export function VehicleDetailPage() {
     );
   }
 
+  const vehicle = vehicleState.item;
+
   return (
     <div className="page-stack">
       <PageHeader
         actionIcon="edit"
         actionLabel="Editar cadastro"
-        actionTo="/gestor/frota/novo"
-        subtitle="Consulta detalhada do veículo, documentação e histórico recente."
+        actionTo={`/gestor/frota/${vehicleId}/editar`}
+        subtitle="Consulta detalhada do veiculo, documentacao e historico recente."
         title={vehicle.model}
       />
 
@@ -36,14 +96,18 @@ export function VehicleDetailPage() {
         <div>
           <span className="plate-chip">{vehicle.plate}</span>
           <h2>{vehicle.model}</h2>
-          <p>{vehicle.mileage}</p>
+          <p>{vehicle.year}</p>
         </div>
         <StatusBadge label={vehicle.status} />
       </div>
 
       <div className="content-grid">
-        <SectionCard subtitle="Campos principais do cadastro." title="Informações gerais">
+        <SectionCard subtitle="Campos principais do cadastro." title="Informacoes gerais">
           <dl className="summary-list">
+            <div>
+              <dt>Marca</dt>
+              <dd>{vehicle.marca}</dd>
+            </div>
             <div>
               <dt>Modelo</dt>
               <dd>{vehicle.model}</dd>
@@ -53,70 +117,57 @@ export function VehicleDetailPage() {
               <dd>{vehicle.year}</dd>
             </div>
             <div>
-              <dt>CNH mínima</dt>
+              <dt>CNH minima</dt>
               <dd>{vehicle.licenseCategory}</dd>
             </div>
           </dl>
         </SectionCard>
-
-        <SectionCard subtitle="Responsável fixo associado ao veículo." title="Motorista vinculado">
-          {vehicle.driver ? (
-            <dl className="summary-list">
-              <div>
-                <dt>Nome</dt>
-                <dd>{vehicle.driver.name}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>
-                  <StatusBadge label={vehicle.driver.status} />
-                </dd>
-              </div>
-              <div>
-                <dt>CPF</dt>
-                <dd>{vehicle.driver.cpf}</dd>
-              </div>
-              <div>
-                <dt>E-mail</dt>
-                <dd>{vehicle.driver.email}</dd>
-              </div>
-              <div>
-                <dt>CNH</dt>
-                <dd>{vehicle.driver.cnh}</dd>
-              </div>
-              <div>
-                <dt>Validade da CNH</dt>
-                <dd>{vehicle.driver.cnhExpiry}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p>Nenhum motorista vinculado a este veículo.</p>
-          )}
-        </SectionCard>
       </div>
 
-      <SectionCard subtitle="Situação dos vencimentos monitorados." title="Documentação">
-          <DocumentPills documents={vehicle.documents} />
-          <div className="documents-list">
-            {vehicle.documents.map((item) => (
-              <div className="documents-list__item" key={item.label}>
-                <strong>{item.label}</strong>
-                <span>Válido até {item.dueDate}</span>
-              </div>
-            ))}
-          </div>
-          <Link className="text-link" to="/gestor/frota/novo">
-            Editar cadastro e documentação
-          </Link>
-      </SectionCard>
-
-      <SectionCard subtitle="Rastreabilidade das movimentações do bem." title="Histórico recente">
-        <div className="history-list">
-          {vehicle.history.map((entry) => (
-            <article className="history-item" key={`${vehicle.id}-${entry.date}`}>
-              <span>{entry.date}</span>
-              <p>{entry.label}</p>
-            </article>
+      <SectionCard subtitle="Situacao dos vencimentos monitorados." title="Documentacao">
+        <DocumentPills documents={vehicle.documents} />
+        <div className="documents-list">
+          {vehicle.documents.map((item) => (
+            <div className="documents-list__item" key={item.id || item.label}>
+              <strong>{item.label}</strong>
+              <span>Valido ate {item.dueDate}</span>
+              {typeof item.id === 'number' ? (
+                <div className="form-grid">
+                  <label className="form-field">
+                    <span>Vencimento</span>
+                    <input
+                      onChange={(event) =>
+                        setEditingDocs((current) => ({
+                          ...current,
+                          [item.id]: { ...current[item.id], dataVencimento: event.target.value },
+                        }))
+                      }
+                      type="date"
+                      value={editingDocs[item.id]?.dataVencimento || ''}
+                    />
+                  </label>
+                  <label className="form-field">
+                    <span>Status</span>
+                    <select
+                      onChange={(event) =>
+                        setEditingDocs((current) => ({
+                          ...current,
+                          [item.id]: { ...current[item.id], statusPagamento: event.target.value },
+                        }))
+                      }
+                      value={editingDocs[item.id]?.statusPagamento || 'PENDENTE'}
+                    >
+                      <option value="PAGO">Pago</option>
+                      <option value="PENDENTE">Pendente</option>
+                      <option value="ATRASADO">Atrasado</option>
+                    </select>
+                  </label>
+                  <ActionButton onClick={() => handleSaveDocument(item)} type="button" variant="secondary">
+                    Salvar documento
+                  </ActionButton>
+                </div>
+              ) : null}
+            </div>
           ))}
         </div>
       </SectionCard>

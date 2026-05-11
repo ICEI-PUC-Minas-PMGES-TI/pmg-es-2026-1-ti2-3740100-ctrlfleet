@@ -31,6 +31,7 @@ function App() {
             <Route path="frota" element={<FleetPage />} />
             <Route path="frota/novo" element={<VehicleCreatePage />} />
             <Route path="frota/novo/documentacao" element={<Navigate replace to="/gestor/frota/novo" />} />
+            <Route path="frota/:vehicleId/editar" element={<VehicleCreatePage />} />
             <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
             <Route
               path="reservas"

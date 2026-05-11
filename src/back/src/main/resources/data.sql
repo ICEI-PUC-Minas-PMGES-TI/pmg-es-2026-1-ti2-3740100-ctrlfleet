@@ -185,6 +185,10 @@ BEGIN
   END IF;
 END $$;
 
+UPDATE veiculos
+SET secretaria = 'Garagem Central'
+WHERE secretaria IS NULL OR btrim(secretaria) = '';
+
 
 -- =====================================================================
 -- 4. TIPO_INSPECAO

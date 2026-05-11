@@ -3,7 +3,7 @@ import { Icon } from '../common/Icon';
 import { StatusBadge } from '../common/StatusBadge';
 import { DocumentPills } from './DocumentPills';
 
-export function VehicleTable({ vehicles }) {
+export function VehicleTable({ onDeactivate, vehicles }) {
   return (
     <>
       <div className="table-wrapper">
@@ -36,12 +36,32 @@ export function VehicleTable({ vehicles }) {
                 </td>
                 <td>
                   <div className="table-actions">
-                    <Link aria-label={`Visualizar ${vehicle.model}`} className="icon-button" to={`/gestor/frota/${vehicle.id}`}>
+                    <Link
+                      aria-label={`Visualizar ${vehicle.model}`}
+                      className="icon-button icon-button--label"
+                      to={`/gestor/frota/${vehicle.id}`}
+                    >
                       <Icon name="eye" />
+                      <span>Visualizar</span>
                     </Link>
-                    <Link aria-label={`Editar ${vehicle.model}`} className="icon-button" to="/gestor/frota/novo">
+                    <Link
+                      aria-label={`Editar ${vehicle.model}`}
+                      className="icon-button icon-button--label"
+                      to={`/gestor/frota/${vehicle.id}/editar`}
+                    >
                       <Icon name="edit" />
+                      <span>Editar</span>
                     </Link>
+                    <button
+                      aria-label={`Desativar ${vehicle.model}`}
+                      className="icon-button icon-button--label"
+                      disabled={vehicle.status === 'Inativo'}
+                      onClick={() => onDeactivate?.(vehicle)}
+                      type="button"
+                    >
+                      <Icon name="close" />
+                      <span>Desativar</span>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -77,10 +97,19 @@ export function VehicleTable({ vehicles }) {
                 <Icon name="eye" />
                 <span>Detalhes</span>
               </Link>
-              <Link className="icon-button icon-button--label" to="/gestor/frota/novo">
+              <Link className="icon-button icon-button--label" to={`/gestor/frota/${vehicle.id}/editar`}>
                 <Icon name="edit" />
                 <span>Editar</span>
               </Link>
+              <button
+                className="icon-button icon-button--label"
+                disabled={vehicle.status === 'Inativo'}
+                onClick={() => onDeactivate?.(vehicle)}
+                type="button"
+              >
+                <Icon name="close" />
+                <span>Desativar</span>
+              </button>
             </div>
           </article>
         ))}

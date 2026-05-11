@@ -32,7 +32,7 @@ export const dashboardAlerts = [
   },
 ];
 
-export const statusTabs = ['Todos', 'Ativo', 'Manutenção', 'Bloqueado'];
+export const statusTabs = ['Todos', 'Ativo', 'Manutenção', 'Inativo', 'Bloqueado'];
 
 export const fleetVehicles = [
   {

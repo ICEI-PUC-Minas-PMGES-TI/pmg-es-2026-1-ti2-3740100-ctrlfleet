@@ -1,105 +1,117 @@
-/**
- * Helpers compartilhados para converter o `VeiculoResponseDTO` retornado pelo
- * backend em estruturas amigáveis para o painel do gestor de frota.
- *
- * Hoje a entidade `Veiculo` no backend ainda é simples (id, placa, modelo,
- * marca, ano, status). Campos que a UI exibe e que ainda não existem no
- * domínio (categoria de CNH, documentos, motorista vinculado, etc.) recebem
- * valores neutros aqui — assim o front continua funcionando enquanto a
- * entidade evolui.
- */
-
-/** Status canônico do enum `StatusVeiculo` (DB) → label exibido na UI. */
 export const STATUS_VEICULO_LABELS = {
   DISPONIVEL: 'Ativo',
   EM_USO: 'Ativo',
-  MANUTENCAO: 'Manutenção',
-  DESATIVADO: 'Bloqueado',
+  MANUTENCAO: 'Manuten\u00e7\u00e3o',
+  DESATIVADO: 'Inativo',
 };
 
-/** Zero-padding para 2 dígitos (usado nas KPIs). */
+export const STATUS_VEICULO_VALUES = {
+  Ativo: 'DISPONIVEL',
+  Manutencao: 'MANUTENCAO',
+  'Manuten\u00e7\u00e3o': 'MANUTENCAO',
+  Reservado: 'EM_USO',
+  Inativo: 'DESATIVADO',
+};
+
 export function pad2(value) {
   return String(value).padStart(2, '0');
 }
 
-/**
- * Resolve o label de status exibido na UI a partir do enum vindo do backend.
- * Caso o backend evolua para novos valores, retorna o próprio valor para que
- * o problema fique visível na interface em vez de virar string vazia.
- */
 export function resolveStatusVeiculo(dto) {
   if (!dto?.status) return 'Ativo';
   return STATUS_VEICULO_LABELS[dto.status] || dto.status;
 }
 
-/**
- * Combina marca + modelo em uma única string ("Chevrolet Onix") usada na
- * coluna "Modelo" da tabela de frota e em buscas por texto. Ignora campos
- * vazios para evitar espaços duplicados.
- */
-export function buildModelLabel(dto) {
-  const parts = [dto?.marca, dto?.modelo].map((p) => (p ? String(p).trim() : '')).filter(Boolean);
-  return parts.join(' ') || (dto?.modelo ?? '—');
+function hasExpiredDocument(documents) {
+  return documents.some((documento) => documento.state === 'expired');
 }
 
-/**
- * Heurística simples para a categoria de CNH com base no nome do modelo.
- * Vans e utilitários grandes (Sprinter, Ducato, Master, Daily, etc.) caem
- * em "D"; o resto em "B". É um placeholder visual enquanto o backend ainda
- * não persiste essa informação.
- */
+export function buildModelLabel(dto) {
+  const parts = [dto?.marca, dto?.modelo].map((p) => (p ? String(p).trim() : '')).filter(Boolean);
+  return parts.join(' ') || (dto?.modelo ?? '-');
+}
+
 const HEAVY_VEHICLE_REGEX = /(sprinter|ducato|master|daily|hilux|sw4|ranger|amarok|s10|toro|frontier|strada)/i;
 
 export function inferLicenseCategory(dto) {
   const text = `${dto?.marca || ''} ${dto?.modelo || ''}`;
-  if (HEAVY_VEHICLE_REGEX.test(text)) {
-    return 'D';
-  }
-  return 'B';
+  return HEAVY_VEHICLE_REGEX.test(text) ? 'D' : 'B';
 }
 
-/**
- * Mocka uma lista de documentos (IPVA, Seguro, Licenciamento) com estados
- * variados de forma determinística pelo id do veículo. Mantém a UI atual
- * com pills coloridas funcionando enquanto a entidade `Documentacao`
- * ainda não foi exposta no backend.
- *
- * Mapeamento por (id mod 3):
- *   0 → todos `ok`
- *   1 → IPVA `warning`, demais `ok`
- *   2 → Licenciamento `expired`, demais `ok`
- */
-const DOCUMENT_TEMPLATES = [
-  { label: 'IPVA', shortLabel: 'IP', dueDate: '12/05/2026' },
-  { label: 'Seguro', shortLabel: 'SG', dueDate: '28/11/2026' },
-  { label: 'Licenciamento', shortLabel: 'LC', dueDate: '17/09/2026' },
-];
+const DOCUMENT_LABELS = {
+  IPVA: { label: 'IPVA', shortLabel: 'IP' },
+  SEGURO: { label: 'Seguro', shortLabel: 'SG' },
+  LICENCIAMENTO: { label: 'Licenciamento', shortLabel: 'LC' },
+};
+
+function formatDateBr(value) {
+  if (!value) return 'Pendente';
+  const [year, month, day] = String(value).split('-');
+  if (!year || !month || !day) return value;
+  return `${day}/${month}/${year}`;
+}
+
+function resolveDocumentState(documento) {
+  if (documento?.statusPagamento === 'ATRASADO') return 'expired';
+  if (documento?.statusPagamento === 'PENDENTE') return 'warning';
+  if (!documento?.dataVencimento) return 'warning';
+
+  const dueDate = new Date(`${documento.dataVencimento}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (dueDate < today) return 'expired';
+
+  const days = Math.ceil((dueDate.getTime() - today.getTime()) / 86400000);
+  return days <= 30 ? 'warning' : 'ok';
+}
+
+export function mapBackendDocumentToView(documento) {
+  const key = String(documento?.tipoDocumento || '').toUpperCase();
+  const labelInfo = DOCUMENT_LABELS[key] || {
+    label: documento?.tipoDocumento || 'Documento',
+    shortLabel: key.slice(0, 2) || 'DC',
+  };
+
+  return {
+    id: documento.id,
+    tipoDocumento: key,
+    dataVencimento: documento.dataVencimento || '',
+    dueDate: formatDateBr(documento.dataVencimento),
+    label: labelInfo.label,
+    shortLabel: labelInfo.shortLabel,
+    state: resolveDocumentState(documento),
+    statusPagamento: documento.statusPagamento || 'PENDENTE',
+    valorPago: documento.valorPago ?? null,
+  };
+}
 
 export function buildMockDocuments(dto) {
   const id = Number(dto?.id) || 0;
   const variant = id % 3;
-  return DOCUMENT_TEMPLATES.map((doc, index) => {
+  return Object.entries(DOCUMENT_LABELS).map(([tipoDocumento, doc], index) => {
     let state = 'ok';
     if (variant === 1 && index === 0) state = 'warning';
     if (variant === 2 && index === 2) state = 'expired';
-    return { ...doc, state };
+    return { ...doc, id: `mock-${tipoDocumento}`, tipoDocumento, dataVencimento: '', dueDate: 'Pendente', state };
   });
 }
 
-/**
- * Converte o `VeiculoResponseDTO` para o formato esperado pelos componentes
- * `FleetPage`, `FleetFilters`, `VehicleTable` e `FleetDashboardPage`.
- * Mantém o mesmo "shape" que antes era servido pelo mock `fleetVehicles`,
- * para minimizar mudanças nos componentes de UI.
- */
 export function mapBackendVehicleToView(dto) {
+  const documents =
+    Array.isArray(dto.documentos) && dto.documentos.length > 0
+      ? dto.documentos.map(mapBackendDocumentToView)
+      : buildMockDocuments(dto);
+  const persistedStatus = resolveStatusVeiculo(dto);
+  const status = persistedStatus === 'Inativo' ? 'Inativo' : hasExpiredDocument(documents) ? 'Bloqueado' : persistedStatus;
+
   return {
     id: String(dto.id),
-    plate: dto.placa || '—',
-    model: buildModelLabel(dto),
-    year: dto.ano ? String(dto.ano) : '—',
-    status: resolveStatusVeiculo(dto),
+    plate: dto.placa || '-',
+    marca: dto.marca || '-',
+    model: dto.modelo || buildModelLabel(dto),
+    year: dto.ano ? String(dto.ano) : '-',
+    status,
     licenseCategory: inferLicenseCategory(dto),
-    documents: buildMockDocuments(dto),
+    documents,
   };
 }

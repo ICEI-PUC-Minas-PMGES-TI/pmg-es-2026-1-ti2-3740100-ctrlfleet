@@ -1,31 +1,101 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { adminUsers } from '../../../data/adminData';
 import { vehicleFormOptions } from '../../../data/fleetData';
+import { atualizarVeiculo, buscarVeiculo, criarVeiculo } from '../../../services/veiculoApi';
+import { STATUS_VEICULO_LABELS, STATUS_VEICULO_VALUES } from '../../../services/veiculoMappers';
 import { useVehicleForm } from '../context/useVehicleForm';
 
 export function VehicleCreatePage() {
   const navigate = useNavigate();
+  const { vehicleId } = useParams();
   const { formState, resetForm, updateForm } = useVehicleForm();
+  const [submitState, setSubmitState] = useState({ loading: false, error: null });
+  const isEditMode = Boolean(vehicleId);
   const drivers = adminUsers.filter((user) => user.role === 'Motorista');
   const selectedDriver = drivers.find((driver) => driver.id === formState.driverId) ?? null;
 
-  function handleSubmit(event) {
+  useEffect(() => {
+    if (!isEditMode) {
+      resetForm();
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    setSubmitState({ loading: true, error: null });
+
+    buscarVeiculo(vehicleId, { signal: controller.signal })
+      .then((vehicle) => {
+        const documentsByType = Object.fromEntries(
+          (vehicle.documentos || []).map((documento) => [documento.tipoDocumento, documento]),
+        );
+
+        updateForm({
+          plate: vehicle.placa || '',
+          brand: vehicle.marca || '',
+          model: vehicle.modelo || '',
+          secretaria: vehicle.secretaria || 'Garagem Central',
+          year: vehicle.ano ? String(vehicle.ano) : '',
+          status: STATUS_VEICULO_LABELS[vehicle.status] || 'Ativo',
+          ipvaDueDate: documentsByType.IPVA?.dataVencimento || '',
+          insuranceDueDate: documentsByType.SEGURO?.dataVencimento || '',
+          licenseDueDate: documentsByType.LICENCIAMENTO?.dataVencimento || '',
+        });
+        setSubmitState({ loading: false, error: null });
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setSubmitState({ loading: false, error: error.message || 'Nao foi possivel carregar o veiculo.' });
+      });
+
+    return () => controller.abort();
+  }, [isEditMode, vehicleId]);
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    const flashMessage = `Veículo ${formState.plate || formState.model || 'novo'} salvo com sucesso.`;
-    resetForm();
-    navigate('/gestor/frota', { state: { flashMessage } });
+    const payload = {
+      placa: formState.plate,
+      marca: formState.brand,
+      modelo: formState.model,
+      secretaria: formState.secretaria || 'Garagem Central',
+      ano: Number(formState.year),
+      status: STATUS_VEICULO_VALUES[formState.status] || 'DISPONIVEL',
+      documentos: [
+        { tipoDocumento: 'IPVA', dataVencimento: formState.ipvaDueDate, statusPagamento: 'PAGO' },
+        { tipoDocumento: 'SEGURO', dataVencimento: formState.insuranceDueDate, statusPagamento: 'PAGO' },
+        { tipoDocumento: 'LICENCIAMENTO', dataVencimento: formState.licenseDueDate, statusPagamento: 'PAGO' },
+      ],
+    };
+
+    try {
+      setSubmitState({ loading: true, error: null });
+      if (isEditMode) {
+        await atualizarVeiculo(vehicleId, payload);
+      } else {
+        await criarVeiculo(payload);
+      }
+      const flashMessage = `Veículo ${formState.plate || formState.model || 'novo'} salvo com sucesso.`;
+      resetForm();
+      navigate('/gestor/frota', { state: { flashMessage } });
+    } catch (error) {
+      setSubmitState({ loading: false, error: error.message || 'Nao foi possivel salvar o veiculo.' });
+    }
   }
 
   return (
     <div className="page-stack">
       <PageHeader
-        subtitle="Preencha em uma única tela os dados do veículo e a documentação obrigatória."
-        title="Cadastro de Novo Veículo"
+        subtitle={
+          isEditMode
+            ? 'Atualize os dados do veículo e a documentação obrigatória.'
+            : 'Preencha em uma única tela os dados do veículo e a documentação obrigatória.'
+        }
+        title={isEditMode ? 'Editar Veículo' : 'Cadastro de Novo Veículo'}
       />
 
       <div className="content-grid content-grid--form">
@@ -62,6 +132,16 @@ export function VehicleCreatePage() {
             </label>
 
             <label className="form-field">
+              <span>Secretaria</span>
+              <input
+                onChange={(event) => updateForm({ secretaria: event.target.value })}
+                placeholder="Ex.: Secretaria de Saúde"
+                required
+                value={formState.secretaria || ''}
+              />
+            </label>
+
+            <label className="form-field">
               <span>Ano</span>
               <input
                 inputMode="numeric"
@@ -74,7 +154,7 @@ export function VehicleCreatePage() {
             </label>
 
             <label className="form-field">
-              <span>Status inicial</span>
+              <span>Status</span>
               <select onChange={(event) => updateForm({ status: event.target.value })} value={formState.status}>
                 {vehicleFormOptions.statuses.map((option) => (
                   <option key={option} value={option}>
@@ -192,11 +272,12 @@ export function VehicleCreatePage() {
             </label>
 
             <div className="form-actions">
+              {submitState.error ? <p className="form-error">{submitState.error}</p> : null}
               <ActionButton onClick={() => navigate('/gestor/frota')} type="button" variant="secondary">
                 Cancelar
               </ActionButton>
-              <ActionButton icon="chevronDown" type="submit">
-                Salvar veículo
+              <ActionButton disabled={submitState.loading} icon="chevronDown" type="submit">
+                {submitState.loading ? 'Salvando...' : isEditMode ? 'Salvar alterações' : 'Salvar veículo'}
               </ActionButton>
             </div>
           </form>

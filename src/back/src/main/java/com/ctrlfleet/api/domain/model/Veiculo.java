@@ -36,7 +36,7 @@ public class Veiculo {
     @Column(nullable = false)
     private StatusVeiculo status = StatusVeiculo.DISPONIVEL;
 
-    protected Veiculo() {}
+    public Veiculo() {}
 
     public Veiculo(String placa, String modelo, String marca, int ano, String secretaria) {
         this.placa = placa;

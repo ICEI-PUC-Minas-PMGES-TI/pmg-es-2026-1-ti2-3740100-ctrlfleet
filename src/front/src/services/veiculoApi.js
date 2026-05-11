@@ -67,3 +67,67 @@ export async function listarVeiculos({ signal } = {}) {
 
   return Array.isArray(data) ? data : [];
 }
+
+async function requestJson(path, options) {
+  const res = await fetch(requestUrl(path), {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...(options?.headers || {}),
+    },
+    ...options,
+  });
+
+  const data = parseJsonSafely(await res.text());
+
+  if (!res.ok) {
+    const msg =
+      (data && typeof data.mensagem === 'string' && data.mensagem) ||
+      (data && typeof data.message === 'string' && data.message) ||
+      `OperaÃ§Ã£o nÃ£o concluÃ­da (${res.status})`;
+    throw new Error(msg);
+  }
+
+  return data;
+}
+
+export function criarVeiculo(payload) {
+  return requestJson('/veiculos', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function atualizarVeiculo(id, payload) {
+  return requestJson(`/veiculos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function buscarVeiculo(id, { signal } = {}) {
+  return requestJson(`/veiculos/${id}`, {
+    method: 'GET',
+    signal,
+  });
+}
+
+export function desativarVeiculo(id) {
+  return requestJson(`/veiculos/${id}/desativar`, {
+    method: 'PATCH',
+  });
+}
+
+export function cadastrarDocumentacaoVeiculo(id, payload) {
+  return requestJson(`/veiculos/${id}/documentacao`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function editarDocumentacaoVeiculo(id, documentoId, payload) {
+  return requestJson(`/veiculos/${id}/documentacao/${documentoId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}

@@ -7,7 +7,7 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { statusTabs } from '../../../data/fleetData';
-import { listarVeiculos } from '../../../services/veiculoApi';
+import { desativarVeiculo, listarVeiculos } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView, pad2 } from '../../../services/veiculoMappers';
 
 function filterByStatus(vehicle, status) {
@@ -28,11 +28,9 @@ export function FleetPage() {
     items: [],
   });
 
-  useEffect(() => {
-    const controller = new AbortController();
-
+  function carregarVeiculos(signal) {
     setVehiclesData((current) => ({ ...current, loading: true, error: null }));
-    listarVeiculos({ signal: controller.signal })
+    return listarVeiculos({ signal })
       .then((items) => {
         setVehiclesData({
           loading: false,
@@ -48,9 +46,30 @@ export function FleetPage() {
           items: [],
         });
       });
+  }
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    carregarVeiculos(controller.signal);
 
     return () => controller.abort();
   }, []);
+
+  async function handleDeactivateVehicle(vehicle) {
+    const confirmed = window.confirm(`Desativar o veiculo ${vehicle.plate}?`);
+    if (!confirmed) return;
+
+    try {
+      await desativarVeiculo(vehicle.id);
+      await carregarVeiculos();
+    } catch (error) {
+      setVehiclesData((current) => ({
+        ...current,
+        error: error.message || 'Nao foi possivel desativar o veiculo.',
+      }));
+    }
+  }
 
   const filteredVehicles = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -88,7 +107,13 @@ export function FleetPage() {
         value: pad2(count((item) => item.status === 'Manutenção')),
       },
       {
-        caption: 'com restrição documental',
+        caption: 'fora de operação',
+        icon: 'close',
+        title: 'Inativos',
+        value: pad2(count((item) => item.status === 'Inativo')),
+      },
+      {
+        caption: 'com documento vencido',
         icon: 'alert',
         title: 'Bloqueados',
         value: pad2(count((item) => item.status === 'Bloqueado')),
@@ -150,7 +175,7 @@ export function FleetPage() {
               <span>Atualização documental e visualização detalhada disponíveis em cada linha.</span>
             </div>
 
-            <VehicleTable vehicles={filteredVehicles} />
+            <VehicleTable onDeactivate={handleDeactivateVehicle} vehicles={filteredVehicles} />
           </>
         )}
       </SectionCard>

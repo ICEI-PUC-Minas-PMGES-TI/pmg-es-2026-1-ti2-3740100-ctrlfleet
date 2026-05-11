@@ -2,8 +2,10 @@ import { createContext, useMemo, useState } from 'react';
 
 const initialFormState = {
   plate: '',
+  brand: '',
   model: '',
   year: '',
+  secretaria: 'Garagem Central',
   status: 'Ativo',
   licenseCategory: 'B',
   driverId: '',
