@@ -165,6 +165,28 @@ const iconMap = {
       <path d="m13 8 4 4-4 4M8 12h9" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
     </>
   ),
+  mail: (
+    <>
+      <rect
+        fill="none"
+        height="13"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        width="17"
+        x="3.5"
+        y="5.5"
+      />
+      <path
+        d="m4.5 8 7.5 5 7.5-5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </>
+  ),
   maintenance: (
     <path
       d="m13.8 4.3 5.9 5.9-2.1 2.1-5.9-5.9a3.5 3.5 0 1 0-4.9 4.9l5.9 5.9-2.1 2.1-5.9-5.9a6.5 6.5 0 1 1 9.1-9.1Z"

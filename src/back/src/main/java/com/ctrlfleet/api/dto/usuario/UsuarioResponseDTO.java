@@ -21,6 +21,9 @@ public class UsuarioResponseDTO {
     private String perfilAcesso;
     private String tipoConta;
     private String status;
+    private String tipoCadastro;
+    private String numeroCnh;
+    private LocalDate validadeCnh;
     private LocalDate dataAdmissao;
     private LocalDate dataDesligamento;
     private String numeroCnh;
@@ -42,6 +45,9 @@ public class UsuarioResponseDTO {
         dto.matricula = usuario.getMatricula();
         dto.cargo = usuario.getCargo();
         dto.status = usuario.getStatus();
+        dto.tipoCadastro = usuario.getTipoCadastro();
+        dto.numeroCnh = usuario.getNumeroCnh();
+        dto.validadeCnh = usuario.getValidadeCnh();
         dto.dataAdmissao = usuario.getDataAdmissao();
         dto.dataDesligamento = usuario.getDataDesligamento();
 
@@ -92,6 +98,18 @@ public class UsuarioResponseDTO {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getTipoCadastro() {
+        return tipoCadastro;
+    }
+
+    public String getNumeroCnh() {
+        return numeroCnh;
+    }
+
+    public LocalDate getValidadeCnh() {
+        return validadeCnh;
     }
 
     public LocalDate getDataAdmissao() {

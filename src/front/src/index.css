@@ -817,9 +817,10 @@ a {
 .select-field,
 .form-field input,
 .form-field select {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--card-strong);
+  border: 1.5px solid #cfd6e3;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.03);
 }
 
 .search-field {
@@ -837,14 +838,33 @@ a {
 }
 
 .search-field input,
-.select-field select,
-.form-field input,
-.form-field select {
+.select-field select {
   width: 100%;
   border: none;
   background: transparent;
   outline: none;
   color: var(--foreground);
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  background: #ffffff;
+  outline: none;
+  color: var(--foreground);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  border-color: rgba(207, 78, 54, 0.65);
+  background: #fff;
+  box-shadow:
+    0 0 0 3px rgba(207, 78, 54, 0.12),
+    inset 0 1px 0 rgba(15, 23, 42, 0.03);
 }
 
 .select-field {
@@ -1568,7 +1588,7 @@ a {
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
-  border: 1px solid #e5e7eb;
+  border: 1.5px solid #cfd6e3;
   border-radius: 6px;
   background: #fff;
   color: var(--foreground);
@@ -1586,6 +1606,40 @@ a {
 .admin-form-field__select:focus {
   border-color: rgba(207, 78, 54, 0.45);
   box-shadow: 0 0 0 3px rgba(207, 78, 54, 0.12);
+}
+
+.matricula-input {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.matricula-input__prefix {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1.5px solid #cfd6e3;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.form-field .matricula-input__prefix {
+  min-height: 54px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.matricula-input input,
+.matricula-input .admin-form-field__input {
+  border-radius: 0 6px 6px 0;
 }
 
 .admin-form-field--date .admin-form-field__input-wrap {

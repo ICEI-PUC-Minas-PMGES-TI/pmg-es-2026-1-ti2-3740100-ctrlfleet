@@ -5,52 +5,42 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public class UsuarioRequestDTO {
+public class UsuarioUpdateRequestDTO {
 
-    @NotBlank(message = "Nome é obrigatório")
+    @NotBlank(message = "Nome e obrigatorio")
     @Size(min = 2, max = 120, message = "Nome deve ter entre 2 e 120 caracteres")
     @Pattern(
             regexp = "^[\\p{L}][\\p{L} .'-]*[\\p{L}]$",
             message = "Nome deve conter apenas letras, espacos, ponto, apostrofo ou hifen")
     private String nome;
 
-    @NotBlank(message = "E-mail é obrigatório")
-    @Email(message = "E-mail inválido")
+    @NotBlank(message = "E-mail e obrigatorio")
+    @Email(message = "E-mail invalido")
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
-    @Size(min = 8, max = 72, message = "Senha deve ter entre 8 e 72 caracteres")
-    private String senha;
-
-    @NotBlank(message = "Matrícula é obrigatória")
+    @NotBlank(message = "Matricula e obrigatoria")
     @Size(min = 1, max = 10, message = "Matricula deve ter entre 1 e 10 numeros")
     @Pattern(regexp = "^\\d+$", message = "Matricula deve conter apenas numeros")
     private String matricula;
 
-    @NotBlank(message = "Perfil de acesso é obrigatório")
+    @NotBlank(message = "Perfil de acesso e obrigatorio")
     private String perfilAcesso;
 
-    private String cargo;
+    @NotBlank(message = "Status e obrigatorio")
+    private String status;
 
-    /** Formato esperado: dd/MM/yyyy (opcional) */
+    private String cargo;
     @Pattern(
             regexp = "^\\d{1,2}/\\d{1,2}/\\d{4}$",
             message = "Data de admissao deve estar no formato dd/mm/aaaa")
     private String dataAdmissao;
-
-    @NotBlank(message = "Tipo de cadastro é obrigatório")
     private String tipoCadastro;
-
     @Pattern(regexp = "^\\d{11}$", message = "CNH deve conter exatamente 11 numeros")
     private String numeroCnh;
-
     @Pattern(
             regexp = "^\\d{1,2}/\\d{1,2}/\\d{4}$",
             message = "Validade da CNH deve estar no formato dd/mm/aaaa")
     private String cnhValidade;
-
-    /** Apenas para o fluxo do front — não persistido por enquanto */
-    private boolean enviarCredenciaisEmail;
 
     public String getNome() {
         return nome;
@@ -68,14 +58,6 @@ public class UsuarioRequestDTO {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
     public String getMatricula() {
         return matricula;
     }
@@ -90,6 +72,14 @@ public class UsuarioRequestDTO {
 
     public void setPerfilAcesso(String perfilAcesso) {
         this.perfilAcesso = perfilAcesso;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getCargo() {
@@ -130,13 +120,5 @@ public class UsuarioRequestDTO {
 
     public void setCnhValidade(String cnhValidade) {
         this.cnhValidade = cnhValidade;
-    }
-
-    public boolean isEnviarCredenciaisEmail() {
-        return enviarCredenciaisEmail;
-    }
-
-    public void setEnviarCredenciaisEmail(boolean enviarCredenciaisEmail) {
-        this.enviarCredenciaisEmail = enviarCredenciaisEmail;
     }
 }
