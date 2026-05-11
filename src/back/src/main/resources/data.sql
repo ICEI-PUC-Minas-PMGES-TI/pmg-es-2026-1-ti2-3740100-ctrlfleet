@@ -14,6 +14,16 @@
 
 
 -- =====================================================================
+-- 0.1 BACKFILL DE AUDITORIA
+--   Versoes anteriores gravavam horarios com o fuso UTC do container.
+--   Corrige eventos que ficaram no futuro em relacao ao horario de Brasilia.
+-- =====================================================================
+UPDATE auditoria_eventos
+SET criado_em = criado_em - INTERVAL '3 hours'
+WHERE criado_em > ((now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '5 minutes');
+
+
+-- =====================================================================
 -- 1. USUARIOS
 --   Entidade Usuario.java: coluna `role` = enum PapelUsuario (STRING).
 --   Dados de CNH ficam na tabela motorista (composição 1:1).

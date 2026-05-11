@@ -20,10 +20,9 @@ export function AdminAuditPage() {
     items: [],
   });
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    listarAuditoria({ signal: controller.signal })
+  function loadAudit(signal) {
+    setAuditData((current) => ({ ...current, loading: true, error: null }));
+    return listarAuditoria({ signal })
       .then((items) => setAuditData({ loading: false, error: null, items }))
       .catch((error) => {
         if (error.name === 'AbortError') return;
@@ -33,8 +32,19 @@ export function AdminAuditPage() {
           items: [],
         });
       });
+  }
 
-    return () => controller.abort();
+  useEffect(() => {
+    const controller = new AbortController();
+    const refreshAudit = () => loadAudit();
+
+    loadAudit(controller.signal);
+    window.addEventListener('ctrlfleet:usuarios-updated', refreshAudit);
+
+    return () => {
+      controller.abort();
+      window.removeEventListener('ctrlfleet:usuarios-updated', refreshAudit);
+    };
   }, []);
 
   const auditStats = useMemo(() => {
