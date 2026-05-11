@@ -3,7 +3,6 @@ import { ManagerLayout } from './components/layout/ManagerLayout';
 import { AdminAuditPage } from './modules/admin/pages/AdminAuditPage';
 import { AdminDashboardPage } from './modules/admin/pages/AdminDashboardPage';
 import { AdminRolesPage } from './modules/admin/pages/AdminRolesPage';
-import { AdminSettingsPage } from './modules/admin/pages/AdminSettingsPage';
 import { AdminUserFormPage } from './modules/admin/pages/AdminUserFormPage';
 import { AdminUsersPage } from './modules/admin/pages/AdminUsersPage';
 import { VehicleFormProvider } from './modules/gestor/context/VehicleFormContext';
@@ -14,6 +13,7 @@ import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
+
 
 function App() {
   return (
@@ -86,7 +86,6 @@ function App() {
             <Route path="usuarios/:userId/editar" element={<AdminUserFormPage />} />
             <Route path="perfis" element={<AdminRolesPage />} />
             <Route path="auditoria" element={<AdminAuditPage />} />
-            <Route path="configuracoes" element={<AdminSettingsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate replace to="/" />} />

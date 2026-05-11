@@ -35,7 +35,6 @@ export function AdminRolesPage() {
     return () => controller.abort();
   }, []);
 
-  /** Mapa { 'Administrador': 3, 'Gestor de Frota': 5, ... } */
   const usersPerRole = useMemo(() => {
     const counts = new Map();
     for (const user of usersData.items) {
@@ -46,7 +45,6 @@ export function AdminRolesPage() {
     return counts;
   }, [usersData.items]);
 
-  /** Cards de perfil já com a contagem de vínculos derivada do banco. */
   const perfis = useMemo(
     () =>
       permissionGroups.map((group) => ({

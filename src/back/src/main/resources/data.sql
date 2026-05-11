@@ -15,10 +15,8 @@
 
 -- =====================================================================
 -- 1. USUARIOS
---   Mapeamento de colunas (entidade Usuario.java):
---    id (PK) | nome | email | senha (BCrypt) | matricula
---    cargo | data_admissao | tipo_cadastro | numero_cnh | validade_cnh
---    + campos novos do diagrama: perfil_acesso | role | data_desligamento | status
+--   Entidade Usuario.java: coluna `role` = enum PapelUsuario (STRING).
+--   Dados de CNH ficam na tabela motorista (composição 1:1).
 --   A senha "$2a$10$N9qo8uLOickgx2..." é o hash BCrypt de "123456"
 --   (somente para mocks/dev — nunca usar em produção).
 -- =====================================================================
@@ -28,22 +26,22 @@
 -- bancos novos onde a coluna nunca foi criada.
 ALTER TABLE usuarios DROP COLUMN IF EXISTS departamento;
 
-INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, numero_cnh, validade_cnh, perfil_acesso, role, data_desligamento, status) VALUES
-(1,  'Ana Costa',         'ana.costa@ctrlfleet.gov.br',         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0001', 'Coordenadora Administrativa', '2018-03-12', 'usuario',   NULL,          NULL,         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
-(2,  'João Duarte',       'joao.duarte@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0002', 'Gestor de Frota',             '2019-06-20', 'usuario',   NULL,          NULL,         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
-(3,  'Marina Silva',      'marina.silva@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0003', 'Assistente Administrativa',   '2024-02-01', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'PENDENTE'),
-(4,  'Carlos Rocha',      'carlos.rocha@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0004', 'Motorista Pleno',             '2020-09-15', 'motorista', '03124567890', '2027-11-18', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'BLOQUEADO'),
-(5,  'Patrícia Melo',     'patricia.melo@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0005', 'Motorista Sênior',            '2017-11-04', 'motorista', '04567891234', '2028-08-09', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
-(6,  'Leandro Sousa',     'leandro.sousa@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0006', 'Motorista Pleno',             '2021-01-22', 'motorista', '05891234765', '2029-02-21', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
-(7,  'Beatriz Lima',      'beatriz.lima@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0007', 'Gestora de Frota',            '2016-04-18', 'usuario',   NULL,          NULL,         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  '2025-12-30', 'INATIVO'),
-(8,  'Rafael Menezes',    'rafael.menezes@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0008', 'Motorista Júnior',            '2025-08-05', 'motorista', '06234587190', '2026-12-05', 'Motorista',       'ROLE_MOTORISTA',     NULL,         'PENDENTE'),
-(9,  'Lúcia Albuquerque', 'lucia.albuquerque@ctrlfleet.gov.br', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0009', 'Gestora de Frota',            '2022-07-19', 'usuario',   NULL,          NULL,         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
-(10, 'Fernando Tavares',  'fernando.tavares@ctrlfleet.gov.br',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0010', 'Servidor Público',            '2023-03-08', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(11, 'Juliana Martins',   'juliana.martins@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0011', 'Servidora Pública',           '2019-10-14', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(12, 'Roberto Alves',     'roberto.alves@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0012', 'Auditor de Sistemas',         '2015-02-26', 'usuario',   NULL,          NULL,         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
-(13, 'Camila Reis',       'camila.reis@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0013', 'Servidora Pública',           '2021-05-17', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(14, 'Eduardo Pereira',   'eduardo.pereira@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0014', 'Servidor Público',            '2020-08-23', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(15, 'Tatiane Cardoso',   'tatiane.cardoso@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0015', 'Servidora Pública',           '2024-11-04', 'usuario',   NULL,          NULL,         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO')
+INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, perfil_acesso, role, data_desligamento, status) VALUES
+(1,  'Ana Costa',         'ana.costa@ctrlfleet.gov.br',         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0001', 'Coordenadora Administrativa', '2018-03-12', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
+(2,  'João Duarte',       'joao.duarte@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0002', 'Gestor de Frota',             '2019-06-20', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
+(3,  'Marina Silva',      'marina.silva@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0003', 'Assistente Administrativa',   '2024-02-01', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'PENDENTE'),
+(4,  'Carlos Rocha',      'carlos.rocha@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0004', 'Motorista Pleno',             '2020-09-15', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'BLOQUEADO'),
+(5,  'Patrícia Melo',     'patricia.melo@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0005', 'Motorista Sênior',            '2017-11-04', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
+(6,  'Leandro Sousa',     'leandro.sousa@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0006', 'Motorista Pleno',             '2021-01-22', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
+(7,  'Beatriz Lima',      'beatriz.lima@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0007', 'Gestora de Frota',            '2016-04-18', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  '2025-12-30', 'INATIVO'),
+(8,  'Rafael Menezes',    'rafael.menezes@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0008', 'Motorista Júnior',            '2025-08-05', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'PENDENTE'),
+(9,  'Lúcia Albuquerque', 'lucia.albuquerque@ctrlfleet.gov.br', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0009', 'Gestora de Frota',            '2022-07-19', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
+(10, 'Fernando Tavares',  'fernando.tavares@ctrlfleet.gov.br',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0010', 'Servidor Público',            '2023-03-08', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(11, 'Juliana Martins',   'juliana.martins@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0011', 'Servidora Pública',           '2019-10-14', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(12, 'Roberto Alves',     'roberto.alves@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0012', 'Auditor de Sistemas',         '2015-02-26', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
+(13, 'Camila Reis',       'camila.reis@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0013', 'Servidora Pública',           '2021-05-17', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(14, 'Eduardo Pereira',   'eduardo.pereira@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0014', 'Servidor Público',            '2020-08-23', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(15, 'Tatiane Cardoso',   'tatiane.cardoso@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0015', 'Servidora Pública',           '2024-11-04', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO')
 ON CONFLICT DO NOTHING;
 
 -- Avança a sequence do IDENTITY para evitar colisão de PK ao criar novos usuários via POST.
@@ -51,54 +49,8 @@ SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE((SELECT MAX(id)
 
 
 -- =====================================================================
--- 1.1 ROLES (idempotente — coluna `nome` é UNIQUE)
---   O RoleBootstrap do Spring já popula essas roles na primeira inicialização,
---   mas garantimos aqui também para que o INSERT em `usuario_roles` abaixo
---   (que roda ANTES do CommandLineRunner) tenha as roles disponíveis.
--- =====================================================================
-INSERT INTO roles (nome) VALUES
-('ROLE_ADMINISTRADOR'),
-('ROLE_GESTOR_FROTA'),
-('ROLE_MOTORISTA'),
-('ROLE_SOLICITANTE')
-ON CONFLICT (nome) DO NOTHING;
-
-
--- =====================================================================
--- 1.2 USUARIO_ROLES (relacionamento ManyToMany)
---   Cria os vínculos para os 12 usuários do mock. Usa JOIN com `roles`
---   pelo nome, para não depender dos IDs gerados pelo IDENTITY.
--- =====================================================================
-INSERT INTO usuario_roles (usuario_id, role_id)
-SELECT v.usuario_id, r.id
-FROM (VALUES
-  (1,  'ROLE_ADMINISTRADOR'),
-  (2,  'ROLE_GESTOR_FROTA'),
-  (3,  'ROLE_SOLICITANTE'),
-  (4,  'ROLE_MOTORISTA'),
-  (5,  'ROLE_MOTORISTA'),
-  (6,  'ROLE_MOTORISTA'),
-  (7,  'ROLE_GESTOR_FROTA'),
-  (8,  'ROLE_MOTORISTA'),
-  (9,  'ROLE_GESTOR_FROTA'),
-  (10, 'ROLE_SOLICITANTE'),
-  (11, 'ROLE_SOLICITANTE'),
-  (12, 'ROLE_ADMINISTRADOR'),
-  (13, 'ROLE_SOLICITANTE'),
-  (14, 'ROLE_SOLICITANTE'),
-  (15, 'ROLE_SOLICITANTE')
-) AS v(usuario_id, role_nome)
-JOIN roles r ON r.nome = v.role_nome
-WHERE EXISTS (SELECT 1 FROM usuarios u WHERE u.id = v.usuario_id)
-ON CONFLICT DO NOTHING;
-
-
--- =====================================================================
--- 1.3 BACKFILL — preenche perfil_acesso/role/status dos usuários antigos
---   Para usuários criados antes da introdução das colunas novas
---   (perfil_acesso, role, status), deriva os valores a partir do
---   relacionamento existente em usuario_roles. Roda apenas em linhas
---   que ainda têm esses campos nulos, então é idempotente.
+-- 1.1 BACKFILL legado — preenche `role` a partir de usuario_roles (antes
+--     de remover as tabelas), apenas onde `role` ainda é nulo.
 -- =====================================================================
 UPDATE usuarios u
 SET
@@ -121,6 +73,34 @@ FROM (
 ) AS sub
 WHERE u.id = sub.usuario_id
   AND (u.role IS NULL OR u.perfil_acesso IS NULL OR u.status IS NULL);
+
+
+-- =====================================================================
+-- 1.2 MOTORISTA (composição com usuario) — migra CNH de colunas antigas
+--     em `usuarios` quando ainda existirem (erro ignorado em bancos novos).
+-- =====================================================================
+INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh)
+SELECT u.id, u.numero_cnh, u.validade_cnh
+FROM usuarios u
+WHERE u.tipo_cadastro = 'motorista'
+  AND u.numero_cnh IS NOT NULL
+ON CONFLICT (usuario_id) DO NOTHING;
+
+INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh) VALUES
+(4, '03124567890', '2027-11-18'),
+(5, '04567891234', '2028-08-09'),
+(6, '05891234765', '2029-02-21'),
+(8, '06234587190', '2026-12-05')
+ON CONFLICT (usuario_id) DO NOTHING;
+
+
+-- =====================================================================
+-- 1.3 Remove tabelas de roles em N:N e colunas de CNH em `usuarios`.
+-- =====================================================================
+DROP TABLE IF EXISTS usuario_roles;
+DROP TABLE IF EXISTS roles;
+ALTER TABLE usuarios DROP COLUMN IF EXISTS numero_cnh;
+ALTER TABLE usuarios DROP COLUMN IF EXISTS validade_cnh;
 
 
 -- =====================================================================
@@ -149,19 +129,61 @@ ON CONFLICT DO NOTHING;
 
 -- =====================================================================
 -- 3. VEICULOS
+--   Mapeamento de colunas (entidade Veiculo.java / @Table("veiculos")):
+--    id (PK, IDENTITY) | placa (UNIQUE) | modelo | marca | ano | status
+--   `status` é o enum StatusVeiculo persistido como STRING:
+--    DISPONIVEL | EM_USO | MANUTENCAO | DESATIVADO
+--   Quando a entidade evoluir (chassi, renavam, quilometragem, combustível,
+--   etc.) basta acrescentar as novas colunas no INSERT abaixo.
 -- =====================================================================
-INSERT INTO veiculos (id_veiculo, placa, status_operacao, modelo, marca, ano_fabricacao, chassi, renavam, quilometragem_inicial, tipo_combustivel) VALUES
-(1,  'ABC1A23', 'DISPONIVEL', 'Onix',     'Chevrolet',  2022, '9BG12345678901234', '12345678901', 15000.00, 'FLEX'),
-(2,  'XYZ5B67', 'DISPONIVEL', 'HB20',     'Hyundai',    2023, '9BH98765432101234', '23456789012', 8200.00,  'FLEX'),
-(3,  'LMN9C12', 'DISPONIVEL', 'Corsa',    'Chevrolet',  2021, '9BG23456789012345', '34567890123', 47000.00, 'FLEX'),
-(4,  'VXY8D01', 'DISPONIVEL', 'March',    'Nissan',     2023, '9BN34567890123456', '45678901234', 5400.00,  'FLEX'),
-(5,  'DEF3E56', 'EM_USO',     'Prisma',   'Chevrolet',  2020, '9BG45678901234567', '56789012345', 62000.00, 'FLEX'),
-(6,  'GHI7F90', 'EM_USO',     'Gol',      'Volkswagen', 2022, '9BV56789012345678', '67890123456', 28100.00, 'FLEX'),
-(7,  'JKL2G45', 'MANUTENCAO', 'Celta',    'Chevrolet',  2019, '9BG67890123456789', '78901234567', 88000.00, 'GASOLINA'),
-(8,  'OPQ6H89', 'MANUTENCAO', 'Fit',      'Honda',      2021, '9BH78901234567890', '89012345678', 51200.00, 'FLEX'),
-(9,  'RST0I23', 'INATIVO',    'Palio',    'Fiat',       2015, '9BF89012345678901', '90123456789', 142000.00,'GASOLINA'),
-(10, 'UVW4J56', 'DISPONIVEL', 'Strada',   'Fiat',       2024, '9BF90123456789012', '01234567890', 1200.00,  'DIESEL')
+-- Migração: versões antigas do Hibernate criavam a tabela citada "Veiculos";
+-- a entidade usa `veiculos` (minúsculas). Copia dados e remove a tabela legada.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relname = 'Veiculos'
+  ) THEN
+    INSERT INTO veiculos (id, placa, modelo, marca, ano, status)
+    SELECT v.id, v.placa, v.modelo, v.marca, v.ano, v.status
+    FROM "Veiculos" v
+    ON CONFLICT (id) DO NOTHING;
+    DROP TABLE "Veiculos" CASCADE;
+  END IF;
+END $$;
+
+INSERT INTO veiculos (id, placa, modelo, marca, ano, status) VALUES
+(1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL'),
+(2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL'),
+(3,  'LMN9C12', 'Corsa',             'Chevrolet',  2021, 'DISPONIVEL'),
+(4,  'VXY8D01', 'March',             'Nissan',     2023, 'DISPONIVEL'),
+(5,  'DEF3E56', 'Prisma',            'Chevrolet',  2020, 'EM_USO'),
+(6,  'GHI7F90', 'Gol',               'Volkswagen', 2022, 'EM_USO'),
+(7,  'JKL2G45', 'Celta',             'Chevrolet',  2019, 'MANUTENCAO'),
+(8,  'OPQ6H89', 'Fit',               'Honda',      2021, 'MANUTENCAO'),
+(9,  'RST0I23', 'Palio',             'Fiat',       2015, 'DESATIVADO'),
+(10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL')
 ON CONFLICT DO NOTHING;
+
+-- Avança a sequence do IDENTITY (só se existir; evita erro se pg_get_serial_sequence for NULL).
+DO $$
+DECLARE
+  seq_name text;
+  max_id bigint;
+  has_rows boolean;
+BEGIN
+  seq_name := pg_get_serial_sequence('veiculos', 'id');
+  IF seq_name IS NOT NULL THEN
+    SELECT COALESCE(MAX(id), 0) INTO max_id FROM veiculos;
+    SELECT EXISTS (SELECT 1 FROM veiculos) INTO has_rows;
+    IF has_rows THEN
+      PERFORM setval(seq_name::regclass, max_id, true);
+    ELSE
+      PERFORM setval(seq_name::regclass, 1, false);
+    END IF;
+  END IF;
+END $$;
 
 
 -- =====================================================================
@@ -306,14 +328,16 @@ ON CONFLICT DO NOTHING;
 
 -- =====================================================================
 -- 12. REGISTROS_USO
+--   id_veiculo / id_motorista são NOT NULL na entidade; alinhar com reservas (id_veiculo)
+--   e usuários motoristas existentes (id_motorista).
 -- =====================================================================
-INSERT INTO registros_uso (id_uso, id_reserva, data_saida, quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo) VALUES
-(1, 1, '2026-04-10 08:00:00', 15200.00, '2026-04-10 17:30:00', 15340.00, 'Viagem para vistoria na regional norte. Veículo entregue em ordem.'),
-(2, 2, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
-(3, 3, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
-(4, 4, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
-(5, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
-(6, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
+INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_saida, quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo) VALUES
+(1, 1, 1, 5, '2026-04-10 08:00:00', 15200.00, '2026-04-10 17:30:00', 15340.00, 'Viagem para vistoria na regional norte. Veículo entregue em ordem.'),
+(2, 2, 2, 6, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
+(3, 3, 5, 4, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
+(4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
+(5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
+(6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
 ON CONFLICT DO NOTHING;
 
 
