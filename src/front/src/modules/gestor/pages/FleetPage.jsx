@@ -1,21 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { VehicleTable } from '../../../components/gestor/VehicleTable';
+import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { fleetVehicles, statusTabs } from '../../../data/fleetData';
+import { statusTabs } from '../../../data/fleetData';
+import { listarVeiculos } from '../../../services/veiculoApi';
+import { mapBackendVehicleToView, pad2 } from '../../../services/veiculoMappers';
 
 function filterByStatus(vehicle, status) {
   if (status === 'Todos') {
     return true;
   }
-
-  if (status === 'Manutenção') {
-    return vehicle.status === 'Manutenção';
-  }
-
   return vehicle.status === status;
 }
 
@@ -24,48 +22,79 @@ export function FleetPage() {
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
 
+  const [vehiclesData, setVehiclesData] = useState({
+    loading: true,
+    error: null,
+    items: [],
+  });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    setVehiclesData((current) => ({ ...current, loading: true, error: null }));
+    listarVeiculos({ signal: controller.signal })
+      .then((items) => {
+        setVehiclesData({
+          loading: false,
+          error: null,
+          items: items.map(mapBackendVehicleToView),
+        });
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setVehiclesData({
+          loading: false,
+          error: error.message || 'Falha ao carregar veículos.',
+          items: [],
+        });
+      });
+
+    return () => controller.abort();
+  }, []);
+
   const filteredVehicles = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return fleetVehicles.filter((vehicle) => {
+    return vehiclesData.items.filter((vehicle) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
-        vehicle.plate.toLowerCase().includes(normalizedSearch) ||
-        vehicle.model.toLowerCase().includes(normalizedSearch);
+        (vehicle.plate || '').toLowerCase().includes(normalizedSearch) ||
+        (vehicle.model || '').toLowerCase().includes(normalizedSearch);
 
       return matchesSearch && filterByStatus(vehicle, selectedStatus);
     });
-  }, [search, selectedStatus]);
+  }, [search, selectedStatus, vehiclesData.items]);
 
-  const summaryCards = useMemo(
-    () => [
+  const summaryCards = useMemo(() => {
+    const items = vehiclesData.items;
+    const count = (predicate) => items.filter(predicate).length;
+    return [
       {
         caption: 'cadastros monitorados',
         icon: 'fleet',
         title: 'Total',
-        value: String(fleetVehicles.length).padStart(2, '0'),
+        value: pad2(items.length),
       },
       {
         caption: 'prontos para uso',
         icon: 'check',
         title: 'Ativos',
-        value: String(fleetVehicles.filter((item) => item.status === 'Ativo').length).padStart(2, '0'),
+        value: pad2(count((item) => item.status === 'Ativo')),
       },
       {
         caption: 'em oficina ou revisão',
         icon: 'maintenance',
         title: 'Manutenção',
-        value: String(fleetVehicles.filter((item) => item.status === 'Manutenção').length).padStart(2, '0'),
+        value: pad2(count((item) => item.status === 'Manutenção')),
       },
       {
         caption: 'com restrição documental',
         icon: 'alert',
         title: 'Bloqueados',
-        value: String(fleetVehicles.filter((item) => item.status === 'Bloqueado').length).padStart(2, '0'),
+        value: pad2(count((item) => item.status === 'Bloqueado')),
       },
-    ],
-    [],
-  );
+    ];
+  }, [vehiclesData.items]);
 
   return (
     <div className="page-stack">
@@ -94,14 +123,36 @@ export function FleetPage() {
           statusTabs={statusTabs}
         />
 
-        <div className="table-summary">
-          <span>
-            Mostrando {filteredVehicles.length} de {fleetVehicles.length} veículos
-          </span>
-          <span>Atualização documental e visualização detalhada disponíveis em cada linha.</span>
-        </div>
+        {vehiclesData.loading ? (
+          <div className="admin-dashboard__loading">
+            <span className="admin-dashboard__spinner" aria-hidden="true" />
+            <p>Carregando veículos...</p>
+          </div>
+        ) : vehiclesData.error ? (
+          <div className="admin-dashboard__error">
+            <Icon name="alert" />
+            <div>
+              <strong>Falha ao carregar veículos</strong>
+              <p>{vehiclesData.error}</p>
+            </div>
+          </div>
+        ) : vehiclesData.items.length === 0 ? (
+          <div className="admin-empty">
+            <Icon name="fleet" />
+            <p>Nenhum veículo cadastrado ainda.</p>
+          </div>
+        ) : (
+          <>
+            <div className="table-summary">
+              <span>
+                Mostrando {filteredVehicles.length} de {vehiclesData.items.length} veículos
+              </span>
+              <span>Atualização documental e visualização detalhada disponíveis em cada linha.</span>
+            </div>
 
-        <VehicleTable vehicles={filteredVehicles} />
+            <VehicleTable vehicles={filteredVehicles} />
+          </>
+        )}
       </SectionCard>
     </div>
   );

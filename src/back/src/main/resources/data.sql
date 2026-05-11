@@ -149,19 +149,28 @@ ON CONFLICT DO NOTHING;
 
 -- =====================================================================
 -- 3. VEICULOS
+--   Mapeamento de colunas (entidade Veiculo.java / @Table("Veiculos")):
+--    id (PK, IDENTITY) | placa (UNIQUE) | modelo | marca | ano | status
+--   `status` é o enum StatusVeiculo persistido como STRING:
+--    DISPONIVEL | EM_USO | MANUTENCAO | DESATIVADO
+--   Quando a entidade evoluir (chassi, renavam, quilometragem, combustível,
+--   etc.) basta acrescentar as novas colunas no INSERT abaixo.
 -- =====================================================================
-INSERT INTO veiculos (id_veiculo, placa, status_operacao, modelo, marca, ano_fabricacao, chassi, renavam, quilometragem_inicial, tipo_combustivel) VALUES
-(1,  'ABC1A23', 'DISPONIVEL', 'Onix',     'Chevrolet',  2022, '9BG12345678901234', '12345678901', 15000.00, 'FLEX'),
-(2,  'XYZ5B67', 'DISPONIVEL', 'HB20',     'Hyundai',    2023, '9BH98765432101234', '23456789012', 8200.00,  'FLEX'),
-(3,  'LMN9C12', 'DISPONIVEL', 'Corsa',    'Chevrolet',  2021, '9BG23456789012345', '34567890123', 47000.00, 'FLEX'),
-(4,  'VXY8D01', 'DISPONIVEL', 'March',    'Nissan',     2023, '9BN34567890123456', '45678901234', 5400.00,  'FLEX'),
-(5,  'DEF3E56', 'EM_USO',     'Prisma',   'Chevrolet',  2020, '9BG45678901234567', '56789012345', 62000.00, 'FLEX'),
-(6,  'GHI7F90', 'EM_USO',     'Gol',      'Volkswagen', 2022, '9BV56789012345678', '67890123456', 28100.00, 'FLEX'),
-(7,  'JKL2G45', 'MANUTENCAO', 'Celta',    'Chevrolet',  2019, '9BG67890123456789', '78901234567', 88000.00, 'GASOLINA'),
-(8,  'OPQ6H89', 'MANUTENCAO', 'Fit',      'Honda',      2021, '9BH78901234567890', '89012345678', 51200.00, 'FLEX'),
-(9,  'RST0I23', 'INATIVO',    'Palio',    'Fiat',       2015, '9BF89012345678901', '90123456789', 142000.00,'GASOLINA'),
-(10, 'UVW4J56', 'DISPONIVEL', 'Strada',   'Fiat',       2024, '9BF90123456789012', '01234567890', 1200.00,  'DIESEL')
+INSERT INTO veiculos (id, placa, modelo, marca, ano, status) VALUES
+(1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL'),
+(2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL'),
+(3,  'LMN9C12', 'Corsa',             'Chevrolet',  2021, 'DISPONIVEL'),
+(4,  'VXY8D01', 'March',             'Nissan',     2023, 'DISPONIVEL'),
+(5,  'DEF3E56', 'Prisma',            'Chevrolet',  2020, 'EM_USO'),
+(6,  'GHI7F90', 'Gol',               'Volkswagen', 2022, 'EM_USO'),
+(7,  'JKL2G45', 'Celta',             'Chevrolet',  2019, 'MANUTENCAO'),
+(8,  'OPQ6H89', 'Fit',               'Honda',      2021, 'MANUTENCAO'),
+(9,  'RST0I23', 'Palio',             'Fiat',       2015, 'DESATIVADO'),
+(10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL')
 ON CONFLICT DO NOTHING;
+
+-- Avança a sequence do IDENTITY para evitar colisão de PK em POSTs futuros.
+SELECT setval(pg_get_serial_sequence('veiculos', 'id'), COALESCE((SELECT MAX(id) FROM veiculos), 0));
 
 
 -- =====================================================================
