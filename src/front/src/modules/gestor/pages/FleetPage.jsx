@@ -89,31 +89,31 @@ export function FleetPage() {
     const count = (predicate) => items.filter(predicate).length;
     return [
       {
-        caption: 'cadastros monitorados',
+        caption: 'Cadastros monitorados',
         icon: 'fleet',
         title: 'Total',
         value: pad2(items.length),
       },
       {
-        caption: 'prontos para uso',
+        caption: 'Prontos para uso',
         icon: 'check',
         title: 'Ativos',
         value: pad2(count((item) => item.status === 'Ativo')),
       },
       {
-        caption: 'em oficina ou revisão',
+        caption: 'Em oficina ou revisão',
         icon: 'maintenance',
         title: 'Manutenção',
         value: pad2(count((item) => item.status === 'Manutenção')),
       },
       {
-        caption: 'fora de operação',
+        caption: 'Fora de operação',
         icon: 'close',
         title: 'Inativos',
         value: pad2(count((item) => item.status === 'Inativo')),
       },
       {
-        caption: 'com documento vencido',
+        caption: 'Com documento vencido',
         icon: 'alert',
         title: 'Bloqueados',
         value: pad2(count((item) => item.status === 'Bloqueado')),
