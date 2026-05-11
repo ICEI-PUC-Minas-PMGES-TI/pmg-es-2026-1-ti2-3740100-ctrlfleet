@@ -5,11 +5,7 @@ import com.ctrlfleet.api.domain.model.Motorista;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.dto.usuario.UsuarioRequestDTO;
 import com.ctrlfleet.api.dto.usuario.UsuarioResponseDTO;
-<<<<<<< HEAD
-=======
 import com.ctrlfleet.api.dto.usuario.UsuarioUpdateRequestDTO;
-import com.ctrlfleet.api.repository.RoleRepository;
->>>>>>> editar-desativar-usuario
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,19 +25,12 @@ public class UsuarioService {
             DateTimeFormatter.ofPattern("d/M/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private static final Map<String, PapelUsuario> PERFIL_PARA_PAPEL =
-            Map.of(
-<<<<<<< HEAD
-                    "Solicitante", PapelUsuario.ROLE_SOLICITANTE,
-                    "Administrador", PapelUsuario.ROLE_ADMINISTRADOR,
-                    "Gestor de Frota", PapelUsuario.ROLE_GESTOR_FROTA,
-                    "Motorista", PapelUsuario.ROLE_MOTORISTA);
-=======
-                    "Solicitante", "ROLE_SOLICITANTE",
-                    "Servidor Solicitante", "ROLE_SOLICITANTE",
-                    "Administrador", "ROLE_ADMINISTRADOR",
-                    "Gestor de Frota", "ROLE_GESTOR_FROTA",
-                    "Motorista", "ROLE_MOTORISTA");
->>>>>>> editar-desativar-usuario
+            Map.ofEntries(
+                    Map.entry("Solicitante", PapelUsuario.ROLE_SOLICITANTE),
+                    Map.entry("Servidor Solicitante", PapelUsuario.ROLE_SOLICITANTE),
+                    Map.entry("Administrador", PapelUsuario.ROLE_ADMINISTRADOR),
+                    Map.entry("Gestor de Frota", PapelUsuario.ROLE_GESTOR_FROTA),
+                    Map.entry("Motorista", PapelUsuario.ROLE_MOTORISTA));
 
     private static final Map<String, String> STATUS_CANONICO =
             Map.of(
@@ -60,13 +49,8 @@ public class UsuarioService {
 
     public UsuarioService(
             UsuarioRepository usuarioRepository,
-<<<<<<< HEAD
-            PasswordEncoder passwordEncoder) {
-=======
-            RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
             AuditoriaService auditoriaService) {
->>>>>>> editar-desativar-usuario
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditoriaService = auditoriaService;
@@ -158,8 +142,15 @@ public class UsuarioService {
                             throw new IllegalArgumentException("Email ja cadastrado");
                         });
 
-        String tipoCadastro = normalizarTipoCadastro(dto.getTipoCadastro(), dto.getPerfilAcesso());
-        Role role = buscarRolePorPerfil(dto.getPerfilAcesso());
+        String tipoCadastro =
+                normalizarTipoCadastro(dto.getTipoCadastro(), dto.getPerfilAcesso() == null ? null : dto.getPerfilAcesso().trim());
+        PapelUsuario papel =
+                Optional.ofNullable(PERFIL_PARA_PAPEL.get(dto.getPerfilAcesso().trim()))
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Perfil invalido: use Solicitante, Administrador,"
+                                                        + " Gestor de Frota ou Motorista"));
         String status = normalizarStatus(dto.getStatus());
 
         usuario.setNome(dto.getNome().trim());
@@ -169,14 +160,11 @@ public class UsuarioService {
         usuario.setDataAdmissao(parseDataOpcional(dto.getDataAdmissao(), "dataAdmissao"));
         usuario.setTipoCadastro(tipoCadastro);
         usuario.setPerfilAcesso(dto.getPerfilAcesso().trim());
-        usuario.setTipoConta(role.getNome());
+        usuario.setPapel(papel);
         usuario.setStatus(status);
         usuario.setDataDesligamento("INATIVO".equals(status) ? LocalDate.now() : null);
 
         aplicarDadosMotorista(usuario, tipoCadastro, dto.getNumeroCnh(), dto.getCnhValidade());
-
-        usuario.getRoles().clear();
-        usuario.addRole(role);
 
         Usuario salvo = usuarioRepository.save(usuario);
         registrarAuditoria(
@@ -303,25 +291,11 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
     }
 
-    private Role buscarRolePorPerfil(String perfilAcesso) {
-        String perfil = perfilAcesso == null ? "" : perfilAcesso.trim();
-        String nomeRole =
-                Optional.ofNullable(PERFIL_PARA_ROLE.get(perfil))
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "Perfil invalido: use Solicitante, Administrador,"
-                                                        + " Gestor de Frota ou Motorista"));
-
-        return roleRepository
-                .findByNome(nomeRole)
-                .orElseThrow(() -> new IllegalArgumentException("Perfil nao encontrado no sistema: " + nomeRole));
-    }
-
     private String normalizarTipoCadastro(String raw, String perfilAcesso) {
+        String perfil = perfilAcesso == null ? "" : perfilAcesso.trim();
         String valor =
                 raw == null || raw.isBlank()
-                        ? ("Motorista".equals(perfilAcesso) ? "motorista" : "usuario")
+                        ? ("Motorista".equals(perfil) ? "motorista" : "usuario")
                         : raw.trim().toLowerCase();
 
         if (!valor.equals("usuario") && !valor.equals("motorista")) {
@@ -332,13 +306,11 @@ public class UsuarioService {
     }
 
     private String normalizarStatus(String raw) {
-        String status =
-                Optional.ofNullable(STATUS_CANONICO.get(raw == null ? "" : raw.trim()))
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "Status invalido: use ATIVO, INATIVO, BLOQUEADO ou PENDENTE"));
-        return status;
+        return Optional.ofNullable(STATUS_CANONICO.get(raw == null ? "" : raw.trim()))
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException(
+                                        "Status invalido: use ATIVO, INATIVO, BLOQUEADO ou PENDENTE"));
     }
 
     private void registrarAuditoria(
@@ -377,11 +349,17 @@ public class UsuarioService {
             if (cnhValidade == null || cnhValidade.isBlank()) {
                 throw new IllegalArgumentException("Validade da CNH e obrigatoria para motorista");
             }
-            usuario.setNumeroCnh(numeroCnh.trim());
-            usuario.setValidadeCnh(parseDataObrigatoria(cnhValidade, "cnhValidade"));
+            LocalDate validade = parseDataObrigatoria(cnhValidade, "cnhValidade");
+            Motorista motorista = usuario.getMotorista();
+            if (motorista == null) {
+                motorista = new Motorista(usuario, numeroCnh.trim(), validade);
+                usuario.setMotorista(motorista);
+            } else {
+                motorista.setNumeroCnh(numeroCnh.trim());
+                motorista.setValidadeCnh(validade);
+            }
         } else {
-            usuario.setNumeroCnh(null);
-            usuario.setValidadeCnh(null);
+            usuario.setMotorista(null);
         }
     }
 

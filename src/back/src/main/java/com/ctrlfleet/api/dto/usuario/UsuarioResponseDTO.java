@@ -26,8 +26,6 @@ public class UsuarioResponseDTO {
     private LocalDate validadeCnh;
     private LocalDate dataAdmissao;
     private LocalDate dataDesligamento;
-    private String numeroCnh;
-    private LocalDate validadeCnh;
 
     public UsuarioResponseDTO() {}
 
@@ -46,8 +44,6 @@ public class UsuarioResponseDTO {
         dto.cargo = usuario.getCargo();
         dto.status = usuario.getStatus();
         dto.tipoCadastro = usuario.getTipoCadastro();
-        dto.numeroCnh = usuario.getNumeroCnh();
-        dto.validadeCnh = usuario.getValidadeCnh();
         dto.dataAdmissao = usuario.getDataAdmissao();
         dto.dataDesligamento = usuario.getDataDesligamento();
 
@@ -118,13 +114,5 @@ public class UsuarioResponseDTO {
 
     public LocalDate getDataDesligamento() {
         return dataDesligamento;
-    }
-
-    public String getNumeroCnh() {
-        return numeroCnh;
-    }
-
-    public LocalDate getValidadeCnh() {
-        return validadeCnh;
     }
 }
