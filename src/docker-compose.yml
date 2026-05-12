@@ -54,8 +54,8 @@ services:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/health"]
       interval: 5s
       timeout: 5s
-      retries: 30
-      start_period: 20s
+      retries: 60
+      start_period: 90s
 
   frontend:
     image: node:20

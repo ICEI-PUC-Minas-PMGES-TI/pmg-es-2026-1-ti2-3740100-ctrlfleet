@@ -155,25 +155,25 @@ BEGIN
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname = 'public' AND c.relkind = 'r' AND c.relname = 'Veiculos'
   ) THEN
-    INSERT INTO veiculos (id, placa, modelo, marca, ano, status)
-    SELECT v.id, v.placa, v.modelo, v.marca, v.ano, v.status
+    INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria)
+    SELECT v.id, v.placa, v.modelo, v.marca, v.ano, v.status, 'Garagem Central'
     FROM "Veiculos" v
     ON CONFLICT (id) DO NOTHING;
     DROP TABLE "Veiculos" CASCADE;
   END IF;
 END $$;
 
-INSERT INTO veiculos (id, placa, modelo, marca, ano, status) VALUES
-(1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL'),
-(2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL'),
-(3,  'LMN9C12', 'Corsa',             'Chevrolet',  2021, 'DISPONIVEL'),
-(4,  'VXY8D01', 'March',             'Nissan',     2023, 'DISPONIVEL'),
-(5,  'DEF3E56', 'Prisma',            'Chevrolet',  2020, 'EM_USO'),
-(6,  'GHI7F90', 'Gol',               'Volkswagen', 2022, 'EM_USO'),
-(7,  'JKL2G45', 'Celta',             'Chevrolet',  2019, 'MANUTENCAO'),
-(8,  'OPQ6H89', 'Fit',               'Honda',      2021, 'MANUTENCAO'),
-(9,  'RST0I23', 'Palio',             'Fiat',       2015, 'DESATIVADO'),
-(10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL')
+INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria) VALUES
+(1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central'),
+(2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central'),
+(3,  'LMN9C12', 'Corsa',             'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central'),
+(4,  'VXY8D01', 'March',             'Nissan',     2023, 'DISPONIVEL', 'Garagem Central'),
+(5,  'DEF3E56', 'Prisma',            'Chevrolet',  2020, 'EM_USO', 'Garagem Central'),
+(6,  'GHI7F90', 'Gol',               'Volkswagen', 2022, 'EM_USO', 'Garagem Central'),
+(7,  'JKL2G45', 'Celta',             'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central'),
+(8,  'OPQ6H89', 'Fit',               'Honda',      2021, 'MANUTENCAO', 'Garagem Central'),
+(9,  'RST0I23', 'Palio',             'Fiat',       2015, 'DESATIVADO', 'Garagem Central'),
+(10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL', 'Garagem Central')
 ON CONFLICT DO NOTHING;
 
 -- Avança a sequence do IDENTITY (só se existir; evita erro se pg_get_serial_sequence for NULL).
