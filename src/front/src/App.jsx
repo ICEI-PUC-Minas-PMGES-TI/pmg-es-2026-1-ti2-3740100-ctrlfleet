@@ -13,6 +13,8 @@ import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
+import { RequesterReservationCreatePage } from './modules/solicitante/pages/RequesterReservationCreatePage';
+import { RequesterReservationsPage } from './modules/solicitante/pages/RequesterReservationsPage';
 
 function App() {
   return (
@@ -85,6 +87,12 @@ function App() {
             <Route path="usuarios/:userId/editar" element={<AdminUserFormPage />} />
             <Route path="perfis" element={<AdminRolesPage />} />
             <Route path="auditoria" element={<AdminAuditPage />} />
+          </Route>
+
+          <Route path="solicitante" element={<ManagerLayout />}>
+            <Route index element={<Navigate replace to="reservas" />} />
+            <Route path="reservas" element={<RequesterReservationsPage />} />
+            <Route path="reservas/nova" element={<RequesterReservationCreatePage />} />
           </Route>
 
           <Route path="*" element={<Navigate replace to="/" />} />

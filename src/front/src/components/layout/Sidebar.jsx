@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
-import { fleetNavigationItems } from '../../data/fleetData';
+import { fleetNavigationItems, requesterNavigationItems } from '../../data/fleetData';
 import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const isAdminArea = location.pathname.startsWith('/admin');
+  const isRequesterArea = location.pathname.startsWith('/solicitante');
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
   const navigationItems = useMemo(() => {
+    if (isRequesterArea) return requesterNavigationItems;
     if (!isAdminArea) return fleetNavigationItems;
 
     return adminNavigationItems.map((item) => {
@@ -19,12 +21,11 @@ export function Sidebar({ isOpen, onClose }) {
         badge: pendingUsersCount > 0 ? pendingUsersCount : null,
       };
     });
-  }, [isAdminArea, pendingUsersCount]);
-  const navigationLabel = isAdminArea ? 'Administração' : 'Gestor de Frotas';
+  }, [isAdminArea, isRequesterArea, pendingUsersCount]);
+  const navigationLabel = isAdminArea ? 'Administração' : isRequesterArea ? 'Solicitante' : 'Gestor de Frotas';
 
   useEffect(() => {
     if (!isAdminArea) {
-      setPendingUsersCount(0);
       return undefined;
     }
 
@@ -87,10 +88,10 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">{isAdminArea ? 'AS' : 'AC'}</span>
+            <span className="avatar-initials">{isAdminArea ? 'AS' : isRequesterArea ? 'MS' : 'AC'}</span>
           </span>
           <div>
-            <strong>{isAdminArea ? 'Ana Souza' : 'Ana Costa'}</strong>
+            <strong>{isAdminArea ? 'Ana Souza' : isRequesterArea ? 'Marina Silva' : 'Ana Costa'}</strong>
             <span>{isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
           </div>
         </div>
