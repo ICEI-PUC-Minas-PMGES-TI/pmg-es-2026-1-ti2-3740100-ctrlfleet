@@ -9,11 +9,15 @@ import { VehicleFormProvider } from './modules/gestor/context/VehicleFormContext
 import { FleetDashboardPage } from './modules/gestor/pages/FleetDashboardPage';
 import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
+import { ReservasGestorPage } from './modules/gestor/pages/ReservasGestorPage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
+import { ChecklistSaidaPage } from './modules/motorista/pages/ChecklistSaidaPage';
+import { MotoristaDashboardPage } from './modules/motorista/pages/MotoristaDashboardPage';
+import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHistoricoPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
-
+import { SolicitanteReservasPage } from './modules/solicitante/pages/SolicitanteReservasPage';
 
 function App() {
   return (
@@ -26,32 +30,21 @@ function App() {
 
           <Route path="gestor" element={<ManagerLayout />}>
             <Route index element={<Navigate replace to="dashboard" />} />
-
             <Route path="dashboard" element={<FleetDashboardPage />} />
             <Route path="frota" element={<FleetPage />} />
             <Route path="frota/novo" element={<VehicleCreatePage />} />
             <Route path="frota/novo/documentacao" element={<Navigate replace to="/gestor/frota/novo" />} />
             <Route path="frota/:vehicleId/editar" element={<VehicleCreatePage />} />
             <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
-            <Route
-              path="reservas"
-              element={
-                <ModulePlaceholderPage
-                  ctaLabel="Ver veículos disponíveis"
-                  ctaTo="/gestor/frota"
-                  description="A fila de reservas, aprovações e disponibilidade pode entrar aqui na próxima etapa."
-                  title="Reservas"
-                />
-              }
-            />
+            <Route path="reservas" element={<ReservasGestorPage />} />
             <Route
               path="manutencao"
               element={
                 <ModulePlaceholderPage
                   ctaLabel="Acompanhar frota"
                   ctaTo="/gestor/frota"
-                  description="Esta área já está preparada na navegação para receber triagem, prioridades e ordens de serviço."
-                  title="Manutenção"
+                  description="Esta area ja esta preparada na navegacao para receber triagem, prioridades e ordens de servico."
+                  title="Manutencao"
                 />
               }
             />
@@ -59,9 +52,9 @@ function App() {
               path="programacao-preventiva"
               element={
                 <ModulePlaceholderPage
-                  ctaLabel="Cadastrar veículo"
+                  ctaLabel="Cadastrar veiculo"
                   ctaTo="/gestor/frota/novo"
-                  description="Aqui podemos evoluir para um calendário preventivo com quilometragem, vencimentos e recorrências."
+                  description="Aqui podemos evoluir para um calendario preventivo com quilometragem, vencimentos e recorrencias."
                   title="Prog. Preventiva"
                 />
               }
@@ -72,8 +65,8 @@ function App() {
                 <ModulePlaceholderPage
                   ctaLabel="Voltar para frota"
                   ctaTo="/gestor/frota"
-                  description="O espaço de relatórios ficou separado para encaixar indicadores, exportações e auditorias sem retrabalho."
-                  title="Relatórios"
+                  description="O espaco de relatorios ficou separado para encaixar indicadores, exportacoes e auditorias sem retrabalho."
+                  title="Relatorios"
                 />
               }
             />
@@ -87,6 +80,19 @@ function App() {
             <Route path="usuarios/:userId/editar" element={<AdminUserFormPage />} />
             <Route path="perfis" element={<AdminRolesPage />} />
             <Route path="auditoria" element={<AdminAuditPage />} />
+          </Route>
+
+          <Route path="motorista" element={<ManagerLayout />}>
+            <Route index element={<Navigate replace to="/motorista/5" />} />
+            <Route path=":motoristaId" element={<MotoristaDashboardPage />} />
+            <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
+            <Route path=":motoristaId/reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+            <Route path="reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+          </Route>
+
+          <Route path="solicitante" element={<ManagerLayout />}>
+            <Route index element={<SolicitanteReservasPage />} />
+            <Route path="reservas" element={<SolicitanteReservasPage />} />
           </Route>
 
           <Route path="*" element={<Navigate replace to="/" />} />

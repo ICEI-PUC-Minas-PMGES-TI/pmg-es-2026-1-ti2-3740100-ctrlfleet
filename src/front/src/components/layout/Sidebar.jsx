@@ -2,14 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
-import { fleetNavigationItems } from '../../data/fleetData';
+import { driverNavigationItems, fleetNavigationItems } from '../../data/fleetData';
 import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const isAdminArea = location.pathname.startsWith('/admin');
+  const isDriverArea = location.pathname.startsWith('/motorista');
+  const motoristaId = location.pathname.match(/^\/motorista\/(\d+)/)?.[1] || '5';
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
   const navigationItems = useMemo(() => {
+    if (isDriverArea) {
+      return driverNavigationItems.map((item) => ({
+        ...item,
+        to: item.to.replace(':motoristaId', motoristaId),
+      }));
+    }
     if (!isAdminArea) return fleetNavigationItems;
 
     return adminNavigationItems.map((item) => {
@@ -19,8 +27,8 @@ export function Sidebar({ isOpen, onClose }) {
         badge: pendingUsersCount > 0 ? pendingUsersCount : null,
       };
     });
-  }, [isAdminArea, pendingUsersCount]);
-  const navigationLabel = isAdminArea ? 'Administração' : 'Gestor de Frotas';
+  }, [isAdminArea, isDriverArea, motoristaId, pendingUsersCount]);
+  const navigationLabel = isAdminArea ? 'Administracao' : isDriverArea ? 'Motorista' : 'Gestor de Frotas';
 
   useEffect(() => {
     if (!isAdminArea) {
@@ -87,10 +95,10 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">{isAdminArea ? 'AS' : 'AC'}</span>
+            <span className="avatar-initials">{isAdminArea ? 'AS' : isDriverArea ? 'PM' : 'AC'}</span>
           </span>
           <div>
-            <strong>{isAdminArea ? 'Ana Souza' : 'Ana Costa'}</strong>
+            <strong>{isAdminArea ? 'Ana Souza' : isDriverArea ? 'Patricia Melo' : 'Ana Costa'}</strong>
             <span>{isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
           </div>
         </div>

@@ -333,10 +333,15 @@ INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, 
 (2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'CONCLUIDA'),
 (3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'CONCLUIDA'),
 (4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'CONCLUIDA'),
-(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'APROVADA'),
 (6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'APROVADA'),
 (7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'SOLICITADA'),
-(8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'SOLICITADA')
+(8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'SOLICITADA'),
+(9, 10, 1, '2026-05-18 09:10:00', '2026-05-19 08:00:00', '2026-05-19 12:00:00', 'Entrega de documentos na Procuradoria', 'Garagem Central', 'APROVADA'),
+(10, 11, 2, '2026-05-18 09:30:00', '2026-05-19 13:30:00', '2026-05-19 17:30:00', 'Reuniao na Secretaria de Educacao', 'Garagem Central', 'APROVADA'),
+(11, 13, 3, '2026-05-18 10:00:00', '2026-05-20 07:30:00', '2026-05-20 11:30:00', 'Vistoria em unidade de saude', 'Garagem Central', 'APROVADA'),
+(12, 14, 10, '2026-05-18 10:20:00', '2026-05-20 14:00:00', '2026-05-20 18:00:00', 'Transporte de equipamentos para evento', 'Garagem Central', 'APROVADA'),
+(13, 10, 1, '2026-05-18 11:00:00', '2026-05-21 09:00:00', '2026-05-21 13:00:00', 'Visita tecnica ao almoxarifado', 'Garagem Central', 'SOLICITADA'),
+(14, 11, 2, '2026-05-18 11:25:00', '2026-05-21 14:00:00', '2026-05-21 17:00:00', 'Acompanhamento de obra municipal', 'Garagem Central', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
 
 
@@ -350,7 +355,6 @@ INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_sa
 (2, 2, 2, 6, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
 (3, 3, 5, 4, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
 (4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
-(5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
 (6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
 ON CONFLICT DO NOTHING;
 
@@ -365,7 +369,50 @@ INSERT INTO carro_checklist (id_checklist, id_uso, id_item, data_checklist, obse
 (4, 2, 4,  '2026-04-05 06:30:00', 'CRLV em dia, deixado no porta-luvas.'),
 (5, 3, 7,  '2026-04-02 17:05:00', 'Pequeno arranhão no para-choque traseiro identificado.'),
 (6, 4, 9,  '2026-04-15 11:40:00', 'Veículo entregue limpo e sem itens pessoais.'),
-(7, 5, 1,  '2026-05-12 07:55:00', 'Pneus calibrados antes da saída.'),
-(8, 5, 3,  '2026-05-12 07:55:00', 'Tanque cheio.'),
 (9, 6, 5,  '2026-05-11 08:50:00', 'Higienização interna realizada.')
 ON CONFLICT DO NOTHING;
+
+DO $$
+DECLARE
+  seq_name text;
+  max_id bigint;
+  has_rows boolean;
+BEGIN
+  seq_name := pg_get_serial_sequence('carro_checklist', 'id_checklist');
+  IF seq_name IS NOT NULL THEN
+    SELECT COALESCE(MAX(id_checklist), 0) INTO max_id FROM carro_checklist;
+    SELECT EXISTS (SELECT 1 FROM carro_checklist) INTO has_rows;
+    IF has_rows THEN
+      PERFORM setval(seq_name::regclass, max_id, true);
+    ELSE
+      PERFORM setval(seq_name::regclass, 1, false);
+    END IF;
+  END IF;
+END $$;
+
+DO $$
+DECLARE
+  table_name text;
+  column_name text;
+  seq_name text;
+  max_id bigint;
+BEGIN
+  FOR table_name, column_name IN
+    SELECT * FROM (VALUES
+      ('tipo_inspecao', 'id_tipo_inspecao'),
+      ('item_checklist', 'id_item'),
+      ('reservas', 'id_reserva'),
+      ('registros_uso', 'id_uso')
+    ) AS targets(table_name, column_name)
+  LOOP
+    seq_name := pg_get_serial_sequence(table_name, column_name);
+    IF seq_name IS NOT NULL THEN
+      EXECUTE format('SELECT COALESCE(MAX(%I), 0) FROM %I', column_name, table_name) INTO max_id;
+      IF max_id > 0 THEN
+        PERFORM setval(seq_name::regclass, max_id, true);
+      ELSE
+        PERFORM setval(seq_name::regclass, 1, false);
+      END IF;
+    END IF;
+  END LOOP;
+END $$;

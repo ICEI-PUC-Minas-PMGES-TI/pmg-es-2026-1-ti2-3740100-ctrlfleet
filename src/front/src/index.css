@@ -427,8 +427,9 @@ a {
 }
 
 .home-highlight__icon {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -438,8 +439,20 @@ a {
 }
 
 .home-highlight__icon svg {
-  width: 23px;
-  height: 23px;
+  display: block;
+  width: 20px;
+  height: 20px;
+  max-width: 20px;
+  max-height: 20px;
+  flex: 0 0 20px;
+}
+
+.public-page .action-button__icon {
+  width: 18px;
+  height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  flex: 0 0 18px;
 }
 
 .home-highlight h2 {
@@ -2956,5 +2969,235 @@ a {
 
   .modal-shell__footer .action-button {
     width: 100%;
+  }
+}
+
+.motorista-page .section-card {
+  overflow: visible;
+}
+
+.driver-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.driver-toolbar label,
+.driver-mileage-field {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.driver-toolbar select,
+.driver-mileage-field input,
+.driver-checklist-item input[type='text'],
+.driver-checklist-item input:not([type]),
+.driver-checklist-item input[type='datetime-local'],
+.driver-checklist-item select {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  padding: 0 12px;
+}
+
+.driver-reservation-list,
+.driver-checklist-list {
+  display: grid;
+  gap: 14px;
+}
+
+.driver-reservation-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 18px;
+}
+
+.driver-reservation-card__main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.driver-reservation-card__kicker {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.driver-reservation-card h2 {
+  margin: 4px 0;
+  font-size: 1.15rem;
+}
+
+.driver-reservation-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.driver-reservation-card__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.driver-reservation-card__meta div {
+  min-width: 0;
+}
+
+.driver-reservation-card__meta dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.driver-reservation-card__meta dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.driver-reservation-card .action-button {
+  justify-self: flex-start;
+}
+
+.driver-checklist-form {
+  display: grid;
+  gap: 18px;
+}
+
+.driver-mileage-field {
+  max-width: 260px;
+}
+
+.driver-checklist-item {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(220px, 0.9fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.driver-checklist-item label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.driver-checklist-item input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+  flex: 0 0 auto;
+}
+
+.driver-checklist-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.driver-required-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.driver-required-item,
+.driver-required-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 14px;
+}
+
+.driver-required-item svg,
+.driver-required-banner svg {
+  width: 22px;
+  height: 22px;
+  max-width: 22px;
+  max-height: 22px;
+  flex: 0 0 22px;
+  color: var(--primary);
+}
+
+.driver-required-item strong,
+.driver-required-banner strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.driver-required-item span,
+.driver-required-banner span,
+.driver-submit-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.driver-required-banner {
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+
+.driver-trip-summary,
+.driver-checklist-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.driver-trip-summary span,
+.driver-checklist-progress span {
+  color: var(--muted);
+}
+
+.driver-checklist-progress strong {
+  color: var(--primary);
+}
+
+@media (max-width: 900px) {
+  .driver-reservation-card__meta,
+  .driver-checklist-item,
+  .driver-required-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-toolbar,
+  .driver-checklist-actions {
+    justify-content: stretch;
+  }
+
+  .driver-toolbar label,
+  .driver-mileage-field,
+  .driver-checklist-actions .action-button {
+    width: 100%;
+  }
+
+  .driver-checklist-actions,
+  .driver-trip-summary,
+  .driver-checklist-progress {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
