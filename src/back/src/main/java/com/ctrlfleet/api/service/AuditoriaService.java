@@ -4,7 +4,6 @@ import com.ctrlfleet.api.domain.model.AuditoriaEvento;
 import com.ctrlfleet.api.dto.auditoria.AuditoriaEventoResponseDTO;
 import com.ctrlfleet.api.repository.AuditoriaEventoRepository;
 import java.util.List;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +18,25 @@ public class AuditoriaService {
 
     @Transactional(readOnly = true)
     public List<AuditoriaEventoResponseDTO> listarEventos() {
-        return auditoriaEventoRepository.findAll(Sort.by(Sort.Direction.DESC, "criadoEm")).stream()
+        return auditoriaEventoRepository.filtrar(null, null, null).stream()
+                .map(AuditoriaEventoResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuditoriaEventoResponseDTO> filtrar(String acao, String severidade, String ator) {
+        String acaoFiltro = (acao == null || acao.isBlank()) ? null : acao.trim();
+        String severidadeFiltro = (severidade == null || severidade.isBlank()) ? null : severidade.trim();
+        String atorFiltro = (ator == null || ator.isBlank()) ? null : ator.trim();
+
+        return auditoriaEventoRepository.filtrar(acaoFiltro, severidadeFiltro, atorFiltro).stream()
                 .map(AuditoriaEventoResponseDTO::fromEntity)
                 .toList();
     }
 
     @Transactional
-    public void registrar(String acao, String ator, String alvo, String status, String severidade, String ip, String detalhe) {
+    public void registrar(String acao, String ator, String alvo, String status, String severidade, String ip,
+            String detalhe) {
         auditoriaEventoRepository.save(new AuditoriaEvento(acao, ator, alvo, status, severidade, ip, detalhe));
     }
 }
