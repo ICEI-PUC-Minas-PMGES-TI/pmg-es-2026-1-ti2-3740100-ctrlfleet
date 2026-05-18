@@ -12,16 +12,20 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.ctrlfleet.api.service.AuditoriaService;
 
 @Service
 public class VeiculoService {
 
     private final VeiculoRepository veiculoRepository;
     private final DocumentacaoRepository documentacaoRepository;
+    private final AuditoriaService auditoriaService;
 
-    public VeiculoService(VeiculoRepository veiculoRepository, DocumentacaoRepository documentacaoRepository) {
+    public VeiculoService(VeiculoRepository veiculoRepository, DocumentacaoRepository documentacaoRepository,
+            AuditoriaService auditoriaService) {
         this.veiculoRepository = veiculoRepository;
         this.documentacaoRepository = documentacaoRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Transactional(readOnly = true)
@@ -64,6 +68,15 @@ public class VeiculoService {
             dto.getDocumentos().forEach(documento -> salvarDocumento(salvo, documento));
         }
 
+        auditoriaService.registrar(
+                "Veiculo cadastrado",
+                "Sistema",
+                salvo.getPlaca() + " - " + salvo.getMarca() + " " + salvo.getModelo(),
+                "Ativo",
+                "info",
+                null,
+                "Veículo cadastrado na frota com placa " + salvo.getPlaca() + ".");
+
         return toResponse(salvo);
     }
 
@@ -97,6 +110,15 @@ public class VeiculoService {
             dto.getDocumentos().forEach(documento -> salvarOuAtualizarDocumento(salvo, documento));
         }
 
+        auditoriaService.registrar(
+                "Veiculo atualizado",
+                "Sistema",
+                salvo.getPlaca() + " - " + salvo.getMarca() + " " + salvo.getModelo(),
+                "Ativo",
+                "info",
+                null,
+                "Dados do veículo " + salvo.getPlaca() + " atualizados.");
+
         return toResponse(salvo);
     }
 
@@ -105,6 +127,16 @@ public class VeiculoService {
         Veiculo veiculo = buscarEntidade(id);
         preencherSecretariaPadraoSeNecessario(veiculo);
         veiculo.setStatus(com.ctrlfleet.api.domain.enums.StatusVeiculo.DESATIVADO);
+
+        auditoriaService.registrar(
+                "Veiculo desativado",
+                "Sistema",
+                veiculo.getPlaca() + " - " + veiculo.getMarca() + " " + veiculo.getModelo(),
+                "Inativo",
+                "warning",
+                null,
+                "Veículo " + veiculo.getPlaca() + " removido da frota ativa.");
+
         return toResponse(veiculoRepository.save(veiculo));
     }
 
@@ -140,15 +172,14 @@ public class VeiculoService {
 
     private Documentacao salvarOuAtualizarDocumento(Veiculo veiculo, DocumentacaoRequestDTO dto) {
         String tipoDocumento = dto.getTipoDocumento().trim().toUpperCase();
-        var documentacao =
-                documentacaoRepository
-                        .findByVeiculoIdAndTipoDocumento(veiculo.getId(), tipoDocumento)
-                        .orElseGet(
-                                () -> {
-                                    var novo = new Documentacao();
-                                    novo.setVeiculo(veiculo);
-                                    return novo;
-                                });
+        var documentacao = documentacaoRepository
+                .findByVeiculoIdAndTipoDocumento(veiculo.getId(), tipoDocumento)
+                .orElseGet(
+                        () -> {
+                            var novo = new Documentacao();
+                            novo.setVeiculo(veiculo);
+                            return novo;
+                        });
         aplicarDadosDocumento(documentacao, dto);
         if (documentacao.getId() == null) {
             documentacaoRepository.sincronizarSequenceId();
@@ -173,10 +204,10 @@ public class VeiculoService {
     }
 
     private VeiculoResponseDTO toResponse(Veiculo veiculo) {
-        List<DocumentacaoResponseDTO> documentos =
-                documentacaoRepository.findByVeiculoIdOrderByIdAsc(veiculo.getId()).stream()
-                        .map(DocumentacaoResponseDTO::fromEntity)
-                        .toList();
+        List<DocumentacaoResponseDTO> documentos = documentacaoRepository.findByVeiculoIdOrderByIdAsc(veiculo.getId())
+                .stream()
+                .map(DocumentacaoResponseDTO::fromEntity)
+                .toList();
         return VeiculoResponseDTO.fromEntity(veiculo, documentos);
     }
 }
