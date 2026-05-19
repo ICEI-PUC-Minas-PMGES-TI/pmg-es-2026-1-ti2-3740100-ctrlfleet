@@ -325,6 +325,8 @@ INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, 
 (8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
 
+SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+
 
 -- =====================================================================
 -- 12. REGISTROS_USO
@@ -339,6 +341,12 @@ INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_sa
 (5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
 (6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
 ON CONFLICT DO NOTHING;
+
+UPDATE reservas r
+SET id_motorista = ru.id_motorista
+FROM registros_uso ru
+WHERE r.id_reserva = ru.id_reserva
+  AND r.id_motorista IS NULL;
 
 
 -- =====================================================================

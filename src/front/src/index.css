@@ -909,6 +909,31 @@ a {
   font-size: 0.94rem;
 }
 
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.table-pagination__info {
+  min-width: 120px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.table-pagination .icon-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .table-wrapper {
   overflow-x: auto;
 }
