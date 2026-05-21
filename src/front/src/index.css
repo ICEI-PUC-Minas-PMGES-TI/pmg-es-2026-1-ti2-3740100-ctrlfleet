@@ -798,6 +798,12 @@ a {
   font-weight: 600;
 }
 
+.flash-banner--error {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: rgba(209, 79, 74, 0.2);
+}
+
 .fleet-filters {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) auto 220px;
@@ -816,7 +822,8 @@ a {
 .search-field,
 .select-field,
 .form-field input,
-.form-field select {
+.form-field select,
+.form-field textarea {
   border: 1.5px solid #cfd6e3;
   border-radius: 12px;
   background: #ffffff;
@@ -847,7 +854,8 @@ a {
 }
 
 .form-field input,
-.form-field select {
+.form-field select,
+.form-field textarea {
   width: 100%;
   background: #ffffff;
   outline: none;
@@ -859,7 +867,8 @@ a {
 }
 
 .form-field input:focus,
-.form-field select:focus {
+.form-field select:focus,
+.form-field textarea:focus {
   border-color: rgba(207, 78, 54, 0.65);
   background: #fff;
   box-shadow:
@@ -970,6 +979,11 @@ a {
 .status-badge--pendente {
   background: rgba(105, 114, 136, 0.12);
   color: #52607a;
+}
+
+.status-badge--concluida {
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .document-pills,
@@ -1185,9 +1199,16 @@ a {
 }
 
 .form-field input,
-.form-field select {
+.form-field select,
+.form-field textarea {
   min-height: 54px;
   padding: 0 16px;
+}
+
+.form-field textarea {
+  min-height: 112px;
+  padding: 14px 16px;
+  resize: vertical;
 }
 
 .form-actions {
@@ -1255,6 +1276,12 @@ a {
 
 .detail-hero h2 {
   margin: 12px 0 6px;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .documents-list {
@@ -2140,6 +2167,109 @@ a {
   display: none;
 }
 
+.finalizar-uso-form__observacoes,
+.finalizar-uso-form .flash-banner {
+  grid-column: 1 / -1;
+}
+
+.reservation-lookup {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.history-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.history-metrics .section-card__header {
+  margin-bottom: 0;
+}
+
+.history-metrics .section-card__header h2 {
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+}
+
+.operational-timeline {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.operational-timeline__item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  position: relative;
+  padding-bottom: 18px;
+}
+
+.operational-timeline__item::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  bottom: 0;
+  left: 6px;
+  width: 2px;
+  background: rgba(207, 78, 54, 0.16);
+}
+
+.operational-timeline__item:last-child {
+  padding-bottom: 0;
+}
+
+.operational-timeline__item:last-child::before {
+  display: none;
+}
+
+.operational-timeline__dot {
+  position: relative;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  margin-top: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 5px var(--accent-soft);
+}
+
+.operational-timeline__body {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.operational-timeline__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.operational-timeline__head span {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.operational-timeline__body p,
+.operational-timeline__body small,
+.operational-timeline__body em {
+  margin: 0;
+}
+
+.operational-timeline__body small,
+.operational-timeline__body em {
+  color: var(--muted);
+}
+
 @media (max-width: 760px) {
   .registro-uso-table-wrapper {
     display: none;
@@ -2197,6 +2327,11 @@ a {
   .registro-uso-card__obs dd {
     font-weight: 500;
     color: var(--muted);
+  }
+
+  .reservation-lookup,
+  .history-metrics {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -3,6 +3,7 @@ package com.ctrlfleet.api.service;
 import com.ctrlfleet.api.domain.model.RegistroUso;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
+import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.dto.registrouso.FinalizarCorridaRequestDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
@@ -42,6 +43,16 @@ public class RegistroUsoService {
     }
 
     /**
+     * Lista os eventos associados a uma reserva, permitindo montar uma timeline operacional.
+     */
+    public List<RegistroUsoResponseDTO> listarPorReserva(Long reservaId) {
+        List<RegistroUso> registros =
+                registroUsoRepository.findByIdReservaOrderByDataSaidaDesc(reservaId);
+
+        return registros.stream().map(this::toResponseDTO).toList();
+    }
+
+    /**
      * Gera o registro de uso automaticamente ao finalizar a corrida. Recebe os dados de saída e
      * retorno e persiste o registro completo.
      */
@@ -69,14 +80,18 @@ public class RegistroUsoService {
         LocalDateTime dataSaida = parseDateTime(dto.getDataSaida(), "dataSaida");
         LocalDateTime dataRetorno = parseDateTime(dto.getDataRetorno(), "dataRetorno");
 
+        validarVeiculoPodeSerFinalizado(veiculo);
+        validarMotoristaAtivo(motorista);
+        validarQuilometragens(dto);
+
         if (dataRetorno.isBefore(dataSaida)) {
             throw new IllegalArgumentException(
                     "A data de retorno deve ser posterior à data de saída");
         }
 
-        if (dto.getQuilometragemRetorno() < dto.getQuilometragemSaida()) {
+        if (dataRetorno.isAfter(LocalDateTime.now().plusMinutes(1))) {
             throw new IllegalArgumentException(
-                    "A quilometragem de retorno deve ser maior ou igual à de saída");
+                    "A data de retorno não pode estar no futuro");
         }
 
         RegistroUso registro =
@@ -88,7 +103,34 @@ public class RegistroUsoService {
                 dto.getObservacoesVeiculo() != null ? dto.getObservacoesVeiculo().trim() : null);
 
         RegistroUso salvo = registroUsoRepository.save(registro);
+        veiculo.setStatus(StatusVeiculo.DISPONIVEL);
+        veiculoRepository.save(veiculo);
         return toResponseDTO(salvo);
+    }
+
+    private void validarVeiculoPodeSerFinalizado(Veiculo veiculo) {
+        if (veiculo.getStatus() == StatusVeiculo.DESATIVADO) {
+            throw new IllegalArgumentException("Não é possível finalizar uso de veículo desativado");
+        }
+        if (veiculo.getStatus() == StatusVeiculo.MANUTENCAO) {
+            throw new IllegalArgumentException("Não é possível finalizar uso de veículo em manutenção");
+        }
+    }
+
+    private void validarMotoristaAtivo(Usuario motorista) {
+        if (!"ATIVO".equalsIgnoreCase(motorista.getStatus())) {
+            throw new IllegalArgumentException("Motorista precisa estar ativo para finalizar o uso");
+        }
+    }
+
+    private void validarQuilometragens(FinalizarCorridaRequestDTO dto) {
+        if (dto.getQuilometragemSaida() < 0 || dto.getQuilometragemRetorno() < 0) {
+            throw new IllegalArgumentException("Quilometragens não podem ser negativas");
+        }
+        if (dto.getQuilometragemRetorno() < dto.getQuilometragemSaida()) {
+            throw new IllegalArgumentException(
+                    "A quilometragem de retorno deve ser maior ou igual à de saída");
+        }
     }
 
     private LocalDateTime parseDateTime(String raw, String campo) {
@@ -104,6 +146,12 @@ public class RegistroUsoService {
     }
 
     private RegistroUsoResponseDTO toResponseDTO(RegistroUso registro) {
+        Double quilometragemPercorrida = null;
+        if (registro.getQuilometragemRetorno() != null && registro.getQuilometragemSaida() != null) {
+            quilometragemPercorrida =
+                    registro.getQuilometragemRetorno() - registro.getQuilometragemSaida();
+        }
+
         return new RegistroUsoResponseDTO(
                 registro.getId(),
                 registro.getVeiculo().getId(),
@@ -115,6 +163,8 @@ public class RegistroUsoService {
                 registro.getQuilometragemSaida(),
                 registro.getDataRetorno(),
                 registro.getQuilometragemRetorno(),
-                registro.getObservacoesVeiculo());
+                registro.getObservacoesVeiculo(),
+                quilometragemPercorrida,
+                registro.getIdReserva() != null ? "CONCLUIDA" : null);
     }
 }

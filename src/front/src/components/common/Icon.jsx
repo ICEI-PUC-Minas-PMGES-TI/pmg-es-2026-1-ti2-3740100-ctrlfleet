@@ -159,6 +159,25 @@ const iconMap = {
       <path d="M6.8 16.8v1.7M17.2 16.8v1.7M7.5 10.7h9" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </>
   ),
+  history: (
+    <>
+      <path
+        d="M4 12a8 8 0 1 0 2.4-5.7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M4 5.2v4.2h4.2M12 7.8v4.7l3.2 1.9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </>
+  ),
   logout: (
     <>
       <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />

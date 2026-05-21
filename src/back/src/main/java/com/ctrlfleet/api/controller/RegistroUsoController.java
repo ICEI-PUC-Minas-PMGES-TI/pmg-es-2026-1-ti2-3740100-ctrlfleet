@@ -35,6 +35,16 @@ public class RegistroUsoController {
     }
 
     /**
+     * Lista os registros vinculados a uma reserva para exibir o histórico/timeline operacional.
+     */
+    @GetMapping("/reserva/{reservaId}")
+    public ResponseEntity<List<RegistroUsoResponseDTO>> listarPorReserva(
+            @PathVariable Long reservaId) {
+        List<RegistroUsoResponseDTO> registros = registroUsoService.listarPorReserva(reservaId);
+        return ResponseEntity.ok(registros);
+    }
+
+    /**
      * Gera o registro de uso automaticamente ao finalizar a corrida. Recebe dados de saída e
      * retorno e cria o registro completo.
      */

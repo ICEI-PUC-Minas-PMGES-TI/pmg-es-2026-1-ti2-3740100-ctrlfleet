@@ -54,6 +54,27 @@ export async function listarRegistrosPorVeiculo(veiculoId) {
 }
 
 /**
+ * Lista os registros vinculados a uma reserva.
+ * @param {number|string} reservaId
+ * @returns {Promise<Array>}
+ */
+export async function listarRegistrosPorReserva(reservaId) {
+  const res = await fetch(requestUrl(`/registros-uso/reserva/${reservaId}`));
+
+  const data = parseJsonSafely(await res.text());
+
+  if (!res.ok) {
+    const msg =
+      (data && typeof data.mensagem === 'string' && data.mensagem) ||
+      (data && typeof data.message === 'string' && data.message) ||
+      `Não foi possível carregar o histórico da reserva (${res.status})`;
+    throw new Error(msg);
+  }
+
+  return data || [];
+}
+
+/**
  * Gera o registro de uso ao finalizar a corrida.
  * @param {Record<string, unknown>} payload corpo alinhado ao `FinalizarCorridaRequestDTO`
  * @returns {Promise<object>}
