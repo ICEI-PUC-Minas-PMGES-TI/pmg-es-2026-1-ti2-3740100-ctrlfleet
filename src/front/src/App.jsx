@@ -9,8 +9,11 @@ import { VehicleFormProvider } from './modules/gestor/context/VehicleFormContext
 import { FleetDashboardPage } from './modules/gestor/pages/FleetDashboardPage';
 import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
+import { ReservationTimelinePage } from './modules/gestor/pages/ReservationTimelinePage';
+import { ReservationsPage } from './modules/gestor/pages/ReservationsPage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
+import { VehicleHistoryPage } from './modules/gestor/pages/VehicleHistoryPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
 
@@ -32,18 +35,10 @@ function App() {
             <Route path="frota/novo" element={<VehicleCreatePage />} />
             <Route path="frota/novo/documentacao" element={<Navigate replace to="/gestor/frota/novo" />} />
             <Route path="frota/:vehicleId/editar" element={<VehicleCreatePage />} />
+            <Route path="frota/:vehicleId/historico" element={<VehicleHistoryPage />} />
             <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
-            <Route
-              path="reservas"
-              element={
-                <ModulePlaceholderPage
-                  ctaLabel="Ver veículos disponíveis"
-                  ctaTo="/gestor/frota"
-                  description="A fila de reservas, aprovações e disponibilidade pode entrar aqui na próxima etapa."
-                  title="Reservas"
-                />
-              }
-            />
+            <Route path="reservas" element={<ReservationsPage />} />
+            <Route path="reservas/:reservaId/historico" element={<ReservationTimelinePage />} />
             <Route
               path="manutencao"
               element={

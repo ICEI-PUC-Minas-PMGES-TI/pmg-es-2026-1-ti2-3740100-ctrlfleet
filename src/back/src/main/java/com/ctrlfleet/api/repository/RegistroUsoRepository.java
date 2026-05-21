@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RegistroUsoRepository extends JpaRepository<RegistroUso, Long> {
 
     List<RegistroUso> findByVeiculoIdOrderByDataSaidaDesc(Long veiculoId);
+
+    List<RegistroUso> findByIdReservaOrderByDataSaidaDesc(Long idReserva);
 }

@@ -148,6 +148,14 @@ ON CONFLICT DO NOTHING;
 -- =====================================================================
 -- Migração: versões antigas do Hibernate criavam a tabela citada "Veiculos";
 -- a entidade usa `veiculos` (minúsculas). Copia dados e remove a tabela legada.
+-- Migração: bancos criados antes do campo `secretaria` precisam receber a coluna
+-- antes dos SELECTs/INSERTs da entidade atual.
+ALTER TABLE IF EXISTS veiculos ADD COLUMN IF NOT EXISTS secretaria varchar(255);
+UPDATE veiculos
+SET secretaria = 'Garagem Central'
+WHERE secretaria IS NULL OR btrim(secretaria) = '';
+ALTER TABLE IF EXISTS veiculos ALTER COLUMN secretaria SET NOT NULL;
+
 DO $$
 BEGIN
   IF EXISTS (
@@ -262,7 +270,62 @@ ON CONFLICT DO NOTHING;
 
 
 -- =====================================================================
--- 7. MANUTENCOES
+-- 7. REGISTROS_USO
+--   Histórico operacional usado pelas telas de histórico do veículo e timeline
+--   da reserva. `id_motorista` referencia usuarios.id dos motoristas mockados.
+-- =====================================================================
+INSERT INTO registros_uso (
+  id_uso,
+  id_veiculo,
+  id_motorista,
+  id_reserva,
+  data_saida,
+  quilometragem_saida,
+  data_retorno,
+  quilometragem_retorno,
+  observacoes_veiculo
+) VALUES
+(1,  1, 5, 1001, '2026-05-02 08:10:00', 15405.0, '2026-05-02 12:35:00', 15538.4, 'Retorno sem avarias. Veículo entregue limpo.'),
+(2,  1, 6, 1008, '2026-05-08 13:20:00', 15538.4, '2026-05-08 17:55:00', 15622.0, 'Abastecimento recomendado antes da próxima saída.'),
+(3,  2, 5, 1002, '2026-05-03 07:40:00', 32242.0, '2026-05-03 11:15:00', 32318.7, 'Uso institucional concluído sem ocorrências.'),
+(4,  2, 6, 1010, '2026-05-10 09:00:00', 32318.7, '2026-05-10 15:25:00', 32472.1, 'Motorista relatou ruído leve ao frear em baixa velocidade.'),
+(5,  3, 5, 1003, '2026-05-04 10:30:00', 46900.0, '2026-05-04 16:45:00', 47058.2, 'Conferência de documentos realizada no retorno.'),
+(6,  4, 6, 1004, '2026-05-05 08:00:00', 5320.0,  '2026-05-05 10:20:00', 5364.6,  'Sem observações no retorno.'),
+(7,  5, 5, 1005, '2026-05-06 07:30:00', 48254.0, '2026-05-06 18:10:00', 48512.9, 'Viagem longa concluída. Solicitar limpeza interna.'),
+(8,  6, 6, 1006, '2026-05-07 06:50:00', 28095.0, '2026-05-07 14:40:00', 28218.3, 'Veículo liberado com tanque acima de meio.'),
+(9, 10, 5, 1007, '2026-05-09 08:25:00', 1180.0,  '2026-05-09 13:05:00', 1276.8,  'Carga entregue e veículo liberado para nova agenda.'),
+(10, 6, 5, 1011, '2026-05-12 07:15:00', 28218.3, '2026-05-12 12:30:00', 28304.5, 'Pequenos riscos já existentes conferidos no retorno.')
+ON CONFLICT (id_uso) DO UPDATE SET
+  id_veiculo = EXCLUDED.id_veiculo,
+  id_motorista = EXCLUDED.id_motorista,
+  id_reserva = EXCLUDED.id_reserva,
+  data_saida = EXCLUDED.data_saida,
+  quilometragem_saida = EXCLUDED.quilometragem_saida,
+  data_retorno = EXCLUDED.data_retorno,
+  quilometragem_retorno = EXCLUDED.quilometragem_retorno,
+  observacoes_veiculo = EXCLUDED.observacoes_veiculo;
+
+DO $$
+DECLARE
+  seq_name text;
+  max_id bigint;
+  has_rows boolean;
+BEGIN
+  seq_name := pg_get_serial_sequence('registros_uso', 'id_uso');
+  IF seq_name IS NOT NULL THEN
+    SELECT COALESCE(MAX(id_uso), 0) INTO max_id FROM registros_uso;
+    SELECT EXISTS (SELECT 1 FROM registros_uso) INTO has_rows;
+    IF has_rows THEN
+      PERFORM setval(seq_name::regclass, max_id, true);
+    ELSE
+      PERFORM setval(seq_name::regclass, 1, false);
+    END IF;
+  END IF;
+END $$;
+
+
+-- =====================================================================
+-- 8. MANUTENCOES
 -- =====================================================================
 INSERT INTO manutencoes (id_manutencao, id_veiculo, tipo_manutencao, descricao_problema, data_realizada, quilometragem_registro, custo_total, oficina_executor, status) VALUES
 (1, 7, 'CORRETIVA',  'Troca da correia dentada e tensores após ruído anormal no motor.',          '2026-04-12', 87850.00, 1840.00, 'Mecânica Central LTDA', 'EM_ANDAMENTO'),
