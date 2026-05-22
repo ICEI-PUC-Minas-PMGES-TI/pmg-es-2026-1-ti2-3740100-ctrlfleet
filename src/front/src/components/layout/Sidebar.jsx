@@ -28,11 +28,12 @@ export function Sidebar({ isOpen, onClose }) {
       };
     });
   }, [isAdminArea, isDriverArea, motoristaId, pendingUsersCount]);
-  const navigationLabel = isAdminArea ? 'Administracao' : isDriverArea ? 'Motorista' : 'Gestor de Frotas';
+  const navigationLabel = isAdminArea ? 'Administração' : isDriverArea ? 'Motorista' : 'Gestor de Frotas';
+  const accessLabel = isAdminArea ? 'Área administrativa' : isDriverArea ? 'Área do motorista' : 'Área do gestor';
 
   useEffect(() => {
     if (!isAdminArea) {
-      setPendingUsersCount(0);
+      Promise.resolve().then(() => setPendingUsersCount(0));
       return undefined;
     }
 
@@ -79,6 +80,7 @@ export function Sidebar({ isOpen, onClose }) {
         {navigationItems.map((item) => (
           <NavLink
             className={({ isActive }) => `sidebar__link ${isActive ? 'is-active' : ''}`}
+            end={item.end}
             key={item.to}
             onClick={onClose}
             to={item.to}
@@ -95,11 +97,11 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">{isAdminArea ? 'AS' : isDriverArea ? 'PM' : 'AC'}</span>
+            <span className="avatar-initials">CF</span>
           </span>
           <div>
-            <strong>{isAdminArea ? 'Ana Souza' : isDriverArea ? 'Patricia Melo' : 'Ana Costa'}</strong>
-            <span>{isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
+            <strong>CtrlFleet</strong>
+            <span>{accessLabel}</span>
           </div>
         </div>
         <Link className="sidebar__logout" to="/login">

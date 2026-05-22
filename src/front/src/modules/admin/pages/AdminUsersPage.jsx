@@ -111,23 +111,26 @@ export function AdminUsersPage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    setUsersData((current) => ({ ...current, loading: true, error: null }));
-    listarUsuarios({ signal: controller.signal })
-      .then((items) => {
-        setUsersData({
-          loading: false,
-          error: null,
-          items: items.map(mapBackendUserToView),
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      setUsersData((current) => ({ ...current, loading: true, error: null }));
+      listarUsuarios({ signal: controller.signal })
+        .then((items) => {
+          setUsersData({
+            loading: false,
+            error: null,
+            items: items.map(mapBackendUserToView),
+          });
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+          setUsersData({
+            loading: false,
+            error: error.message || 'Falha ao carregar usuários.',
+            items: [],
+          });
         });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setUsersData({
-          loading: false,
-          error: error.message || 'Falha ao carregar usuários.',
-          items: [],
-        });
-      });
+    });
 
     return () => controller.abort();
   }, []);

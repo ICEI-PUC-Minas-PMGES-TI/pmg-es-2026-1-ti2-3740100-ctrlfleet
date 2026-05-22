@@ -328,6 +328,21 @@ ON CONFLICT DO NOTHING;
 -- =====================================================================
 -- 11. RESERVAS
 -- =====================================================================
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'reservas'
+  ) THEN
+    ALTER TABLE reservas DROP CONSTRAINT IF EXISTS reservas_status_reserva_check;
+    ALTER TABLE reservas
+      ADD CONSTRAINT reservas_status_reserva_check
+      CHECK (status_reserva IN ('SOLICITADA', 'APROVADA', 'EM_USO', 'CONCLUIDA', 'CANCELADA', 'REPROVADA'));
+  END IF;
+END $$;
+
 INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, status_reserva) VALUES
 (1, 3,  1, '2026-04-08 16:20:00', '2026-04-10 08:00:00', '2026-04-10 18:00:00', 'Vistoria Regional Norte',         'Garagem Central', 'CONCLUIDA'),
 (2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'CONCLUIDA'),

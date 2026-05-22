@@ -3,6 +3,7 @@ package com.ctrlfleet.api.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,5 +30,12 @@ public class ApiExceptionHandler {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("mensagem", detalhes);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> integridade(DataIntegrityViolationException e) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("mensagem", "Não foi possível salvar os dados. Verifique as informações e tente novamente.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 }

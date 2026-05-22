@@ -31,19 +31,23 @@ export function RegistroUsoSection({ veiculoId }) {
     if (!veiculoId) return;
 
     let cancelado = false;
-    setLoading(true);
-    setErro(null);
 
-    listarRegistrosPorVeiculo(veiculoId)
-      .then((data) => {
-        if (!cancelado) setRegistros(data);
-      })
-      .catch((err) => {
-        if (!cancelado) setErro(err.message);
-      })
-      .finally(() => {
-        if (!cancelado) setLoading(false);
-      });
+    Promise.resolve().then(() => {
+      if (cancelado) return;
+      setLoading(true);
+      setErro(null);
+
+      listarRegistrosPorVeiculo(veiculoId)
+        .then((data) => {
+          if (!cancelado) setRegistros(data);
+        })
+        .catch((err) => {
+          if (!cancelado) setErro(err.message);
+        })
+        .finally(() => {
+          if (!cancelado) setLoading(false);
+        });
+    });
 
     return () => {
       cancelado = true;

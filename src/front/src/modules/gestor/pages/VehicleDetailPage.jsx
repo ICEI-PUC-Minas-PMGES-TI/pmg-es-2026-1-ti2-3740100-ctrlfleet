@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { RegistroUsoSection } from '../../../components/fleet/RegistroUsoSection';
 import { DocumentPills } from '../../../components/gestor/DocumentPills';
@@ -14,7 +14,7 @@ export function VehicleDetailPage() {
   const [vehicleState, setVehicleState] = useState({ loading: true, error: null, item: null });
   const [editingDocs, setEditingDocs] = useState({});
 
-  function loadVehicle(signal) {
+  const loadVehicle = useCallback((signal) => {
     setVehicleState((current) => ({ ...current, loading: true, error: null }));
     return buscarVeiculo(vehicleId, { signal })
       .then((dto) => {
@@ -38,15 +38,17 @@ export function VehicleDetailPage() {
       })
       .catch((error) => {
         if (error.name === 'AbortError') return;
-        setVehicleState({ loading: false, error: error.message || 'Falha ao carregar veiculo.', item: null });
+        setVehicleState({ loading: false, error: error.message || 'Falha ao carregar veículo.', item: null });
       });
-  }
+  }, [vehicleId]);
 
   useEffect(() => {
     const controller = new AbortController();
-    loadVehicle(controller.signal);
+    Promise.resolve().then(() => {
+      if (!controller.signal.aborted) loadVehicle(controller.signal);
+    });
     return () => controller.abort();
-  }, [vehicleId]);
+  }, [loadVehicle]);
 
   async function handleSaveDocument(documento) {
     const form = editingDocs[documento.id];
@@ -64,7 +66,7 @@ export function VehicleDetailPage() {
   if (vehicleState.loading) {
     return (
       <div className="page-stack">
-        <PageHeader subtitle="Carregando dados do cadastro." title="Veiculo" />
+        <PageHeader subtitle="Carregando dados do cadastro." title="Veículo" />
       </div>
     );
   }
@@ -72,7 +74,7 @@ export function VehicleDetailPage() {
   if (vehicleState.error || !vehicleState.item) {
     return (
       <div className="page-stack">
-        <PageHeader subtitle={vehicleState.error || 'Nao encontramos o veiculo solicitado.'} title="Veiculo nao encontrado" />
+        <PageHeader subtitle={vehicleState.error || 'Não encontramos o veículo solicitado.'} title="Veículo não encontrado" />
         <ActionButton to="/gestor/frota" variant="secondary">
           Voltar para a frota
         </ActionButton>
@@ -88,7 +90,7 @@ export function VehicleDetailPage() {
         actionIcon="edit"
         actionLabel="Editar cadastro"
         actionTo={`/gestor/frota/${vehicleId}/editar`}
-        subtitle="Consulta detalhada do veiculo, documentacao e historico recente."
+        subtitle="Consulta detalhada do veículo, documentação e histórico recente."
         title={vehicle.model}
       />
 
@@ -102,7 +104,7 @@ export function VehicleDetailPage() {
       </div>
 
       <div className="content-grid">
-        <SectionCard subtitle="Campos principais do cadastro." title="Informacoes gerais">
+        <SectionCard subtitle="Campos principais do cadastro." title="Informações gerais">
           <dl className="summary-list">
             <div>
               <dt>Marca</dt>
@@ -117,20 +119,20 @@ export function VehicleDetailPage() {
               <dd>{vehicle.year}</dd>
             </div>
             <div>
-              <dt>CNH minima</dt>
+              <dt>CNH mínima</dt>
               <dd>{vehicle.licenseCategory}</dd>
             </div>
           </dl>
         </SectionCard>
       </div>
 
-      <SectionCard subtitle="Situacao dos vencimentos monitorados." title="Documentacao">
+      <SectionCard subtitle="Situação dos vencimentos monitorados." title="Documentação">
         <DocumentPills documents={vehicle.documents} />
         <div className="documents-list">
           {vehicle.documents.map((item) => (
             <div className="documents-list__item" key={item.id || item.label}>
               <strong>{item.label}</strong>
-              <span>Valido ate {item.dueDate}</span>
+              <span>Válido até {item.dueDate}</span>
               {typeof item.id === 'number' ? (
                 <div className="form-grid">
                   <label className="form-field">

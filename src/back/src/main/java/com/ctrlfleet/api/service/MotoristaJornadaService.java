@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MotoristaJornadaService {
     private static final long TIPO_INSPECAO_SAIDA_ID = 1L;
+    private static final Set<String> PALAVRAS_CHAVE_ITENS_CRITICOS = Set.of("freio", "pneu", "luz", "farol", "seta");
 
     private final ReservaRepository reservaRepository;
     private final UsuarioRepository usuarioRepository;
@@ -81,7 +82,7 @@ public class MotoristaJornadaService {
     public List<ChecklistItemResponseDTO> listarChecklistSaida() {
         return itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_SAIDA_ID)
                 .stream()
-                .map(item -> new ChecklistItemResponseDTO(item.getId(), item.getNome()))
+                .map(item -> new ChecklistItemResponseDTO(item.getId(), item.getNome(), isItemCritico(item)))
                 .toList();
     }
 
@@ -89,22 +90,27 @@ public class MotoristaJornadaService {
     public RegistroUsoResponseDTO iniciarTrajeto(Long reservaId, IniciarTrajetoRequestDTO dto) {
         Reserva reserva = reservaRepository
                 .findById(reservaId)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva nao encontrada com id: " + reservaId));
+                .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com id: " + reservaId));
 
-        if (reserva.getStatusReserva() != StatusReserva.APROVADA
-                && reserva.getStatusReserva() != StatusReserva.EM_USO) {
-            throw new IllegalArgumentException("Apenas reservas aprovadas podem iniciar trajeto");
+        if (reserva.getStatusReserva() != StatusReserva.APROVADA) {
+            throw new IllegalArgumentException("Apenas reservas aprovadas podem iniciar trajeto.");
         }
+        if (registroUsoRepository.existsByIdReservaAndDataRetornoIsNull(reserva.getId())) {
+            throw new IllegalArgumentException("Esta reserva já possui um trajeto em andamento.");
+        }
+        if (reserva.getVeiculo().getStatus() != StatusVeiculo.DISPONIVEL) {
+            throw new IllegalArgumentException("O veículo desta reserva não está disponível para saída.");
+        }
+        validarJanelaDeInicio(reserva);
 
         Usuario motorista = validarMotorista(dto.getIdMotorista());
+        validarQuilometragemSaida(reserva, dto.getQuilometragemSaida());
         List<ItemChecklist> itensObrigatorios =
                 itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_SAIDA_ID);
         validarChecklistObrigatorio(dto.getItensChecklist(), itensObrigatorios);
+        validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensObrigatorios);
 
-        RegistroUso registro = registroUsoRepository
-                .findFirstByIdReservaAndDataRetornoIsNull(reserva.getId())
-                .map(existente -> validarRegistroExistente(existente, motorista.getId()))
-                .orElseGet(() -> criarRegistroUso(reserva, motorista, dto.getQuilometragemSaida()));
+        RegistroUso registro = criarRegistroUso(reserva, motorista, dto.getQuilometragemSaida());
 
         salvarChecklist(registro, itensObrigatorios, dto.getObservacoesChecklist());
 
@@ -118,7 +124,7 @@ public class MotoristaJornadaService {
                 "Em uso",
                 "success",
                 null,
-                "Registro de uso #" + registro.getId() + " criado/ativado para o veiculo " + reserva.getVeiculo().getPlaca());
+                "Registro de uso #" + registro.getId() + " criado para o veículo " + reserva.getVeiculo().getPlaca());
 
         return toRegistroUsoResponseDTO(registro);
     }
@@ -127,19 +133,19 @@ public class MotoristaJornadaService {
     public RegistroUsoResponseDTO finalizarTrajeto(Long reservaId, FinalizarTrajetoRequestDTO dto) {
         Reserva reserva = reservaRepository
                 .findById(reservaId)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva nao encontrada com id: " + reservaId));
+                .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com id: " + reservaId));
 
         if (reserva.getStatusReserva() != StatusReserva.EM_USO) {
-            throw new IllegalArgumentException("Apenas reservas em uso podem ser concluidas");
+            throw new IllegalArgumentException("Apenas reservas em uso podem ser concluídas.");
         }
 
         Usuario motorista = validarMotorista(dto.getIdMotorista());
         RegistroUso registro = registroUsoRepository
                 .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motorista.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Nao existe trajeto aberto para esta reserva e motorista"));
+                .orElseThrow(() -> new IllegalArgumentException("Não existe trajeto aberto para esta reserva e motorista."));
 
         if (dto.getQuilometragemRetorno() < registro.getQuilometragemSaida()) {
-            throw new IllegalArgumentException("Quilometragem de retorno deve ser maior ou igual a de saida");
+            throw new IllegalArgumentException("Quilometragem de retorno deve ser maior ou igual à de saída.");
         }
 
         registro.setDataRetorno(LocalDateTime.now());
@@ -155,10 +161,10 @@ public class MotoristaJornadaService {
                 "TRAJETO_FINALIZADO",
                 motorista.getNome(),
                 "Reserva #" + reserva.getId(),
-                "Concluida",
+                "Concluída",
                 "success",
                 null,
-                "Registro de uso #" + registro.getId() + " finalizado e veiculo " + reserva.getVeiculo().getPlaca() + " liberado");
+                "Registro de uso #" + registro.getId() + " finalizado e veículo " + reserva.getVeiculo().getPlaca() + " liberado");
 
         return toRegistroUsoResponseDTO(registro);
     }
@@ -166,22 +172,15 @@ public class MotoristaJornadaService {
     private Usuario validarMotorista(Long motoristaId) {
         Usuario motorista = usuarioRepository
                 .findById(motoristaId)
-                .orElseThrow(() -> new IllegalArgumentException("Motorista nao encontrado com id: " + motoristaId));
+                .orElseThrow(() -> new IllegalArgumentException("Motorista não encontrado com id: " + motoristaId));
 
         if (motorista.getPapel() == null || !"ROLE_MOTORISTA".equals(motorista.getPapel().name())) {
-            throw new IllegalArgumentException("Usuario informado nao possui perfil de motorista");
+            throw new IllegalArgumentException("Usuário informado não possui perfil de motorista.");
         }
         if (!"ATIVO".equalsIgnoreCase(motorista.getStatus())) {
-            throw new IllegalArgumentException("Motorista precisa estar ativo para iniciar trajeto");
+            throw new IllegalArgumentException("Motorista precisa estar ativo para iniciar trajeto.");
         }
         return motorista;
-    }
-
-    private RegistroUso validarRegistroExistente(RegistroUso registro, Long motoristaId) {
-        if (!registro.getMotorista().getId().equals(motoristaId)) {
-            throw new IllegalArgumentException("Reserva ja possui trajeto aberto por outro motorista");
-        }
-        return registro;
     }
 
     private RegistroUso criarRegistroUso(Reserva reserva, Usuario motorista, Double quilometragemSaida) {
@@ -199,8 +198,57 @@ public class MotoristaJornadaService {
         List<Long> obrigatorios = itensObrigatorios.stream().map(ItemChecklist::getId).toList();
 
         if (!selecionados.containsAll(obrigatorios)) {
-            throw new IllegalArgumentException("Todos os itens obrigatorios do checklist de saida devem ser marcados");
+            throw new IllegalArgumentException("Todos os itens obrigatórios do checklist de saída devem ser marcados.");
         }
+        if (!new HashSet<>(obrigatorios).containsAll(selecionados)) {
+            throw new IllegalArgumentException("Checklist contém itens inválidos para a saída.");
+        }
+    }
+
+    private void validarOcorrenciasCriticas(Map<Long, String> observacoes, List<ItemChecklist> itensObrigatorios) {
+        if (observacoes == null || observacoes.isEmpty()) {
+            return;
+        }
+
+        for (ItemChecklist item : itensObrigatorios) {
+            String observacao = observacoes.get(item.getId());
+            if (isItemCritico(item) && observacao != null && !observacao.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Item crítico com ocorrência informada: " + item.getNome() + ". Acione o gestor antes da saída.");
+            }
+        }
+    }
+
+    private void validarJanelaDeInicio(Reserva reserva) {
+        LocalDateTime agora = LocalDateTime.now();
+        if (reserva.getDataHoraInicioPrevista() != null && agora.isBefore(reserva.getDataHoraInicioPrevista())) {
+            throw new IllegalArgumentException(
+                    "Trajeto disponível somente a partir de " + reserva.getDataHoraInicioPrevista() + ".");
+        }
+        if (reserva.getDataHoraFimEstimada() != null && agora.isAfter(reserva.getDataHoraFimEstimada())) {
+            throw new IllegalArgumentException("O horário previsto desta reserva já foi encerrado. Solicite nova aprovação.");
+        }
+    }
+
+    private void validarQuilometragemSaida(Reserva reserva, Double quilometragemSaida) {
+        if (quilometragemSaida == null || quilometragemSaida < 0) {
+            throw new IllegalArgumentException("Informe uma quilometragem de saída válida.");
+        }
+
+        registroUsoRepository.buscarUltimaQuilometragemVeiculo(reserva.getVeiculo().getId())
+                .ifPresent(ultima -> {
+                    if (quilometragemSaida < ultima) {
+                        throw new IllegalArgumentException(
+                                "Quilometragem de saída deve ser maior ou igual à última registrada para o veículo ("
+                                        + ultima + " km).");
+                    }
+                });
+    }
+
+    private boolean isItemCritico(ItemChecklist item) {
+        if (item == null || item.getNome() == null) return false;
+        String nome = item.getNome().toLowerCase();
+        return PALAVRAS_CHAVE_ITENS_CRITICOS.stream().anyMatch(nome::contains);
     }
 
     private void salvarChecklist(
@@ -234,17 +282,25 @@ public class MotoristaJornadaService {
                 reserva.getStatusReserva().name(),
                 reserva.getDataHoraInicioPrevista(),
                 reserva.getDataHoraFimEstimada(),
+                registroUsoRepository.buscarUltimaQuilometragemVeiculo(reserva.getVeiculo().getId()).orElse(null),
                 checklistSaida);
     }
 
     private RegistroUsoResponseDTO toRegistroUsoResponseDTO(RegistroUso registro) {
+        Reserva reserva = registro.getIdReserva() == null
+                ? null
+                : reservaRepository.findById(registro.getIdReserva()).orElse(null);
+
         return new RegistroUsoResponseDTO(
                 registro.getId(),
                 registro.getVeiculo().getId(),
                 registro.getVeiculo().getPlaca(),
+                registro.getVeiculo().getMarca() + " " + registro.getVeiculo().getModelo(),
                 registro.getMotorista().getId(),
                 registro.getMotorista().getNome(),
                 registro.getIdReserva(),
+                reserva == null ? null : reserva.getOrigem(),
+                reserva == null ? null : reserva.getDestino(),
                 registro.getDataSaida(),
                 registro.getQuilometragemSaida(),
                 registro.getDataRetorno(),

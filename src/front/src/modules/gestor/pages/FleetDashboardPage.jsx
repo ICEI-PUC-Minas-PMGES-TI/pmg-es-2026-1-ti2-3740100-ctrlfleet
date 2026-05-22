@@ -44,23 +44,26 @@ export function FleetDashboardPage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    setVehiclesData((current) => ({ ...current, loading: true, error: null }));
-    listarVeiculos({ signal: controller.signal })
-      .then((items) => {
-        setVehiclesData({
-          loading: false,
-          error: null,
-          items: items.map(mapBackendVehicleToView),
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      setVehiclesData((current) => ({ ...current, loading: true, error: null }));
+      listarVeiculos({ signal: controller.signal })
+        .then((items) => {
+          setVehiclesData({
+            loading: false,
+            error: null,
+            items: items.map(mapBackendVehicleToView),
+          });
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+          setVehiclesData({
+            loading: false,
+            error: error.message || 'Falha ao carregar veículos.',
+            items: [],
+          });
         });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setVehiclesData({
-          loading: false,
-          error: error.message || 'Falha ao carregar veículos.',
-          items: [],
-        });
-      });
+    });
 
     return () => controller.abort();
   }, []);

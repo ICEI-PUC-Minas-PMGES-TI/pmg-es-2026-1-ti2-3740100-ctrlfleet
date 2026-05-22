@@ -15,6 +15,7 @@ public class ReservaMotoristaResponseDTO {
     private String statusReserva;
     private LocalDateTime dataHoraInicioPrevista;
     private LocalDateTime dataHoraFimEstimada;
+    private Double ultimaQuilometragemVeiculo;
     private List<ChecklistItemResponseDTO> checklistSaida;
 
     public ReservaMotoristaResponseDTO(
@@ -29,6 +30,7 @@ public class ReservaMotoristaResponseDTO {
             String statusReserva,
             LocalDateTime dataHoraInicioPrevista,
             LocalDateTime dataHoraFimEstimada,
+            Double ultimaQuilometragemVeiculo,
             List<ChecklistItemResponseDTO> checklistSaida) {
         this.idReserva = idReserva;
         this.idSolicitante = idSolicitante;
@@ -41,6 +43,7 @@ public class ReservaMotoristaResponseDTO {
         this.statusReserva = statusReserva;
         this.dataHoraInicioPrevista = dataHoraInicioPrevista;
         this.dataHoraFimEstimada = dataHoraFimEstimada;
+        this.ultimaQuilometragemVeiculo = ultimaQuilometragemVeiculo;
         this.checklistSaida = checklistSaida;
     }
 
@@ -55,5 +58,6 @@ public class ReservaMotoristaResponseDTO {
     public String getStatusReserva() { return statusReserva; }
     public LocalDateTime getDataHoraInicioPrevista() { return dataHoraInicioPrevista; }
     public LocalDateTime getDataHoraFimEstimada() { return dataHoraFimEstimada; }
+    public Double getUltimaQuilometragemVeiculo() { return ultimaQuilometragemVeiculo; }
     public List<ChecklistItemResponseDTO> getChecklistSaida() { return checklistSaida; }
 }

@@ -4,10 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public class FinalizarTrajetoRequestDTO {
-    @NotNull(message = "Motorista e obrigatorio")
+    @NotNull(message = "Motorista é obrigatório")
     private Long idMotorista;
 
-    @NotNull(message = "Quilometragem de retorno e obrigatoria")
+    @NotNull(message = "Quilometragem de retorno é obrigatória")
     @PositiveOrZero(message = "Quilometragem de retorno deve ser maior ou igual a zero")
     private Double quilometragemRetorno;
 

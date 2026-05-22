@@ -19,10 +19,10 @@ const fieldPatterns = {
   cnh: '[0-9]{11}',
 };
 const fieldHints = {
-  name: 'Use apenas letras, espacos, ponto, apostrofo ou hifen.',
-  registration: 'Digite apenas o numero da matricula. O prefixo MAT- sera aplicado automaticamente.',
+  name: 'Use apenas letras, espaços, ponto, apóstrofo ou hífen.',
+  registration: 'Digite apenas o número da matrícula. O prefixo MAT- será aplicado automaticamente.',
   brDate: 'Use uma data no formato dd/mm/aaaa.',
-  cnh: 'Informe exatamente 11 numeros.',
+  cnh: 'Informe exatamente 11 números.',
 };
 
 const cargoPorPerfilAcesso = {
@@ -74,21 +74,25 @@ export function AdminUserFormPage() {
     if (isCreateMode) return undefined;
 
     const controller = new AbortController();
-    setLoadingUser(true);
-    setLoadError('');
 
-    buscarUsuario(userId, { signal: controller.signal })
-      .then((dto) => {
-        setSelectedUser(dto);
-        setEditAccessProfile(resolvePerfil(dto) || 'Servidor Solicitante');
-        setEditStatus(resolveStatus(dto));
-        setLoadingUser(false);
-      })
-      .catch((err) => {
-        if (err.name === 'AbortError') return;
-        setLoadError(err instanceof Error ? err.message : 'Erro ao carregar usuário.');
-        setLoadingUser(false);
-      });
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      setLoadingUser(true);
+      setLoadError('');
+
+      buscarUsuario(userId, { signal: controller.signal })
+        .then((dto) => {
+          setSelectedUser(dto);
+          setEditAccessProfile(resolvePerfil(dto) || 'Servidor Solicitante');
+          setEditStatus(resolveStatus(dto));
+          setLoadingUser(false);
+        })
+        .catch((err) => {
+          if (err.name === 'AbortError') return;
+          setLoadError(err instanceof Error ? err.message : 'Erro ao carregar usuário.');
+          setLoadingUser(false);
+        });
+    });
 
     return () => controller.abort();
   }, [isCreateMode, userId]);
@@ -158,7 +162,7 @@ export function AdminUserFormPage() {
     try {
       await atualizarUsuario(userId, payload);
       window.dispatchEvent(new Event('ctrlfleet:usuarios-updated'));
-      window.alert('Usuario atualizado com sucesso!');
+      window.alert('Usuário atualizado com sucesso!');
       navigate('/admin/usuarios');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar usuário.';
@@ -411,7 +415,7 @@ export function AdminUserFormPage() {
             <Icon name="alert" />
             <div>
               <strong>Falha ao carregar usuário</strong>
-              <p>{loadError || 'Usuario nao encontrado.'}</p>
+              <p>{loadError || 'Usuário não encontrado.'}</p>
             </div>
           </div>
           <div className="form-actions">
@@ -507,7 +511,7 @@ export function AdminUserFormPage() {
             </label>
 
             <label className="form-field">
-              <span>Data admissao</span>
+              <span>Data de admissão</span>
               <input
                 defaultValue={formatBrDateInput(selectedUser.dataAdmissao)}
                 maxLength={10}
@@ -522,7 +526,7 @@ export function AdminUserFormPage() {
             {editAccessProfile === 'Motorista' ? (
               <>
                 <label className="form-field">
-                  <span>Numero da CNH</span>
+                  <span>Número da CNH</span>
                   <input
                     defaultValue={selectedUser.numeroCnh || ''}
                     inputMode="numeric"
@@ -558,13 +562,13 @@ export function AdminUserFormPage() {
                 Cancelar
               </ActionButton>
               <button className="action-button action-button--primary" disabled={submitting} type="submit">
-                {submitting ? 'Salvando...' : 'Salvar alteracoes'}
+                {submitting ? 'Salvando...' : 'Salvar alterações'}
               </button>
             </div>
           </form>
         </SectionCard>
 
-        <SectionCard subtitle="Acesso aplicado automaticamente aos modulos permitidos." title="Resumo do acesso">
+        <SectionCard subtitle="Acesso aplicado automaticamente aos módulos permitidos." title="Resumo do acesso">
           <dl className="summary-list admin-summary">
             <div>
               <dt>Perfil</dt>
@@ -577,15 +581,15 @@ export function AdminUserFormPage() {
               </dd>
             </div>
             <div>
-              <dt>Ultimo acesso</dt>
-              <dd>-</dd>
+              <dt>Tipo de cadastro</dt>
+              <dd>{selectedUser.tipoCadastro || 'Usuário'}</dd>
             </div>
           </dl>
 
           <div className="quick-links admin-access-links">
             <Link className="quick-link" to="/admin/perfis">
-              <strong>Revisar permissoes</strong>
-              <span>Confira as regras antes de salvar perfis sensiveis.</span>
+              <strong>Revisar permissões</strong>
+              <span>Confira as regras antes de salvar perfis sensíveis.</span>
             </Link>
           </div>
         </SectionCard>

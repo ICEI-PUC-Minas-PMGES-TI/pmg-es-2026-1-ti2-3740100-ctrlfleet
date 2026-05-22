@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
@@ -20,7 +20,7 @@ export function AdminAuditPage() {
     items: [],
   });
 
-  function loadAudit(signal) {
+  const loadAudit = useCallback((signal) => {
     setAuditData((current) => ({ ...current, loading: true, error: null }));
     return listarAuditoria({ signal })
       .then((items) => setAuditData({ loading: false, error: null, items }))
@@ -32,20 +32,22 @@ export function AdminAuditPage() {
           items: [],
         });
       });
-  }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
     const refreshAudit = () => loadAudit();
 
-    loadAudit(controller.signal);
+    Promise.resolve().then(() => {
+      if (!controller.signal.aborted) loadAudit(controller.signal);
+    });
     window.addEventListener('ctrlfleet:usuarios-updated', refreshAudit);
 
     return () => {
       controller.abort();
       window.removeEventListener('ctrlfleet:usuarios-updated', refreshAudit);
     };
-  }, []);
+  }, [loadAudit]);
 
   const auditStats = useMemo(() => {
     const items = auditData.items;

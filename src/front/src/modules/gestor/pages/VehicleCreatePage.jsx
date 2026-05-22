@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
+import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { adminUsers } from '../../../data/adminData';
 import { vehicleFormOptions } from '../../../data/fleetData';
+import { listarMotoristas } from '../../../services/usuarioApi';
+import { mapBackendUserToView } from '../../../services/usuarioMappers';
 import { atualizarVeiculo, buscarVeiculo, criarVeiculo } from '../../../services/veiculoApi';
 import { STATUS_VEICULO_LABELS, STATUS_VEICULO_VALUES } from '../../../services/veiculoMappers';
 import { useVehicleForm } from '../context/useVehicleForm';
@@ -15,9 +17,37 @@ export function VehicleCreatePage() {
   const { vehicleId } = useParams();
   const { formState, resetForm, updateForm } = useVehicleForm();
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
+  const [driversData, setDriversData] = useState({ loading: true, error: null, items: [] });
   const isEditMode = Boolean(vehicleId);
-  const drivers = adminUsers.filter((user) => user.role === 'Motorista');
-  const selectedDriver = drivers.find((driver) => driver.id === formState.driverId) ?? null;
+  const drivers = driversData.items;
+  const selectedDriver =
+    drivers.find((driver) => String(driver.id) === String(formState.driverId)) ?? null;
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      listarMotoristas({ signal: controller.signal })
+        .then((items) => {
+          setDriversData({
+            loading: false,
+            error: null,
+            items: items.map(mapBackendUserToView),
+          });
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+        setDriversData({
+          loading: false,
+          error: error.message || 'Não foi possível carregar motoristas.',
+          items: [],
+        });
+        });
+    });
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (!isEditMode) {
@@ -26,34 +56,38 @@ export function VehicleCreatePage() {
     }
 
     const controller = new AbortController();
-    setSubmitState({ loading: true, error: null });
 
-    buscarVeiculo(vehicleId, { signal: controller.signal })
-      .then((vehicle) => {
-        const documentsByType = Object.fromEntries(
-          (vehicle.documentos || []).map((documento) => [documento.tipoDocumento, documento]),
-        );
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      setSubmitState({ loading: true, error: null });
 
-        updateForm({
-          plate: vehicle.placa || '',
-          brand: vehicle.marca || '',
-          model: vehicle.modelo || '',
-          secretaria: vehicle.secretaria || 'Garagem Central',
-          year: vehicle.ano ? String(vehicle.ano) : '',
-          status: STATUS_VEICULO_LABELS[vehicle.status] || 'Ativo',
-          ipvaDueDate: documentsByType.IPVA?.dataVencimento || '',
-          insuranceDueDate: documentsByType.SEGURO?.dataVencimento || '',
-          licenseDueDate: documentsByType.LICENCIAMENTO?.dataVencimento || '',
+      buscarVeiculo(vehicleId, { signal: controller.signal })
+        .then((vehicle) => {
+          const documentsByType = Object.fromEntries(
+            (vehicle.documentos || []).map((documento) => [documento.tipoDocumento, documento]),
+          );
+
+          updateForm({
+            plate: vehicle.placa || '',
+            brand: vehicle.marca || '',
+            model: vehicle.modelo || '',
+            secretaria: vehicle.secretaria || 'Garagem Central',
+            year: vehicle.ano ? String(vehicle.ano) : '',
+            status: STATUS_VEICULO_LABELS[vehicle.status] || 'Ativo',
+            ipvaDueDate: documentsByType.IPVA?.dataVencimento || '',
+            insuranceDueDate: documentsByType.SEGURO?.dataVencimento || '',
+            licenseDueDate: documentsByType.LICENCIAMENTO?.dataVencimento || '',
+          });
+          setSubmitState({ loading: false, error: null });
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+          setSubmitState({ loading: false, error: error.message || 'Não foi possível carregar o veículo.' });
         });
-        setSubmitState({ loading: false, error: null });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setSubmitState({ loading: false, error: error.message || 'Nao foi possivel carregar o veiculo.' });
       });
 
     return () => controller.abort();
-  }, [isEditMode, vehicleId]);
+  }, [isEditMode, resetForm, updateForm, vehicleId]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -83,7 +117,7 @@ export function VehicleCreatePage() {
       resetForm();
       navigate('/gestor/frota', { state: { flashMessage } });
     } catch (error) {
-      setSubmitState({ loading: false, error: error.message || 'Nao foi possivel salvar o veiculo.' });
+      setSubmitState({ loading: false, error: error.message || 'Não foi possível salvar o veículo.' });
     }
   }
 
@@ -186,11 +220,14 @@ export function VehicleCreatePage() {
             <label className="form-field">
               <span>Motorista responsável</span>
               <select
+                disabled={driversData.loading || Boolean(driversData.error)}
                 onChange={(event) => updateForm({ driverId: event.target.value })}
                 required
                 value={formState.driverId}
               >
-                <option value="">Selecione um motorista</option>
+                <option value="">
+                  {driversData.loading ? 'Carregando motoristas...' : 'Selecione um motorista'}
+                </option>
                 {drivers.map((driver) => (
                   <option key={driver.id} value={driver.id}>
                     {driver.name}
@@ -198,6 +235,16 @@ export function VehicleCreatePage() {
                 ))}
               </select>
             </label>
+
+            {driversData.error ? (
+              <div className="admin-dashboard__error">
+                <Icon name="alert" />
+                <div>
+                  <strong>Falha ao carregar motoristas</strong>
+                  <p>{driversData.error}</p>
+                </div>
+              </div>
+            ) : null}
 
             <div className="driver-association-card">
               {selectedDriver ? (
@@ -224,8 +271,8 @@ export function VehicleCreatePage() {
                       <dd>{selectedDriver.cnhExpiry || 'Não informada'}</dd>
                     </div>
                     <div>
-                      <dt>Último acesso</dt>
-                      <dd>{selectedDriver.lastAccess}</dd>
+                      <dt>Matrícula</dt>
+                      <dd>{selectedDriver.matricula}</dd>
                     </div>
                   </dl>
                 </>

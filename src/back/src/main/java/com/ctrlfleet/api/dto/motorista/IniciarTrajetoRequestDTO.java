@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 public class IniciarTrajetoRequestDTO {
-    @NotNull(message = "Motorista e obrigatorio")
+    @NotNull(message = "Motorista é obrigatório")
     private Long idMotorista;
 
-    @NotNull(message = "Quilometragem de saida e obrigatoria")
-    @PositiveOrZero(message = "Quilometragem de saida deve ser maior ou igual a zero")
+    @NotNull(message = "Quilometragem de saída é obrigatória")
+    @PositiveOrZero(message = "Quilometragem de saída deve ser maior ou igual a zero")
     private Double quilometragemSaida;
 
-    @NotEmpty(message = "Checklist de saida e obrigatorio")
+    @NotEmpty(message = "Checklist de saída é obrigatório")
     private List<Long> itensChecklist;
 
     private Map<Long, String> observacoesChecklist;

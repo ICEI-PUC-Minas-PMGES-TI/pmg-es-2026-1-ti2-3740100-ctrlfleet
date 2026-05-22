@@ -18,6 +18,7 @@ import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHisto
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
 import { SolicitanteReservasPage } from './modules/solicitante/pages/SolicitanteReservasPage';
+import { getMotoristaHomePath } from './services/currentMotorista';
 
 function App() {
   return (
@@ -43,8 +44,8 @@ function App() {
                 <ModulePlaceholderPage
                   ctaLabel="Acompanhar frota"
                   ctaTo="/gestor/frota"
-                  description="Esta area ja esta preparada na navegacao para receber triagem, prioridades e ordens de servico."
-                  title="Manutencao"
+                  description="Esta área já está preparada na navegação para receber triagem, prioridades e ordens de serviço."
+                  title="Manutenção"
                 />
               }
             />
@@ -52,9 +53,9 @@ function App() {
               path="programacao-preventiva"
               element={
                 <ModulePlaceholderPage
-                  ctaLabel="Cadastrar veiculo"
+                  ctaLabel="Cadastrar veículo"
                   ctaTo="/gestor/frota/novo"
-                  description="Aqui podemos evoluir para um calendario preventivo com quilometragem, vencimentos e recorrencias."
+                  description="Aqui podemos evoluir para um calendário preventivo com quilometragem, vencimentos e recorrências."
                   title="Prog. Preventiva"
                 />
               }
@@ -65,8 +66,8 @@ function App() {
                 <ModulePlaceholderPage
                   ctaLabel="Voltar para frota"
                   ctaTo="/gestor/frota"
-                  description="O espaco de relatorios ficou separado para encaixar indicadores, exportacoes e auditorias sem retrabalho."
-                  title="Relatorios"
+                  description="O espaço de relatórios ficou separado para encaixar indicadores, exportações e auditorias sem retrabalho."
+                  title="Relatórios"
                 />
               }
             />
@@ -83,7 +84,7 @@ function App() {
           </Route>
 
           <Route path="motorista" element={<ManagerLayout />}>
-            <Route index element={<Navigate replace to="/motorista/5" />} />
+            <Route index element={<Navigate replace to={getMotoristaHomePath()} />} />
             <Route path=":motoristaId" element={<MotoristaDashboardPage />} />
             <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
             <Route path=":motoristaId/reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />

@@ -7,7 +7,8 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { adminRecentActivity, permissionGroups } from '../../../data/adminData';
+import { permissionGroups } from '../../../data/adminData';
+import { listarAuditoria } from '../../../services/auditoriaApi';
 import { aprovarUsuario, listarUsuarios, recusarUsuario } from '../../../services/usuarioApi';
 import {
   formatBrDate,
@@ -30,6 +31,10 @@ function severityToBadge(severity) {
   if (severity === 'critical') return 'Bloqueado';
   if (severity === 'warning') return 'Pendente';
   return 'Ativo';
+}
+
+function getActivityDate(event) {
+  return event.timestamp || event.date || '-';
 }
 
 /**
@@ -61,6 +66,11 @@ export function AdminDashboardPage() {
     error: null,
     items: [],
   });
+  const [auditData, setAuditData] = useState({
+    loading: true,
+    error: null,
+    items: [],
+  });
 
   const [dismissedPendingIds, setDismissedPendingIds] = useState(() => new Set());
 
@@ -84,14 +94,52 @@ export function AdminDashboardPage() {
       });
   }
 
+  function fetchAuditoria(signal) {
+    setAuditData((current) => ({ ...current, loading: true, error: null }));
+    return listarAuditoria({ signal })
+      .then((items) => {
+        setAuditData({
+          loading: false,
+          error: null,
+          items,
+        });
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setAuditData({
+          loading: false,
+          error: error.message || 'Falha ao carregar auditoria.',
+          items: [],
+        });
+      });
+  }
+
   useEffect(() => {
     const controller = new AbortController();
-    fetchUsuarios(controller.signal);
-    return () => controller.abort();
+    const refreshAdminData = () => {
+      fetchUsuarios();
+      fetchAuditoria();
+    };
+
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      fetchUsuarios(controller.signal);
+      fetchAuditoria(controller.signal);
+    });
+    window.addEventListener('ctrlfleet:usuarios-updated', refreshAdminData);
+
+    return () => {
+      controller.abort();
+      window.removeEventListener('ctrlfleet:usuarios-updated', refreshAdminData);
+    };
   }, []);
 
   const recentUsers = useMemo(() => usersData.items.slice(0, 5), [usersData.items]);
+  const recentActivity = useMemo(() => auditData.items.slice(0, 5), [auditData.items]);
   const totalUsers = usersData.items.length;
+  const hasDashboardError = Boolean(usersData.error || auditData.error);
+  const isDashboardLoading = usersData.loading || auditData.loading;
+  const toolbarLabel = hasDashboardError ? 'Atenção necessária' : isDashboardLoading ? 'Carregando painel' : 'Painel carregado';
 
   const pendingList = useMemo(
     () =>
@@ -147,10 +195,10 @@ export function AdminDashboardPage() {
         caption: 'Ações registradas hoje',
         icon: 'reports',
         title: 'Auditoria',
-        value: '76',
+        value: pad2(auditData.items.length),
       },
     ];
-  }, [usersData.items.length, pendingList.length, distribution]);
+  }, [auditData.items.length, usersData.items.length, pendingList.length, distribution]);
 
   function openApprovalModal(item, intent) {
     setApprovalModal({ open: true, intent, item });
@@ -202,7 +250,7 @@ export function AdminDashboardPage() {
 
   function handleRefresh() {
     setDismissedPendingIds(new Set());
-    fetchUsuarios()
+    Promise.all([fetchUsuarios(), fetchAuditoria()])
       .then(() => setFeedback({ tone: 'success', message: 'Indicadores atualizados.' }))
       .then(() => setTimeout(() => setFeedback(null), 3000))
       .catch(() => {});
@@ -220,10 +268,10 @@ export function AdminDashboardPage() {
         <div className="admin-dashboard__toolbar-meta">
           <span className="admin-dashboard__chip">
             <span className="admin-dashboard__pulse" />
-            Sistema operacional
+            {toolbarLabel}
           </span>
           <span className="admin-dashboard__toolbar-info">
-            Última sincronização há 2 minutos
+            Atualize para buscar as informações mais recentes.
           </span>
         </div>
         <div className="admin-dashboard__toolbar-actions">
@@ -335,30 +383,50 @@ export function AdminDashboardPage() {
           subtitle="Eventos administrativos importantes do dia."
           title="Atividade recente"
         >
-          <ol className="admin-timeline">
-            {adminRecentActivity.map((event) => (
-              <li className="admin-timeline__item" key={event.id}>
-                <span
-                  className={`admin-timeline__dot admin-timeline__dot--${event.severity}`}
-                  aria-hidden="true"
-                />
-                <button
-                  className="admin-timeline__body"
-                  onClick={() => setActivityModal({ open: true, item: event })}
-                  type="button"
-                >
-                  <div className="admin-timeline__head">
-                    <strong>{event.action}</strong>
-                    <StatusBadge label={severityToBadge(event.severity)} />
-                  </div>
-                  <p>{event.detail}</p>
-                  <small>
-                    {event.actor} • {event.timestamp}
-                  </small>
-                </button>
-              </li>
-            ))}
-          </ol>
+          {auditData.loading ? (
+            <div className="admin-dashboard__loading">
+              <span className="admin-dashboard__spinner" aria-hidden="true" />
+              <p>Carregando atividade...</p>
+            </div>
+          ) : auditData.error ? (
+            <div className="admin-dashboard__error">
+              <Icon name="alert" />
+              <div>
+                <strong>Falha ao carregar atividade</strong>
+                <p>{auditData.error}</p>
+              </div>
+            </div>
+          ) : recentActivity.length === 0 ? (
+            <div className="admin-empty">
+              <Icon name="reports" />
+              <p>Nenhum evento registrado ainda.</p>
+            </div>
+          ) : (
+            <ol className="admin-timeline">
+              {recentActivity.map((event) => (
+                <li className="admin-timeline__item" key={event.id}>
+                  <span
+                    className={`admin-timeline__dot admin-timeline__dot--${event.severity}`}
+                    aria-hidden="true"
+                  />
+                  <button
+                    className="admin-timeline__body"
+                    onClick={() => setActivityModal({ open: true, item: event })}
+                    type="button"
+                  >
+                    <div className="admin-timeline__head">
+                      <strong>{event.action}</strong>
+                      <StatusBadge label={event.status || severityToBadge(event.severity)} />
+                    </div>
+                    <p>{event.detail}</p>
+                    <small>
+                      {event.actor} • {getActivityDate(event)}
+                    </small>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          )}
         </SectionCard>
 
         <SectionCard
@@ -438,7 +506,7 @@ export function AdminDashboardPage() {
                   <th>Usuário</th>
                   <th>Perfil</th>
                   <th>Status</th>
-                  <th>Último acesso</th>
+                  <th>Matrícula</th>
                   <th aria-label="Ações" />
                 </tr>
               </thead>
@@ -460,7 +528,7 @@ export function AdminDashboardPage() {
                     <td>
                       <StatusBadge label={user.status} />
                     </td>
-                    <td>{user.lastAccess}</td>
+                    <td>{user.matricula}</td>
                     <td>
                       <div className="table-actions">
                         <button
@@ -597,7 +665,7 @@ export function AdminDashboardPage() {
               </div>
               <div>
                 <dt>Data</dt>
-                <dd>{activityModal.item.timestamp}</dd>
+                <dd>{getActivityDate(activityModal.item)}</dd>
               </div>
               <div>
                 <dt>Responsável</dt>
@@ -671,12 +739,6 @@ export function AdminDashboardPage() {
                   {userModal.item.cnh}
                   {userModal.item.cnhExpiry ? ` • válida até ${userModal.item.cnhExpiry}` : ''}
                 </dd>
-              </div>
-            ) : null}
-            {userModal.item.lastAccess ? (
-              <div>
-                <dt>Último acesso</dt>
-                <dd>{userModal.item.lastAccess}</dd>
               </div>
             ) : null}
           </dl>

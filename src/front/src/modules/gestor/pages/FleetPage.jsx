@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { VehicleTable } from '../../../components/gestor/VehicleTable';
@@ -28,7 +28,7 @@ export function FleetPage() {
     items: [],
   });
 
-  function carregarVeiculos(signal) {
+  const carregarVeiculos = useCallback((signal) => {
     setVehiclesData((current) => ({ ...current, loading: true, error: null }));
     return listarVeiculos({ signal })
       .then((items) => {
@@ -46,18 +46,20 @@ export function FleetPage() {
           items: [],
         });
       });
-  }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    carregarVeiculos(controller.signal);
+    Promise.resolve().then(() => {
+      if (!controller.signal.aborted) carregarVeiculos(controller.signal);
+    });
 
     return () => controller.abort();
-  }, []);
+  }, [carregarVeiculos]);
 
   async function handleDeactivateVehicle(vehicle) {
-    const confirmed = window.confirm(`Desativar o veiculo ${vehicle.plate}?`);
+    const confirmed = window.confirm(`Desativar o veículo ${vehicle.plate}?`);
     if (!confirmed) return;
 
     try {
@@ -66,7 +68,7 @@ export function FleetPage() {
     } catch (error) {
       setVehiclesData((current) => ({
         ...current,
-        error: error.message || 'Nao foi possivel desativar o veiculo.',
+        error: error.message || 'Não foi possível desativar o veículo.',
       }));
     }
   }

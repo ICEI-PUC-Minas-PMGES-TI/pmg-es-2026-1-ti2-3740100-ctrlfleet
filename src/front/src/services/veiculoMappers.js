@@ -85,22 +85,11 @@ export function mapBackendDocumentToView(documento) {
   };
 }
 
-export function buildMockDocuments(dto) {
-  const id = Number(dto?.id) || 0;
-  const variant = id % 3;
-  return Object.entries(DOCUMENT_LABELS).map(([tipoDocumento, doc], index) => {
-    let state = 'ok';
-    if (variant === 1 && index === 0) state = 'warning';
-    if (variant === 2 && index === 2) state = 'expired';
-    return { ...doc, id: `mock-${tipoDocumento}`, tipoDocumento, dataVencimento: '', dueDate: 'Pendente', state };
-  });
-}
-
 export function mapBackendVehicleToView(dto) {
   const documents =
     Array.isArray(dto.documentos) && dto.documentos.length > 0
       ? dto.documentos.map(mapBackendDocumentToView)
-      : buildMockDocuments(dto);
+      : [];
   const persistedStatus = resolveStatusVeiculo(dto);
   const status = persistedStatus === 'Inativo' ? 'Inativo' : hasExpiredDocument(documents) ? 'Bloqueado' : persistedStatus;
 

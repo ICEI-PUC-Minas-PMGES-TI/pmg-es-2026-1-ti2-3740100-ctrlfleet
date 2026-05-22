@@ -1,3 +1,5 @@
+import { resolvePerfil } from './usuarioMappers';
+
 /**
  * Em desenvolvimento usa URL direta do Spring Boot (evita 502 do proxy quando o
  * backend não está acessível via `localhost` ou está desligado).
@@ -148,6 +150,15 @@ export async function listarUsuarios({ signal } = {}) {
   }
 
   return Array.isArray(data) ? data : [];
+}
+
+export async function listarUsuariosPorPerfil(perfil, options = {}) {
+  const usuarios = await listarUsuarios(options);
+  return usuarios.filter((usuario) => resolvePerfil(usuario) === perfil);
+}
+
+export function listarMotoristas(options = {}) {
+  return listarUsuariosPorPerfil('Motorista', options);
 }
 
 async function acaoUsuario(id, path, method = 'PATCH') {

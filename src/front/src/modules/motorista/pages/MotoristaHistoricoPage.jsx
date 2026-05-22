@@ -5,9 +5,8 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
+import { getCurrentMotoristaId, setCurrentMotoristaId } from '../../../services/currentMotorista';
 import { listarHistoricoMotorista } from '../../../services/motoristaApi';
-
-const DEFAULT_MOTORISTA_ID = 5;
 
 function formatDateTime(value) {
   if (!value) return '-';
@@ -25,25 +24,40 @@ function formatKm(value) {
   return `${Number(value).toLocaleString('pt-BR')} km`;
 }
 
+function formatRoute(registro) {
+  if (!registro.origem && !registro.destino) return 'Reserva sem rota informada';
+  if (!registro.origem) return registro.destino;
+  if (!registro.destino) return registro.origem;
+  return `${registro.origem} -> ${registro.destino}`;
+}
+
 export function MotoristaHistoricoPage() {
   const params = useParams();
-  const motoristaId = Number(params.motoristaId || DEFAULT_MOTORISTA_ID);
+  const motoristaId = Number(params.motoristaId || getCurrentMotoristaId());
   const [state, setState] = useState({ loading: true, error: null, items: [] });
 
   useEffect(() => {
-    const controller = new AbortController();
-    setState((current) => ({ ...current, loading: true, error: null }));
+    setCurrentMotoristaId(motoristaId);
+  }, [motoristaId]);
 
-    listarHistoricoMotorista(motoristaId, { signal: controller.signal })
-      .then((items) => setState({ loading: false, error: null, items: items || [] }))
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setState({
-          loading: false,
-          error: error.message || 'Nao foi possivel carregar o historico.',
-          items: [],
+  useEffect(() => {
+    const controller = new AbortController();
+
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      setState((current) => ({ ...current, loading: true, error: null }));
+
+      listarHistoricoMotorista(motoristaId, { signal: controller.signal })
+        .then((items) => setState({ loading: false, error: null, items: items || [] }))
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+          setState({
+            loading: false,
+            error: error.message || 'Não foi possível carregar o histórico.',
+            items: [],
+          });
         });
-      });
+    });
 
     return () => controller.abort();
   }, [motoristaId]);
@@ -58,7 +72,7 @@ export function MotoristaHistoricoPage() {
 
     return [
       { caption: 'Registros de uso', icon: 'reports', title: 'Total', value: String(state.items.length).padStart(2, '0') },
-      { caption: 'Com retorno registrado', icon: 'check', title: 'Concluidas', value: String(finalizadas).padStart(2, '0') },
+      { caption: 'Com retorno registrado', icon: 'check', title: 'Concluídas', value: String(finalizadas).padStart(2, '0') },
       { caption: 'Ainda em uso', icon: 'fleet', title: 'Abertas', value: String(abertas).padStart(2, '0') },
       { caption: 'Quilometragem percorrida', icon: 'dashboard', title: 'KM', value: Math.round(kmTotal).toLocaleString('pt-BR') },
     ];
@@ -67,9 +81,9 @@ export function MotoristaHistoricoPage() {
   return (
     <div className="page-stack motorista-page">
       <PageHeader
-        eyebrow="Historico do motorista"
-        subtitle="Registros de uso, quilometragem informada e situacao de cada trajeto."
-        title={`Historico #${motoristaId}`}
+        eyebrow="Histórico do motorista"
+        subtitle="Registros de uso, quilometragem informada e situação de cada trajeto."
+        title={`Histórico #${motoristaId}`}
       />
 
       <section className="stats-grid stats-grid--compact">
@@ -82,13 +96,13 @@ export function MotoristaHistoricoPage() {
         {state.loading ? (
           <div className="admin-dashboard__loading">
             <span className="admin-dashboard__spinner" aria-hidden="true" />
-            <p>Carregando historico...</p>
+            <p>Carregando histórico...</p>
           </div>
         ) : state.error ? (
           <div className="admin-dashboard__error">
             <Icon name="alert" />
             <div>
-              <strong>Falha ao carregar historico</strong>
+              <strong>Falha ao carregar histórico</strong>
               <p>{state.error}</p>
             </div>
           </div>
@@ -104,19 +118,26 @@ export function MotoristaHistoricoPage() {
                 <div className="driver-reservation-card__main">
                   <div>
                     <span className="driver-reservation-card__kicker">Registro #{registro.id}</span>
-                    <h2>{registro.placaVeiculo}</h2>
-                    <p>Reserva #{registro.idReserva || '-'}</p>
+                    <h2>{registro.destino || registro.placaVeiculo}</h2>
+                    <p>
+                      Reserva #{registro.idReserva || '-'} · {registro.placaVeiculo}
+                      {registro.modeloVeiculo ? ` - ${registro.modeloVeiculo}` : ''}
+                    </p>
                   </div>
-                  <StatusBadge label={registro.dataRetorno ? 'Concluida' : 'Em uso'} />
+                  <StatusBadge label={registro.dataRetorno ? 'Concluída' : 'Em uso'} />
                 </div>
 
                 <dl className="driver-reservation-card__meta">
                   <div>
-                    <dt>Saida</dt>
+                    <dt>Trajeto</dt>
+                    <dd>{formatRoute(registro)}</dd>
+                  </div>
+                  <div>
+                    <dt>Saída</dt>
                     <dd>{formatDateTime(registro.dataSaida)}</dd>
                   </div>
                   <div>
-                    <dt>KM saida</dt>
+                    <dt>KM saída</dt>
                     <dd>{formatKm(registro.quilometragemSaida)}</dd>
                   </div>
                   <div>

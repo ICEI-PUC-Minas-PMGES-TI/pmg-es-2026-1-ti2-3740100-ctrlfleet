@@ -17,20 +17,24 @@ export function AdminRolesPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    setUsersData({ loading: true, error: null, items: [] });
 
-    listarUsuarios({ signal: controller.signal })
-      .then((items) => {
-        setUsersData({ loading: false, error: null, items });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setUsersData({
-          loading: false,
-          error: error.message || 'Falha ao carregar usuários.',
-          items: [],
+    Promise.resolve().then(() => {
+      if (controller.signal.aborted) return;
+      setUsersData({ loading: true, error: null, items: [] });
+
+      listarUsuarios({ signal: controller.signal })
+        .then((items) => {
+          setUsersData({ loading: false, error: null, items });
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+          setUsersData({
+            loading: false,
+            error: error.message || 'Falha ao carregar usuários.',
+            items: [],
+          });
         });
-      });
+    });
 
     return () => controller.abort();
   }, []);
@@ -57,6 +61,7 @@ export function AdminRolesPage() {
   const roleStats = useMemo(() => {
     const totalVinculos = usersData.items.length;
     const perfisAtivos = perfis.filter((group) => group.users > 0).length;
+    const perfisSemVinculo = perfis.filter((group) => group.users === 0).length;
     return [
       {
         caption: 'Perfis com usuários ativos',
@@ -65,10 +70,10 @@ export function AdminRolesPage() {
         value: pad2(perfisAtivos),
       },
       {
-        caption: 'Módulos protegidos',
+        caption: 'Perfis configurados',
         icon: 'dashboard',
-        title: 'Módulos',
-        value: '06',
+        title: 'Tipos',
+        value: pad2(perfis.length),
       },
       {
         caption: 'Usuários vinculados',
@@ -77,10 +82,10 @@ export function AdminRolesPage() {
         value: pad2(totalVinculos),
       },
       {
-        caption: 'Revisões neste mês',
+        caption: 'Sem usuários vinculados',
         icon: 'reports',
-        title: 'Revisões',
-        value: '09',
+        title: 'Vazios',
+        value: pad2(perfisSemVinculo),
       },
     ];
   }, [usersData.items.length, perfis]);

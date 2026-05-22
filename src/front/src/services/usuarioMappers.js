@@ -53,7 +53,6 @@ export function mapBackendUserToView(dto) {
     cargo: dto.cargo || null,
     cnh: dto.numeroCnh || null,
     cnhExpiry: dto.validadeCnh || null,
-    lastAccess: '—',
     dataAdmissao: dto.dataAdmissao || null,
     tipoCadastro: dto.tipoCadastro || null,
   };

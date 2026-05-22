@@ -32,7 +32,7 @@ async function request(path, options = {}) {
     const msg =
       (data && typeof data.mensagem === 'string' && data.mensagem) ||
       (data && typeof data.message === 'string' && data.message) ||
-      `Falha na requisicao (${res.status})`;
+      `Falha na requisição (${res.status})`;
     throw new Error(msg);
   }
 
