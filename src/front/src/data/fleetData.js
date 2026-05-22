@@ -145,6 +145,11 @@ export const fleetVehicles = [
   },
 ];
 
+export const driverNavigationItems = [
+  { end: true, icon: 'check', label: 'Minhas viagens', to: '/motorista/:motoristaId' },
+  { icon: 'reports', label: 'Historico', to: '/motorista/:motoristaId/historico' },
+];
+
 export const vehicleFormOptions = {
   licenseCategories: ['A', 'B', 'C', 'D', 'E'],
   statuses: ['Ativo', 'Manutenção', 'Reservado', 'Inativo'],

@@ -317,7 +317,9 @@ export function Icon({ className, name }) {
       aria-hidden="true"
       className={className}
       fill="none"
+      height="1em"
       viewBox="0 0 24 24"
+      width="1em"
       xmlns="http://www.w3.org/2000/svg"
     >
       {iconMap[name] ?? iconMap.dashboard}

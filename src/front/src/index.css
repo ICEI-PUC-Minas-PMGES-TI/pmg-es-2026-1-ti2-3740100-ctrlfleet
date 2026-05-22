@@ -986,6 +986,23 @@ a {
   color: var(--success);
 }
 
+.status-badge--aprovada,
+.status-badge--em-uso {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-badge--solicitada {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.status-badge--reprovada,
+.status-badge--cancelada {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .document-pills,
 .table-actions {
   display: flex;
@@ -2158,6 +2175,329 @@ a {
   font-weight: 600;
 }
 
+/* ===================================================
+   JORNADA DO MOTORISTA E RESERVAS
+   =================================================== */
+
+.motorista-page {
+  max-width: 1280px;
+}
+
+.stats-grid--compact {
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+}
+
+.driver-required-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.driver-required-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 92px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.driver-required-item svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin-top: 2px;
+  color: var(--accent);
+}
+
+.driver-required-item strong,
+.driver-required-item span {
+  display: block;
+}
+
+.driver-required-item strong {
+  margin-bottom: 4px;
+  color: var(--foreground);
+}
+
+.driver-required-item span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.driver-reservation-list {
+  display: grid;
+  gap: 16px;
+}
+
+.driver-reservation-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.driver-reservation-card__main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.driver-reservation-card__main > div {
+  min-width: 0;
+}
+
+.driver-reservation-card__kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 6px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.driver-reservation-card h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+.driver-reservation-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.driver-reservation-card__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.driver-reservation-card__meta > div {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.78);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-reservation-card__meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.driver-reservation-card__meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.driver-required-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(213, 141, 33, 0.24);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.driver-required-banner svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin-top: 2px;
+}
+
+.driver-required-banner strong,
+.driver-required-banner span {
+  display: block;
+}
+
+.driver-required-banner strong {
+  margin-bottom: 2px;
+  color: #8a5a12;
+}
+
+.driver-required-banner span {
+  color: #725116;
+  font-size: 0.9rem;
+}
+
+.driver-required-banner--warning {
+  margin-top: 2px;
+}
+
+.driver-checklist-form {
+  display: grid;
+  gap: 18px;
+}
+
+.driver-trip-summary {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 12px;
+}
+
+.driver-trip-summary > div,
+.driver-mileage-field,
+.driver-checklist-progress,
+.driver-checklist-item {
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.driver-trip-summary > div {
+  padding: 14px 16px;
+}
+
+.driver-trip-summary strong,
+.driver-trip-summary span {
+  display: block;
+}
+
+.driver-trip-summary strong {
+  margin-bottom: 4px;
+}
+
+.driver-trip-summary span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.driver-mileage-field {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+}
+
+.driver-mileage-field span,
+.driver-checklist-item label > span:first-child {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.driver-mileage-field input,
+.driver-checklist-item input,
+.driver-checklist-item select {
+  width: 100%;
+  min-height: 46px;
+  border: 1.5px solid #cfd6e3;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--foreground);
+  outline: none;
+  padding: 0 12px;
+}
+
+.driver-mileage-field input:focus,
+.driver-checklist-item input:focus,
+.driver-checklist-item select:focus {
+  border-color: rgba(207, 78, 54, 0.65);
+  box-shadow: 0 0 0 3px rgba(207, 78, 54, 0.12);
+}
+
+.driver-checklist-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.driver-checklist-progress span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.driver-checklist-progress strong {
+  color: var(--accent);
+}
+
+.driver-checklist-list {
+  display: grid;
+  gap: 12px;
+}
+
+.driver-checklist-item {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1.1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+}
+
+.driver-checklist-item > label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.driver-checklist-item input[type="checkbox"] {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+  accent-color: var(--accent);
+}
+
+.driver-critical-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.driver-checklist-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.driver-submit-hint {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.reservation-decision-modal {
+  display: grid;
+  gap: 16px;
+}
+
 .registro-uso-erro p {
   margin: 0;
 }
@@ -3029,6 +3369,14 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .stats-grid--compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .driver-reservation-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .admin-pending-item {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -3046,6 +3394,15 @@ a {
 }
 
 @media (max-width: 920px) {
+  .driver-required-grid,
+  .driver-trip-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-checklist-item {
+    grid-template-columns: 1fr;
+  }
+
   .admin-dashboard__toolbar {
     flex-direction: column;
     align-items: flex-start;
@@ -3076,6 +3433,27 @@ a {
 }
 
 @media (max-width: 640px) {
+  .stats-grid--compact,
+  .driver-reservation-card__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-reservation-card__main,
+  .driver-checklist-progress {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .driver-checklist-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .driver-submit-hint,
+  .driver-checklist-actions .action-button {
+    width: 100%;
+  }
+
   .admin-modal-list {
     grid-template-columns: 1fr;
   }

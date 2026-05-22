@@ -1,0 +1,120 @@
+package com.ctrlfleet.api.domain.model;
+
+import com.ctrlfleet.api.domain.enums.StatusReserva;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "reservas")
+public class Reserva {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_reserva")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_veiculo", nullable = false)
+    private Veiculo veiculo;
+
+    @Column(name = "datahora_solicitacao", nullable = false)
+    private LocalDateTime dataHoraSolicitacao;
+
+    @Column(name = "datahora_inicio_prevista", nullable = false)
+    private LocalDateTime dataHoraInicioPrevista;
+
+    @Column(name = "datahora_fim_estimada", nullable = false)
+    private LocalDateTime dataHoraFimEstimada;
+
+    @Column(nullable = false)
+    private String destino;
+
+    @Column(nullable = false)
+    private String origem;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_reserva", nullable = false, length = 30)
+    private StatusReserva statusReserva = StatusReserva.SOLICITADA;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public Veiculo getVeiculo() {
+        return veiculo;
+    }
+
+    public LocalDateTime getDataHoraSolicitacao() {
+        return dataHoraSolicitacao;
+    }
+
+    public LocalDateTime getDataHoraInicioPrevista() {
+        return dataHoraInicioPrevista;
+    }
+
+    public LocalDateTime getDataHoraFimEstimada() {
+        return dataHoraFimEstimada;
+    }
+
+    public String getDestino() {
+        return destino;
+    }
+
+    public String getOrigem() {
+        return origem;
+    }
+
+    public StatusReserva getStatusReserva() {
+        return statusReserva;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public void setVeiculo(Veiculo veiculo) {
+        this.veiculo = veiculo;
+    }
+
+    public void setDataHoraSolicitacao(LocalDateTime dataHoraSolicitacao) {
+        this.dataHoraSolicitacao = dataHoraSolicitacao;
+    }
+
+    public void setDataHoraInicioPrevista(LocalDateTime dataHoraInicioPrevista) {
+        this.dataHoraInicioPrevista = dataHoraInicioPrevista;
+    }
+
+    public void setDataHoraFimEstimada(LocalDateTime dataHoraFimEstimada) {
+        this.dataHoraFimEstimada = dataHoraFimEstimada;
+    }
+
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
+
+    public void setOrigem(String origem) {
+        this.origem = origem;
+    }
+
+    public void setStatusReserva(StatusReserva statusReserva) {
+        this.statusReserva = statusReserva;
+    }
+}
