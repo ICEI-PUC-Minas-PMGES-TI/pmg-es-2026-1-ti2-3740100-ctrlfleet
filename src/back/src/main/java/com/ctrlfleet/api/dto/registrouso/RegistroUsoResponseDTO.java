@@ -15,6 +15,8 @@ public class RegistroUsoResponseDTO {
     private LocalDateTime dataRetorno;
     private Double quilometragemRetorno;
     private String observacoesVeiculo;
+    private Double quilometragemPercorrida;
+    private String statusReserva;
 
     public RegistroUsoResponseDTO() {
     }
@@ -30,7 +32,9 @@ public class RegistroUsoResponseDTO {
             Double quilometragemSaida,
             LocalDateTime dataRetorno,
             Double quilometragemRetorno,
-            String observacoesVeiculo) {
+            String observacoesVeiculo,
+            Double quilometragemPercorrida,
+            String statusReserva) {
         this.id = id;
         this.idVeiculo = idVeiculo;
         this.placaVeiculo = placaVeiculo;
@@ -42,6 +46,8 @@ public class RegistroUsoResponseDTO {
         this.dataRetorno = dataRetorno;
         this.quilometragemRetorno = quilometragemRetorno;
         this.observacoesVeiculo = observacoesVeiculo;
+        this.quilometragemPercorrida = quilometragemPercorrida;
+        this.statusReserva = statusReserva;
     }
 
     public Long getId() {
@@ -86,5 +92,13 @@ public class RegistroUsoResponseDTO {
 
     public String getObservacoesVeiculo() {
         return observacoesVeiculo;
+    }
+
+    public Double getQuilometragemPercorrida() {
+        return quilometragemPercorrida;
+    }
+
+    public String getStatusReserva() {
+        return statusReserva;
     }
 }

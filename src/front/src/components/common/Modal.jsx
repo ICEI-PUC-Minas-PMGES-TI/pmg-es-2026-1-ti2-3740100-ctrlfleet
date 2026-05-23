@@ -34,10 +34,12 @@ export function Modal({
     return null;
   }
 
+  const overlayClass = size === 'map' ? 'modal-overlay modal-overlay--map' : 'modal-overlay';
+
   return (
     <div
       aria-modal="true"
-      className="modal-overlay"
+      className={overlayClass}
       onClick={onClose}
       role="dialog"
     >

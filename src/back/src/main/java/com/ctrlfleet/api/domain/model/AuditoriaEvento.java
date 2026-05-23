@@ -2,10 +2,13 @@ package com.ctrlfleet.api.domain.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "auditoria_eventos")
 public class AuditoriaEvento {
+
+    private static final ZoneId ZONA_BRASILIA = ZoneId.of("America/Sao_Paulo");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +48,7 @@ public class AuditoriaEvento {
         this.severidade = severidade;
         this.ip = ip;
         this.detalhe = detalhe;
-        this.criadoEm = LocalDateTime.now();
+        this.criadoEm = LocalDateTime.now(ZONA_BRASILIA);
     }
 
     public Long getId() {
