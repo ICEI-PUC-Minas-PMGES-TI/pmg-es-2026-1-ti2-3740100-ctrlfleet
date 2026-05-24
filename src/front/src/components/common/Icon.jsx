@@ -206,6 +206,24 @@ const iconMap = {
       />
     </>
   ),
+  map: (
+    <>
+      <path
+        d="M4.5 6.8c0-1.2 1-2.1 2.2-1.9l11.1 2.2c.9.2 1.6 1 1.6 1.9v8.4c0 1.2-1 2.1-2.2 1.9L6.7 17.1c-.9-.2-1.6-1-1.6-1.9V6.8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M9.2 8.8c0 1.5-1.2 2.7-2.7 2.7S3.8 10.3 3.8 8.8s1.2-2.7 2.7-2.7 2.7 1.2 2.7 2.7ZM20.2 11.8c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7 1.2-2.7 2.7-2.7 2.7 1.2 2.7 2.7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path d="M7.2 10.2 16.8 13.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </>
+  ),
   maintenance: (
     <path
       d="m13.8 4.3 5.9 5.9-2.1 2.1-5.9-5.9a3.5 3.5 0 1 0-4.9 4.9l5.9 5.9-2.1 2.1-5.9-5.9a6.5 6.5 0 1 1 9.1-9.1Z"

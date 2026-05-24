@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
-import { VehicleTable } from '../../../components/gestor/VehicleTable';
+import { FleetMapModal } from '../../../components/gestor/FleetMapModal';
+import { VehicleCardGrid } from '../../../components/gestor/VehicleCardGrid';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
@@ -22,6 +23,7 @@ export function FleetPage() {
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
 
+  const [mapModalOpen, setMapModalOpen] = useState(false);
   const [vehiclesData, setVehiclesData] = useState({
     loading: true,
     error: null,
@@ -93,30 +95,35 @@ export function FleetPage() {
         icon: 'fleet',
         title: 'Total',
         value: pad2(items.length),
+        variant: 'total',
       },
       {
         caption: 'Prontos para uso',
         icon: 'check',
         title: 'Ativos',
         value: pad2(count((item) => item.status === 'Ativo')),
+        variant: 'active',
       },
       {
         caption: 'Em oficina ou revisão',
         icon: 'maintenance',
         title: 'Manutenção',
         value: pad2(count((item) => item.status === 'Manutenção')),
+        variant: 'maintenance',
       },
       {
         caption: 'Fora de operação',
         icon: 'close',
         title: 'Inativos',
         value: pad2(count((item) => item.status === 'Inativo')),
+        variant: 'inactive',
       },
       {
         caption: 'Com documento vencido',
         icon: 'alert',
         title: 'Bloqueados',
         value: pad2(count((item) => item.status === 'Bloqueado')),
+        variant: 'blocked',
       },
     ];
   }, [vehiclesData.items]);
@@ -127,15 +134,18 @@ export function FleetPage() {
         actionIcon="plus"
         actionLabel="Cadastrar veículo"
         actionTo="/gestor/frota/novo"
+        onSecondaryAction={() => setMapModalOpen(true)}
+        secondaryActionIcon="map"
+        secondaryActionLabel="Mapa da frota"
         subtitle="Gerenciamento de veículos cadastrados"
         title="Frota"
       />
 
       {location.state?.flashMessage ? <div className="flash-banner">{location.state.flashMessage}</div> : null}
 
-      <section className="stats-grid">
+      <section aria-label="Resumo da frota" className="stats-grid stats-grid--fleet">
         {summaryCards.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
+          <StatCard key={stat.title} layout="vertical" {...stat} />
         ))}
       </section>
 
@@ -172,13 +182,19 @@ export function FleetPage() {
               <span>
                 Mostrando {filteredVehicles.length} de {vehiclesData.items.length} veículos
               </span>
-              <span>Atualização documental e visualização detalhada disponíveis em cada linha.</span>
+              <span>Clique em um card para visualizar, editar ou desativar o veículo.</span>
             </div>
 
-            <VehicleTable onDeactivate={handleDeactivateVehicle} vehicles={filteredVehicles} />
+            <VehicleCardGrid onDeactivate={handleDeactivateVehicle} vehicles={filteredVehicles} />
           </>
         )}
       </SectionCard>
+
+      <FleetMapModal
+        onClose={() => setMapModalOpen(false)}
+        open={mapModalOpen}
+        vehicles={vehiclesData.items}
+      />
     </div>
   );
 }

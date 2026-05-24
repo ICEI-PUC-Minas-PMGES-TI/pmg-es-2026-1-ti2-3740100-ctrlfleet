@@ -50,6 +50,9 @@ public class Reserva {
     @Column(name = "status_reserva", nullable = false, length = 30)
     private StatusReserva statusReserva = StatusReserva.SOLICITADA;
 
+    public Reserva() {
+    }
+
     public Long getId() {
         return id;
     }

@@ -8,7 +8,14 @@ export function LoginPage() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    navigate(profile === 'admin' ? '/admin/dashboard' : '/gestor/dashboard');
+
+    const profileHome = {
+      admin: '/admin/dashboard',
+      gestor: '/gestor/dashboard',
+      solicitante: '/solicitante/reservas',
+    };
+
+    navigate(profileHome[profile]);
   }
 
   return (
@@ -40,6 +47,13 @@ export function LoginPage() {
               type="button"
             >
               Admin
+            </button>
+            <button
+              className={profile === 'solicitante' ? 'is-active' : ''}
+              onClick={() => setProfile('solicitante')}
+              type="button"
+            >
+              Solicitante
             </button>
           </div>
 

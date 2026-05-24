@@ -96,6 +96,31 @@ export function buildMockDocuments(dto) {
   });
 }
 
+const FLEET_MAP_CENTER = { lat: -19.9167, lng: -43.9345 };
+
+export function resolveVehicleLocation(dto) {
+  const lat = dto?.latitude ?? dto?.lat ?? dto?.localizacao?.latitude;
+  const lng = dto?.longitude ?? dto?.lng ?? dto?.localizacao?.longitude;
+
+  if (lat != null && lng != null) {
+    return {
+      lat: Number(lat),
+      lng: Number(lng),
+      source: 'api',
+    };
+  }
+
+  const id = Number(dto?.id) || 1;
+  const angle = ((id * 47) % 360) * (Math.PI / 180);
+  const radius = 0.006 + (id % 6) * 0.0018;
+
+  return {
+    lat: FLEET_MAP_CENTER.lat + radius * Math.cos(angle),
+    lng: FLEET_MAP_CENTER.lng + radius * Math.sin(angle),
+    source: 'mock',
+  };
+}
+
 export function mapBackendVehicleToView(dto) {
   const documents =
     Array.isArray(dto.documentos) && dto.documentos.length > 0
@@ -113,5 +138,6 @@ export function mapBackendVehicleToView(dto) {
     status,
     licenseCategory: inferLicenseCategory(dto),
     documents,
+    location: resolveVehicleLocation(dto),
   };
 }

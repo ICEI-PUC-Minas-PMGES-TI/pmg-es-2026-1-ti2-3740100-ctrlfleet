@@ -7,6 +7,10 @@ export const fleetNavigationItems = [
   { icon: 'reports', label: 'Relatórios', to: '/gestor/relatorios' },
 ];
 
+export const requesterNavigationItems = [
+  { icon: 'reservations', label: 'Minhas reservas', to: '/solicitante/reservas' },
+];
+
 export const dashboardStats = [
   { caption: 'veículos ativos hoje', icon: 'fleet', title: 'Disponíveis', value: '42' },
   { caption: 'precisam de atenção', icon: 'alert', title: 'Alertas', value: '07' },
