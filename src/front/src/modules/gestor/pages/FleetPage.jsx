@@ -10,20 +10,7 @@ import { StatCard } from '../../../components/common/StatCard';
 import { statusTabs, vehicleTypeTabs } from '../../../data/fleetData';
 import { desativarVeiculo, listarVeiculos } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView, pad2 } from '../../../services/veiculoMappers';
-
-function filterByStatus(vehicle, status) {
-  if (status === 'Todos') {
-    return true;
-  }
-  return vehicle.status === status;
-}
-
-function filterByType(vehicle, type) {
-  if (type === 'Todos') {
-    return true;
-  }
-  return vehicle.vehicleTypeLabel === type;
-}
+import { filterFleetVehicles } from '../../../utils/fleetVehicleFilters';
 
 export function FleetPage() {
   const location = useLocation();
@@ -81,22 +68,15 @@ export function FleetPage() {
     }
   }
 
-  const filteredVehicles = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return vehiclesData.items.filter((vehicle) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        (vehicle.plate || '').toLowerCase().includes(normalizedSearch) ||
-        (vehicle.model || '').toLowerCase().includes(normalizedSearch) ||
-        (vehicle.marca || '').toLowerCase().includes(normalizedSearch) ||
-        (vehicle.vehicleTypeLabel || '').toLowerCase().includes(normalizedSearch);
-
-      return (
-        matchesSearch && filterByStatus(vehicle, selectedStatus) && filterByType(vehicle, selectedType)
-      );
-    });
-  }, [search, selectedStatus, selectedType, vehiclesData.items]);
+  const filteredVehicles = useMemo(
+    () =>
+      filterFleetVehicles(vehiclesData.items, {
+        search,
+        status: selectedStatus,
+        type: selectedType,
+      }),
+    [search, selectedStatus, selectedType, vehiclesData.items],
+  );
 
   const summaryCards = useMemo(() => {
     const items = vehiclesData.items;

@@ -31,16 +31,20 @@ export function createFleetCarIcon({ bearing = 0, isSelected, placeType, plate, 
   });
 }
 
+const GARAGE_ICON_WIDTH = 72;
+const GARAGE_ICON_HEIGHT = 54;
+
 export function createGarageIcon() {
   return L.divIcon({
-    className: 'fleet-leaflet-marker-wrap',
+    className: 'fleet-leaflet-marker-wrap fleet-leaflet-marker-wrap--garage',
     html: `
       <div class="fleet-leaflet-garage">
         <span class="fleet-leaflet-garage__icon" aria-hidden="true">🏢</span>
         <span class="fleet-leaflet-garage__label">Garagem</span>
       </div>
     `,
-    iconSize: [80, 40],
-    iconAnchor: [40, 40],
+    iconSize: [GARAGE_ICON_WIDTH, GARAGE_ICON_HEIGHT],
+    iconAnchor: [GARAGE_ICON_WIDTH / 2, GARAGE_ICON_HEIGHT],
+    popupAnchor: [0, -GARAGE_ICON_HEIGHT],
   });
 }

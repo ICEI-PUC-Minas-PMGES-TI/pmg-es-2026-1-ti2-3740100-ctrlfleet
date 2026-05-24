@@ -1,7 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../common/Icon';
 import { StatusBadge } from '../common/StatusBadge';
+import { statusTabs, vehicleTypeTabs } from '../../data/fleetData';
 import { applyGarageLocations, FLEET_GARAGE } from '../../services/fleetMapLocations';
+import {
+  filterFleetVehicles,
+  hasActiveFleetFilters,
+} from '../../utils/fleetVehicleFilters';
+import { resolveVehicleImageUrl } from '../../utils/vehicleImage';
 import { FleetLeafletMap } from './FleetLeafletMap';
 import { FleetMapVehicleDetail } from './FleetMapVehicleDetail';
 
@@ -20,23 +26,42 @@ function SummaryChip({ count, icon, label, modifier }) {
 export function FleetMapView({ variant = 'default', vehicles = [] }) {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [search, setSearch] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('Todos');
+  const [selectedType, setSelectedType] = useState('Todos');
   const isModal = variant === 'modal';
 
   const mapVehicles = useMemo(() => applyGarageLocations(vehicles), [vehicles]);
 
-  const filteredList = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    return mapVehicles.filter((vehicle) => {
-      if (term.length === 0) return true;
-      return (
-        (vehicle.plate || '').toLowerCase().includes(term) ||
-        (vehicle.model || '').toLowerCase().includes(term)
-      );
-    });
-  }, [mapVehicles, search]);
+  const filteredList = useMemo(
+    () =>
+      filterFleetVehicles(mapVehicles, {
+        search,
+        status: selectedStatus,
+        type: selectedType,
+      }),
+    [mapVehicles, search, selectedStatus, selectedType],
+  );
+
+  const activeFilters = hasActiveFleetFilters({
+    search,
+    status: selectedStatus,
+    type: selectedType,
+  });
+
+  useEffect(() => {
+    if (selectedVehicle && !filteredList.some((vehicle) => vehicle.id === selectedVehicle.id)) {
+      setSelectedVehicle(null);
+    }
+  }, [filteredList, selectedVehicle]);
 
   function handleSelectVehicle(vehicle) {
     setSelectedVehicle(vehicle || null);
+  }
+
+  function clearFilters() {
+    setSearch('');
+    setSelectedStatus('Todos');
+    setSelectedType('Todos');
   }
 
   if (vehicles.length === 0) {
@@ -53,7 +78,7 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
       {isModal ? (
         <div className="fleet-map-summary" aria-label="Resumo da frota">
           <SummaryChip count={mapVehicles.length} icon="fleet" label="Veículos" modifier="total" />
-          <SummaryChip count={mapVehicles.length} icon="fleet" label="Na garagem" modifier="garage" />
+          <SummaryChip count={filteredList.length} icon="fleet" label="Exibidos" modifier="garage" />
         </div>
       ) : null}
 
@@ -61,17 +86,27 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
         <div className="fleet-map-layout__map">
           <div className="fleet-map-toolbar">
             <p className="fleet-map-toolbar__context">
-              Todos os veículos em <strong>{FLEET_GARAGE.label}</strong> · OpenStreetMap
+              {filteredList.length === mapVehicles.length ? (
+                <>
+                  Todos os veículos em <strong>{FLEET_GARAGE.label}</strong>
+                </>
+              ) : (
+                <>
+                  <strong>{filteredList.length}</strong> de {mapVehicles.length} veículos em{' '}
+                  <strong>{FLEET_GARAGE.label}</strong>
+                </>
+              )}{' '}
+              · OpenStreetMap
             </p>
           </div>
 
           <FleetLeafletMap
             onSelectVehicle={handleSelectVehicle}
             selectedVehicle={selectedVehicle}
-            vehicles={mapVehicles}
+            vehicles={filteredList}
           />
 
-          {selectedVehicle ? (
+          {selectedVehicle && !isModal ? (
             <div className="modal-overlay" style={{ zIndex: 1000 }}>
               <div className="modal-shell modal-shell--md" role="dialog" aria-modal="true">
                 <FleetMapVehicleDetail onClose={() => setSelectedVehicle(null)} vehicle={selectedVehicle} />
@@ -90,26 +125,81 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
         <aside className="fleet-map-sidebar">
           <div className="fleet-map-sidebar__header">
             <div>
-              <strong>Veículos ({filteredList.length})</strong>
+              <strong>Veículos na garagem</strong>
               <span className="fleet-map-sidebar__note">{FLEET_GARAGE.label}</span>
             </div>
           </div>
 
-          <div className="fleet-map-sidebar__filters">
-            <label className="fleet-map-sidebar__search">
-              <Icon name="search" />
+          <div className="fleet-map-sidebar__filters fleet-map-sidebar__filters--enhanced">
+            <label className="search-field fleet-map-sidebar__search-field" htmlFor="fleet-map-search">
+              <Icon className="search-field__icon" name="search" />
               <input
+                id="fleet-map-search"
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar placa ou modelo"
+                placeholder="Buscar por placa, modelo, marca ou tipo..."
                 type="search"
                 value={search}
               />
             </label>
+
+            <div aria-label="Filtrar por status" className="fleet-map-sidebar__tabs" role="tablist">
+              {statusTabs.map((tab) => (
+                <button
+                  aria-pressed={selectedStatus === tab}
+                  className={`fleet-map-sidebar__tab ${selectedStatus === tab ? 'is-active' : ''}`}
+                  key={tab}
+                  onClick={() => setSelectedStatus(tab)}
+                  type="button"
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <div className="fleet-map-sidebar__type-row">
+              <span className="fleet-map-sidebar__type-label" id="fleet-map-type-label">
+                Tipo
+              </span>
+              <label className="select-field fleet-map-sidebar__type-select" htmlFor="fleet-map-type">
+                <select
+                  aria-labelledby="fleet-map-type-label"
+                  id="fleet-map-type"
+                  onChange={(event) => setSelectedType(event.target.value)}
+                  value={selectedType}
+                >
+                  {vehicleTypeTabs.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="fleet-map-sidebar__filter-meta">
+              <span className="fleet-map-sidebar__filter-count">
+                <Icon name="fleet" />
+                {filteredList.length} de {mapVehicles.length} no mapa
+              </span>
+              {activeFilters ? (
+                <button className="fleet-map-sidebar__clear" onClick={clearFilters} type="button">
+                  Limpar filtros
+                </button>
+              ) : null}
+            </div>
           </div>
 
           <ul className="fleet-map-vehicle-list">
             {filteredList.length === 0 ? (
-              <li className="fleet-map-vehicle-list__empty">Nenhum veículo encontrado.</li>
+              <li className="fleet-map-vehicle-list__empty">
+                <Icon name="search" />
+                <p>Nenhum veículo encontrado com os filtros atuais.</p>
+                {activeFilters ? (
+                  <button className="fleet-map-sidebar__clear" onClick={clearFilters} type="button">
+                    Limpar filtros
+                  </button>
+                ) : null}
+              </li>
             ) : (
               filteredList.map((vehicle) => (
                 <li key={vehicle.id}>
@@ -117,17 +207,24 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
                     className={[
                       'fleet-map-vehicle-list__item',
                       selectedVehicle?.id === vehicle.id ? 'fleet-map-vehicle-list__item--active' : '',
-                      'fleet-map-vehicle-list__item--garage',
                     ]
                       .filter(Boolean)
                       .join(' ')}
                     onClick={() => handleSelectVehicle(vehicle)}
                     type="button"
                   >
-                    <span className="fleet-map-vehicle-list__dot fleet-map-vehicle-list__dot--garage" />
+                    <img
+                      alt=""
+                      className="fleet-map-vehicle-list__thumb"
+                      loading="lazy"
+                      src={resolveVehicleImageUrl(vehicle)}
+                    />
                     <div className="fleet-map-vehicle-list__main">
                       <span className="fleet-map-vehicle-list__plate">{vehicle.plate}</span>
-                      <span className="fleet-map-vehicle-list__model">Garagem</span>
+                      <span className="fleet-map-vehicle-list__model">{vehicle.model}</span>
+                      {vehicle.vehicleTypeLabel ? (
+                        <span className="fleet-map-vehicle-list__type">{vehicle.vehicleTypeLabel}</span>
+                      ) : null}
                     </div>
                     <StatusBadge label={vehicle.status} />
                   </button>
