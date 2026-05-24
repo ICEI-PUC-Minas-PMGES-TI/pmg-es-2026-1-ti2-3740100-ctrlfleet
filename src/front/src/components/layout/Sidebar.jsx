@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
-import { driverNavigationItems, fleetNavigationItems } from '../../data/fleetData';
+import { driverNavigationItems, fleetNavigationItems, requesterNavigationItems } from '../../data/fleetData';
 import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const isAdminArea = location.pathname.startsWith('/admin');
   const isDriverArea = location.pathname.startsWith('/motorista');
+  const isRequesterArea = location.pathname.startsWith('/solicitante');
   const motoristaId = location.pathname.match(/^\/motorista\/(\d+)/)?.[1] || '5';
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
 
@@ -20,6 +21,7 @@ export function Sidebar({ isOpen, onClose }) {
       }));
     }
 
+    if (isRequesterArea) return requesterNavigationItems;
     if (!isAdminArea) return fleetNavigationItems;
 
     return adminNavigationItems.map((item) => {
@@ -29,14 +31,25 @@ export function Sidebar({ isOpen, onClose }) {
         badge: pendingUsersCount > 0 ? pendingUsersCount : null,
       };
     });
-  }, [isAdminArea, isDriverArea, motoristaId, pendingUsersCount]);
+  }, [isAdminArea, isDriverArea, isRequesterArea, motoristaId, pendingUsersCount]);
 
-  const navigationLabel = isAdminArea ? 'Administracao' : isDriverArea ? 'Motorista' : 'Gestor de Frotas';
-  const accessLabel = isAdminArea ? 'Area administrativa' : isDriverArea ? 'Area do motorista' : 'Area do gestor';
+  const navigationLabel = isAdminArea
+    ? 'Administração'
+    : isDriverArea
+      ? 'Motorista'
+      : isRequesterArea
+        ? 'Solicitante'
+        : 'Gestor de Frotas';
+  const accessLabel = isAdminArea
+    ? 'Área administrativa'
+    : isDriverArea
+      ? 'Área do motorista'
+      : isRequesterArea
+        ? 'Área do solicitante'
+        : 'Área do gestor';
 
   useEffect(() => {
     if (!isAdminArea) {
-      setPendingUsersCount(0);
       return undefined;
     }
 
@@ -100,11 +113,15 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">CF</span>
+            <span className="avatar-initials">
+              {isAdminArea ? 'AS' : isRequesterArea ? 'MS' : isDriverArea ? 'CF' : 'AC'}
+            </span>
           </span>
           <div>
-            <strong>CtrlFleet</strong>
-            <span>{accessLabel}</span>
+            <strong>
+              {isAdminArea ? 'Ana Souza' : isRequesterArea ? 'Marina Silva' : isDriverArea ? 'CtrlFleet' : 'Ana Costa'}
+            </strong>
+            <span>{isDriverArea ? accessLabel : isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
           </div>
         </div>
         <Link className="sidebar__logout" to="/login">

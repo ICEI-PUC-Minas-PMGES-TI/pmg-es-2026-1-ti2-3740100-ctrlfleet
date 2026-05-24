@@ -7,6 +7,7 @@ const initialFormState = {
   year: '',
   secretaria: 'Garagem Central',
   status: 'Ativo',
+  tipoVeiculo: 'HATCH',
   licenseCategory: 'B',
   driverId: '',
   ipvaDueDate: '',

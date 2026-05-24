@@ -1,6 +1,7 @@
 package com.ctrlfleet.api.dto.veiculo;
 
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
+import com.ctrlfleet.api.domain.enums.TipoVeiculo;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,8 @@ public class VeiculoRequestDTO {
 
     private StatusVeiculo status;
 
+    private TipoVeiculo tipoVeiculo;
+
     @Valid private List<DocumentacaoRequestDTO> documentos = new ArrayList<>();
 
     public String getPlaca() {
@@ -50,6 +53,10 @@ public class VeiculoRequestDTO {
 
     public StatusVeiculo getStatus() {
         return status;
+    }
+
+    public TipoVeiculo getTipoVeiculo() {
+        return tipoVeiculo;
     }
 
     public List<DocumentacaoRequestDTO> getDocumentos() {

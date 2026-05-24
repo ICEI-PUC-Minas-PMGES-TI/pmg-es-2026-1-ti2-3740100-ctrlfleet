@@ -58,6 +58,9 @@ public class VeiculoService {
         if (dto.getStatus() != null) {
             veiculo.setStatus(dto.getStatus());
         }
+        if (dto.getTipoVeiculo() != null) {
+            veiculo.setTipoVeiculo(dto.getTipoVeiculo());
+        }
 
         Veiculo salvo = veiculoRepository.save(veiculo);
         if (dto.getDocumentos() != null) {
@@ -90,6 +93,9 @@ public class VeiculoService {
         veiculo.setAno(dto.getAno());
         if (dto.getStatus() != null) {
             veiculo.setStatus(dto.getStatus());
+        }
+        if (dto.getTipoVeiculo() != null) {
+            veiculo.setTipoVeiculo(dto.getTipoVeiculo());
         }
 
         Veiculo salvo = veiculoRepository.save(veiculo);

@@ -1,6 +1,7 @@
 package com.ctrlfleet.api.dto.veiculo;
 
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
+import com.ctrlfleet.api.domain.enums.TipoVeiculo;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class VeiculoResponseDTO {
     private String secretaria;
     private int ano;
     private StatusVeiculo status;
+    private TipoVeiculo tipoVeiculo;
     private List<DocumentacaoResponseDTO> documentos = new ArrayList<>();
 
     public VeiculoResponseDTO() {}
@@ -34,6 +36,7 @@ public class VeiculoResponseDTO {
         dto.secretaria = veiculo.getSecretaria();
         dto.ano = veiculo.getAno();
         dto.status = veiculo.getStatus();
+        dto.tipoVeiculo = veiculo.getTipoVeiculo();
         return dto;
     }
 
@@ -69,6 +72,10 @@ public class VeiculoResponseDTO {
 
     public StatusVeiculo getStatus() {
         return status;
+    }
+
+    public TipoVeiculo getTipoVeiculo() {
+        return tipoVeiculo;
     }
 
     public List<DocumentacaoResponseDTO> getDocumentos() {

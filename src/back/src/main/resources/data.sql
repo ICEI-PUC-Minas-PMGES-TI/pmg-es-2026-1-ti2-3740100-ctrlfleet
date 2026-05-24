@@ -156,6 +156,9 @@ SET secretaria = 'Garagem Central'
 WHERE secretaria IS NULL OR btrim(secretaria) = '';
 ALTER TABLE IF EXISTS veiculos ALTER COLUMN secretaria SET NOT NULL;
 
+ALTER TABLE IF EXISTS veiculos ADD COLUMN IF NOT EXISTS tipo_veiculo varchar(30);
+UPDATE veiculos SET tipo_veiculo = 'SEDAN' WHERE tipo_veiculo IS NULL OR btrim(tipo_veiculo) = '';
+
 DO $$
 BEGIN
   IF EXISTS (
@@ -171,18 +174,75 @@ BEGIN
   END IF;
 END $$;
 
-INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria) VALUES
-(1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central'),
-(2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central'),
-(3,  'LMN9C12', 'Corsa',             'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central'),
-(4,  'VXY8D01', 'March',             'Nissan',     2023, 'DISPONIVEL', 'Garagem Central'),
-(5,  'DEF3E56', 'Prisma',            'Chevrolet',  2020, 'EM_USO', 'Garagem Central'),
-(6,  'GHI7F90', 'Gol',               'Volkswagen', 2022, 'EM_USO', 'Garagem Central'),
-(7,  'JKL2G45', 'Celta',             'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central'),
-(8,  'OPQ6H89', 'Fit',               'Honda',      2021, 'MANUTENCAO', 'Garagem Central'),
-(9,  'RST0I23', 'Palio',             'Fiat',       2015, 'DESATIVADO', 'Garagem Central'),
-(10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL', 'Garagem Central')
-ON CONFLICT DO NOTHING;
+INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_veiculo) VALUES
+(1,  'ABC1A23', 'Onix',         'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(2,  'XYZ5B67', 'HB20',         'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(3,  'LMN9C12', 'Corsa',        'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(4,  'VXY8D01', 'March',        'Nissan',     2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'EM_USO',     'Garagem Central',               'SEDAN'),
+(6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'EM_USO',     'Garagem Central',               'HATCH'),
+(7,  'JKL2G45', 'Celta',        'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central',               'HATCH'),
+(8,  'OPQ6H89', 'Fit',          'Honda',      2021, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
+(9,  'RST0I23', 'Palio',        'Fiat',       2015, 'DESATIVADO', 'Garagem Central',               'HATCH'),
+(10, 'UVW4J56', 'Strada',       'Fiat',       2024, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(11, 'RKM1A11', 'Polo',         'Volkswagen', 2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(12, 'TBN2B22', 'Argo',         'Fiat',       2022, 'DISPONIVEL', 'Secretaria de Educacao',      'HATCH'),
+(13, 'FCH3C33', 'Mobi',         'Fiat',       2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(14, 'JLP4D44', 'Kwid',         'Renault',    2023, 'EM_USO',     'Secretaria de Obras',         'HATCH'),
+(15, 'MNR5E55', 'Sandero',      'Renault',    2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(16, 'QST6F66', 'Ka',           'Ford',       2020, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'HATCH'),
+(17, 'VWX7G77', 'Yaris',        'Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(18, 'YZA8H88', 'Etios',        'Toyota',     2019, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
+(19, 'BCD9I99', 'Up!',          'Volkswagen', 2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(20, 'EFG0J00', 'Picanto',      'Kia',        2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(21, 'HIJ1K11', 'Compass',      'Jeep',       2024, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(22, 'KLM2L22', 'Creta',        'Hyundai',    2023, 'DISPONIVEL', 'Secretaria de Educacao',      'SUV'),
+(23, 'NOP3M33', 'Tracker',      'Chevrolet',  2022, 'EM_USO',     'Garagem Central',               'SUV'),
+(24, 'QRS4N44', 'T-Cross',      'Volkswagen', 2023, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(25, 'TUV5O55', 'Duster',       'Renault',    2021, 'DISPONIVEL', 'Secretaria de Obras',         'SUV'),
+(26, 'WXY6P66', 'Corolla Cross','Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(27, 'ZAB7Q77', 'HR-V',         'Honda',      2022, 'DISPONIVEL', 'Secretaria de Saude',         'SUV'),
+(28, 'CDE8R88', 'Sportage',     'Kia',        2023, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(29, 'FGH9S99', 'Nivus',        'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(30, 'IJK0T10', 'Sprinter',     'Mercedes-Benz',2022,'DISPONIVEL','Garagem Central',               'VAN'),
+(31, 'LMN1U21', 'Ducato',       'Fiat',       2021, 'DISPONIVEL', 'Secretaria de Educacao',      'VAN'),
+(32, 'OPQ2V32', 'Master',       'Renault',    2023, 'EM_USO',     'Secretaria de Obras',         'VAN'),
+(33, 'RST3W43', 'Daily',        'Iveco',      2020, 'DISPONIVEL', 'Garagem Central',               'VAN'),
+(34, 'UVW4X54', 'Kombi',        'Volkswagen', 2014, 'MANUTENCAO', 'Garagem Central',               'VAN'),
+(35, 'XYZ5Y65', 'Fiorino',      'Fiat',       2022, 'DISPONIVEL', 'Secretaria de Saude',         'VAN'),
+(36, 'ABC6Z76', 'Partner',      'Peugeot',    2021, 'DISPONIVEL', 'Garagem Central',               'VAN'),
+(37, 'DEF7A87', 'Expert',       'Peugeot',    2023, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'VAN'),
+(38, 'GHI8B98', 'OF-1519',      'Mercedes-Benz',2019,'DISPONIVEL','Secretaria de Educacao',      'ONIBUS'),
+(39, 'JKL9C09', 'Volare W9',    'Marcopolo',  2020, 'DISPONIVEL', 'Garagem Central',               'ONIBUS'),
+(40, 'MNO0D10', 'Apache U',     'Volkswagen', 2018, 'EM_USO',     'Secretaria de Obras',         'ONIBUS'),
+(41, 'PQR1E21', 'Paradiso',     'Marcopolo',  2021, 'DISPONIVEL', 'Garagem Central',               'ONIBUS'),
+(42, 'STU2F32', 'Torino',       'Caio',       2022, 'MANUTENCAO', 'Garagem Central',               'ONIBUS'),
+(43, 'VWX3G43', 'Millennium',   'Busscar',    2017, 'DESATIVADO', 'Garagem Central',               'ONIBUS'),
+(44, 'YZA4H54', 'Corolla',      'Toyota',     2023, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(45, 'BCD5I65', 'Civic',        'Honda',      2022, 'DISPONIVEL', 'Secretaria de Saude',         'SEDAN'),
+(46, 'EFG6J76', 'Virtus',       'Volkswagen', 2024, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(47, 'HIJ7K87', 'Cronos',       'Fiat',       2021, 'EM_USO',     'Secretaria de Educacao',      'SEDAN'),
+(48, 'KLM8L98', 'Sentra',       'Nissan',     2022, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(49, 'NOP9M09', 'Jetta',        'Volkswagen', 2020, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(50, 'QRS0N10', 'Cruze',        'Chevrolet',  2023, 'DISPONIVEL', 'Secretaria de Obras',         'SEDAN'),
+(51, 'TUV1O21', 'Logan',        'Renault',    2019, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(52, 'WXY2P32', 'Voyage',       'Volkswagen', 2021, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(53, 'ZAB3Q43', 'Hilux',        'Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(54, 'CDE4R54', 'Ranger',       'Ford',       2023, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'CAMINHONETE'),
+(55, 'FGH5S65', 'S10',          'Chevrolet',  2022, 'EM_USO',     'Garagem Central',               'CAMINHONETE'),
+(56, 'IJK6T76', 'Amarok',       'Volkswagen', 2021, 'DISPONIVEL', 'Secretaria de Obras',         'CAMINHONETE'),
+(57, 'LMN7U87', 'Toro',         'Fiat',       2023, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(58, 'OPQ8V98', 'Frontier',     'Nissan',     2022, 'DISPONIVEL', 'Secretaria de Educacao',      'CAMINHONETE'),
+(59, 'RST9W09', 'L200',         'Mitsubishi', 2020, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(60, 'UVW0X10', 'Saveiro',      'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE')
+ON CONFLICT (id) DO UPDATE SET
+  placa = EXCLUDED.placa,
+  modelo = EXCLUDED.modelo,
+  marca = EXCLUDED.marca,
+  ano = EXCLUDED.ano,
+  status = EXCLUDED.status,
+  secretaria = EXCLUDED.secretaria,
+  tipo_veiculo = EXCLUDED.tipo_veiculo;
 
 -- Avança a sequence do IDENTITY (só se existir; evita erro se pg_get_serial_sequence for NULL).
 DO $$
@@ -242,31 +302,36 @@ ON CONFLICT DO NOTHING;
 -- 6. DOCUMENTACAO
 -- =====================================================================
 INSERT INTO documentacao (id_documento, id_veiculo, tipo_documento, data_vencimento, valor_pago, status_pagamento) VALUES
-(1,  1,  'IPVA',          '2026-04-30', 1450.00, 'PAGO'),
+(1,  1,  'IPVA',          '2024-06-30', 1450.00, 'ATRASADO'),
 (2,  1,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(3,  1,  'SEGURO',        '2026-12-01', 2380.00, 'PAGO'),
-(4,  2,  'IPVA',          '2026-04-30', 1620.00, 'PAGO'),
+(3,  1,  'SEGURO',        '2024-01-15', 2380.00, 'ATRASADO'),
+(4,  2,  'IPVA',          '2024-03-20', 1620.00, 'ATRASADO'),
 (5,  2,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (6,  2,  'SEGURO',        '2027-02-10', 2510.00, 'PAGO'),
 (7,  3,  'IPVA',          '2026-04-30', 980.00,  'PAGO'),
-(8,  3,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PENDENTE'),
-(9,  4,  'IPVA',          '2026-04-30', 1740.00, 'PAGO'),
+(8,  3,  'LICENCIAMENTO', '2024-08-01', 165.00,  'ATRASADO'),
+(9,  4,  'IPVA',          '2024-02-10', 1740.00, 'ATRASADO'),
 (10, 4,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(11, 5,  'IPVA',          '2026-04-30', 1180.00, 'ATRASADO'),
+(11, 5,  'IPVA',          '2026-04-30', 1180.00, 'PAGO'),
 (12, 5,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (13, 5,  'SEGURO',        '2026-07-22', 2110.00, 'PAGO'),
-(14, 6,  'IPVA',          '2026-04-30', 1290.00, 'PAGO'),
+(14, 6,  'IPVA',          '2024-05-01', 1290.00, 'ATRASADO'),
 (15, 6,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (16, 7,  'IPVA',          '2026-04-30', 720.00,  'PAGO'),
-(17, 7,  'LICENCIAMENTO', '2026-09-15', 165.00,  'ATRASADO'),
+(17, 7,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (18, 8,  'IPVA',          '2026-04-30', 1080.00, 'PAGO'),
 (19, 8,  'SEGURO',        '2026-11-08', 2240.00, 'PAGO'),
-(20, 9,  'IPVA',          '2026-04-30', 540.00,  'ATRASADO'),
+(20, 9,  'IPVA',          '2026-04-30', 540.00,  'PAGO'),
 (21, 10, 'IPVA',          '2026-04-30', 1980.00, 'PAGO'),
 (22, 10, 'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (23, 10, 'SEGURO',        '2027-04-01', 2890.00, 'PAGO'),
 (24, 10, 'DPVAT',         '2026-12-31', 50.00,   'PAGO')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_documento) DO UPDATE SET
+  id_veiculo = EXCLUDED.id_veiculo,
+  tipo_documento = EXCLUDED.tipo_documento,
+  data_vencimento = EXCLUDED.data_vencimento,
+  valor_pago = EXCLUDED.valor_pago,
+  status_pagamento = EXCLUDED.status_pagamento;
 
 
 -- =====================================================================
@@ -285,16 +350,16 @@ INSERT INTO registros_uso (
   quilometragem_retorno,
   observacoes_veiculo
 ) VALUES
-(1,  1, 5, 1001, '2026-05-02 08:10:00', 15405.0, '2026-05-02 12:35:00', 15538.4, 'Retorno sem avarias. Veículo entregue limpo.'),
-(2,  1, 6, 1008, '2026-05-08 13:20:00', 15538.4, '2026-05-08 17:55:00', 15622.0, 'Abastecimento recomendado antes da próxima saída.'),
-(3,  2, 5, 1002, '2026-05-03 07:40:00', 32242.0, '2026-05-03 11:15:00', 32318.7, 'Uso institucional concluído sem ocorrências.'),
-(4,  2, 6, 1010, '2026-05-10 09:00:00', 32318.7, '2026-05-10 15:25:00', 32472.1, 'Motorista relatou ruído leve ao frear em baixa velocidade.'),
-(5,  3, 5, 1003, '2026-05-04 10:30:00', 46900.0, '2026-05-04 16:45:00', 47058.2, 'Conferência de documentos realizada no retorno.'),
-(6,  4, 6, 1004, '2026-05-05 08:00:00', 5320.0,  '2026-05-05 10:20:00', 5364.6,  'Sem observações no retorno.'),
-(7,  5, 5, 1005, '2026-05-06 07:30:00', 48254.0, '2026-05-06 18:10:00', 48512.9, 'Viagem longa concluída. Solicitar limpeza interna.'),
-(8,  6, 6, 1006, '2026-05-07 06:50:00', 28095.0, '2026-05-07 14:40:00', 28218.3, 'Veículo liberado com tanque acima de meio.'),
-(9, 10, 5, 1007, '2026-05-09 08:25:00', 1180.0,  '2026-05-09 13:05:00', 1276.8,  'Carga entregue e veículo liberado para nova agenda.'),
-(10, 6, 5, 1011, '2026-05-12 07:15:00', 28218.3, '2026-05-12 12:30:00', 28304.5, 'Pequenos riscos já existentes conferidos no retorno.')
+(101,  1, 5, NULL, '2026-05-02 08:10:00', 15405.0, '2026-05-02 12:35:00', 15538.4, 'Retorno sem avarias. Veículo entregue limpo.'),
+(102,  1, 6, NULL, '2026-05-08 13:20:00', 15538.4, '2026-05-08 17:55:00', 15622.0, 'Abastecimento recomendado antes da próxima saída.'),
+(103,  2, 5, NULL, '2026-05-03 07:40:00', 32242.0, '2026-05-03 11:15:00', 32318.7, 'Uso institucional concluído sem ocorrências.'),
+(104,  2, 6, NULL, '2026-05-10 09:00:00', 32318.7, '2026-05-10 15:25:00', 32472.1, 'Motorista relatou ruído leve ao frear em baixa velocidade.'),
+(105,  3, 5, NULL, '2026-05-04 10:30:00', 46900.0, '2026-05-04 16:45:00', 47058.2, 'Conferência de documentos realizada no retorno.'),
+(106,  4, 6, NULL, '2026-05-05 08:00:00', 5320.0,  '2026-05-05 10:20:00', 5364.6,  'Sem observações no retorno.'),
+(107,  5, 5, NULL, '2026-05-06 07:30:00', 48254.0, '2026-05-06 18:10:00', 48512.9, 'Viagem longa concluída. Solicitar limpeza interna.'),
+(108,  6, 6, NULL, '2026-05-07 06:50:00', 28095.0, '2026-05-07 14:40:00', 28218.3, 'Veículo liberado com tanque acima de meio.'),
+(109, 10, 5, NULL, '2026-05-09 08:25:00', 1180.0,  '2026-05-09 13:05:00', 1276.8,  'Carga entregue e veículo liberado para nova agenda.'),
+(110,  6, 5, NULL, '2026-05-12 07:15:00', 28218.3, '2026-05-12 12:30:00', 28304.5, 'Pequenos riscos já existentes conferidos no retorno.')
 ON CONFLICT (id_uso) DO UPDATE SET
   id_veiculo = EXCLUDED.id_veiculo,
   id_motorista = EXCLUDED.id_motorista,
@@ -402,6 +467,8 @@ INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, 
 (8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
 
+SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+
 
 -- =====================================================================
 -- 12. REGISTROS_USO
@@ -415,7 +482,21 @@ INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_sa
 (4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
 (5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
 (6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_uso) DO UPDATE SET
+  id_reserva = EXCLUDED.id_reserva,
+  id_veiculo = EXCLUDED.id_veiculo,
+  id_motorista = EXCLUDED.id_motorista,
+  data_saida = EXCLUDED.data_saida,
+  quilometragem_saida = EXCLUDED.quilometragem_saida,
+  data_retorno = EXCLUDED.data_retorno,
+  quilometragem_retorno = EXCLUDED.quilometragem_retorno,
+  observacoes_veiculo = EXCLUDED.observacoes_veiculo;
+
+UPDATE reservas r
+SET id_motorista = ru.id_motorista
+FROM registros_uso ru
+WHERE r.id_reserva = ru.id_reserva
+  AND r.id_motorista IS NULL;
 
 
 -- =====================================================================

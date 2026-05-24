@@ -7,6 +7,10 @@ export const fleetNavigationItems = [
   { icon: 'reports', label: 'Relatórios', to: '/gestor/relatorios' },
 ];
 
+export const requesterNavigationItems = [
+  { icon: 'reservations', label: 'Minhas reservas', to: '/solicitante/reservas' },
+];
+
 export const dashboardStats = [
   { caption: 'veículos ativos hoje', icon: 'fleet', title: 'Disponíveis', value: '42' },
   { caption: 'precisam de atenção', icon: 'alert', title: 'Alertas', value: '07' },
@@ -33,6 +37,8 @@ export const dashboardAlerts = [
 ];
 
 export const statusTabs = ['Todos', 'Ativo', 'Manutenção', 'Inativo', 'Bloqueado'];
+
+export const vehicleTypeTabs = ['Todos', 'Hatch', 'Sedan', 'SUV', 'Van', 'Ônibus', 'Caminhonete'];
 
 export const fleetVehicles = [
   {
@@ -153,4 +159,12 @@ export const driverNavigationItems = [
 export const vehicleFormOptions = {
   licenseCategories: ['A', 'B', 'C', 'D', 'E'],
   statuses: ['Ativo', 'Manutenção', 'Reservado', 'Inativo'],
+  vehicleTypes: [
+    { value: 'HATCH', label: 'Hatch' },
+    { value: 'SEDAN', label: 'Sedan' },
+    { value: 'SUV', label: 'SUV' },
+    { value: 'VAN', label: 'Van' },
+    { value: 'ONIBUS', label: 'Ônibus' },
+    { value: 'CAMINHONETE', label: 'Caminhonete' },
+  ],
 };

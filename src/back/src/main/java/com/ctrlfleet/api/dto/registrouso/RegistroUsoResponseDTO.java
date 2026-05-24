@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 public class RegistroUsoResponseDTO {
 
+    /** PK da tabela `registros_uso` (`id_uso`). */
+    private Long idUso;
     private Long id;
     private Long idVeiculo;
     private String placaVeiculo;
@@ -109,6 +111,7 @@ public class RegistroUsoResponseDTO {
             Double quilometragemPercorrida,
             String statusReserva) {
         this.id = id;
+        this.idUso = id;
         this.idVeiculo = idVeiculo;
         this.placaVeiculo = placaVeiculo;
         this.modeloVeiculo = modeloVeiculo;
@@ -128,6 +131,10 @@ public class RegistroUsoResponseDTO {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getIdUso() {
+        return idUso;
     }
 
     public Long getIdVeiculo() {
