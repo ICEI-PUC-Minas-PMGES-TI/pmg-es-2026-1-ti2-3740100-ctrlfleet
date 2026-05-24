@@ -1,3 +1,6 @@
+import { resolveRegistrosUsoForReserva } from '../utils/mockRegistroUso';
+import { mapRegistroUsoFromApi, mapRegistrosUsoFromApi } from '../utils/registroUsoMappers';
+
 /**
  * Em desenvolvimento usa URL direta do Spring Boot (evita 502 do proxy quando o
  * backend não está acessível via `localhost` ou está desligado).
@@ -50,20 +53,25 @@ export async function listarRegistrosPorVeiculo(veiculoId) {
     throw new Error(msg);
   }
 
-  return data || [];
+  return mapRegistrosUsoFromApi(data || []);
 }
 
 /**
  * Lista os registros vinculados a uma reserva.
+ * Para reservas concluídas sem vínculo no backend, preenche com dados de apoio do seed.
  * @param {number|string} reservaId
+ * @param {object|null} reserva metadados da reserva (status, datas, veículo…)
  * @returns {Promise<Array>}
  */
-export async function listarRegistrosPorReserva(reservaId) {
+export async function listarRegistrosPorReserva(reservaId, reserva = null) {
   const res = await fetch(requestUrl(`/registros-uso/reserva/${reservaId}`));
 
   const data = parseJsonSafely(await res.text());
 
   if (!res.ok) {
+    if (reserva?.statusReserva === 'CONCLUIDA') {
+      return resolveRegistrosUsoForReserva(reserva, []);
+    }
     const msg =
       (data && typeof data.mensagem === 'string' && data.mensagem) ||
       (data && typeof data.message === 'string' && data.message) ||
@@ -71,7 +79,8 @@ export async function listarRegistrosPorReserva(reservaId) {
     throw new Error(msg);
   }
 
-  return data || [];
+  const registros = mapRegistrosUsoFromApi(Array.isArray(data) ? data : []);
+  return resolveRegistrosUsoForReserva(reserva, registros);
 }
 
 /**
@@ -96,5 +105,5 @@ export async function finalizarCorrida(payload) {
     throw new Error(msg);
   }
 
-  return data;
+  return mapRegistroUsoFromApi(data);
 }

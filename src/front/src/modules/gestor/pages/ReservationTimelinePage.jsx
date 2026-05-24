@@ -5,18 +5,38 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { listarRegistrosPorReserva } from '../../../services/registroUsoApi';
+import { listarReservas } from '../../../services/reservaApi';
 import { formatDateTime, formatKm } from '../../../utils/registroUsoFormatters';
 
 export function ReservationTimelinePage() {
   const { reservaId } = useParams();
-  const [state, setState] = useState({ loading: true, error: null, registros: [] });
+  const [state, setState] = useState({ loading: true, error: null, registros: [], reserva: null });
 
   useEffect(() => {
-    listarRegistrosPorReserva(reservaId)
-      .then((registros) => setState({ loading: false, error: null, registros }))
-      .catch((error) =>
-        setState({ loading: false, error: error.message || 'Não foi possível carregar a reserva.', registros: [] }),
-      );
+    let ignore = false;
+
+    listarReservas()
+      .then(async (reservas) => {
+        if (ignore) return;
+        const reserva =
+          (reservas || []).find((item) => String(item.idReserva) === String(reservaId)) || null;
+        const registros = await listarRegistrosPorReserva(reservaId, reserva);
+        if (ignore) return;
+        setState({ loading: false, error: null, registros, reserva });
+      })
+      .catch((error) => {
+        if (ignore) return;
+        setState({
+          loading: false,
+          error: error.message || 'Não foi possível carregar a reserva.',
+          registros: [],
+          reserva: null,
+        });
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [reservaId]);
 
   const registroPrincipal = state.registros[0] || null;
@@ -49,8 +69,8 @@ export function ReservationTimelinePage() {
 
       {!state.error && state.registros.length === 0 ? (
         <SectionCard subtitle="Nenhum encerramento foi vinculado a esta reserva." title="Sem histórico">
-          <ActionButton to="/gestor/frota" variant="secondary">
-            Finalizar uso de um veículo
+          <ActionButton to="/gestor/reservas" variant="secondary">
+            Voltar para reservas
           </ActionButton>
         </SectionCard>
       ) : null}
@@ -61,32 +81,36 @@ export function ReservationTimelinePage() {
             <div>
               <span className="plate-chip">{registroPrincipal.placaVeiculo}</span>
               <h2>{registroPrincipal.nomeMotorista || 'Motorista não informado'}</h2>
-              <p>{formatDateTime(registroPrincipal.dataSaida)} até {formatDateTime(registroPrincipal.dataRetorno)}</p>
+              <p>
+                {formatDateTime(registroPrincipal.dataSaida)} até {formatDateTime(registroPrincipal.dataRetorno)}
+              </p>
             </div>
-            <StatusBadge label={registroPrincipal.statusReserva === 'CONCLUIDA' ? 'Ativo' : 'Pendente'} />
+            <StatusBadge label={registroPrincipal.statusReserva === 'CONCLUIDA' ? 'Concluída' : 'Registrada'} />
           </div>
 
           <div className="history-metrics">
-            <SectionCard subtitle="Eventos da reserva" title={String(state.registros.length)} />
+            <SectionCard subtitle="Registros de uso" title={String(state.registros.length)} />
             <SectionCard subtitle="KM percorridos" title={formatKm(totalKm)} />
-            <SectionCard subtitle="Veículo liberado em" title={formatDateTime(registroPrincipal.dataRetorno)} />
+            <SectionCard subtitle="Retorno em" title={formatDateTime(registroPrincipal.dataRetorno)} />
           </div>
 
-          <SectionCard subtitle="Da saída ao retorno finalizado." title="Timeline da reserva">
+          <SectionCard subtitle="Da saída ao retorno finalizado." title="Detalhes do uso">
             <ol className="operational-timeline">
-              {state.registros.map((registro) => (
-                <li className="operational-timeline__item" key={registro.id}>
+              {state.registros.map((registro, index) => (
+                <li className="operational-timeline__item" key={registro.idUso ?? index}>
                   <span className="operational-timeline__dot" />
                   <div className="operational-timeline__body">
                     <div className="operational-timeline__head">
-                      <strong>{registro.placaVeiculo}</strong>
+                      <strong>{registro.placaVeiculo || 'Veículo'}</strong>
                       <span>{registro.statusReserva === 'CONCLUIDA' ? 'Concluída' : 'Registrada'}</span>
                     </div>
                     <p>
-                      {registro.nomeMotorista || 'Motorista'} finalizou o uso com {formatKm(registro.quilometragemPercorrida || 0)}.
+                      {registro.nomeMotorista || 'Motorista'} · {formatKm(registro.quilometragemPercorrida || 0)}{' '}
+                      percorridos
                     </p>
                     <small>
-                      Saída: {formatDateTime(registro.dataSaida)} · Retorno: {formatDateTime(registro.dataRetorno)}
+                      Saída: {formatDateTime(registro.dataSaida)} · Retorno:{' '}
+                      {formatDateTime(registro.dataRetorno)}
                     </small>
                     <small>
                       KM {formatKm(registro.quilometragemSaida)} → {formatKm(registro.quilometragemRetorno)}

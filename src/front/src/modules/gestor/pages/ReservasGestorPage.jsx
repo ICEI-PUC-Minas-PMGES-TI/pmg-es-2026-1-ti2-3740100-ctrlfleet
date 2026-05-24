@@ -1,11 +1,26 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
 import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
-import { StatusBadge } from '../../../components/common/StatusBadge';
+import { StatCard } from '../../../components/common/StatCard';
+import { FleetFilters } from '../../../components/gestor/FleetFilters';
+import { ReservationCardGrid } from '../../../components/gestor/ReservationCardGrid';
+import { listarRegistrosPorReserva } from '../../../services/registroUsoApi';
 import { aprovarReserva, listarReservas, reprovarReserva } from '../../../services/reservaApi';
+import { pad2 } from '../../../services/veiculoMappers';
+
+const STATUS_TABS = ['Todas', 'Solicitada', 'Aprovada', 'Em uso', 'Concluída', 'Reprovada', 'Cancelada'];
+
+const STATUS_FILTER_MAP = {
+  Solicitada: 'SOLICITADA',
+  Aprovada: 'APROVADA',
+  'Em uso': 'EM_USO',
+  Concluída: 'CONCLUIDA',
+  Reprovada: 'REPROVADA',
+  Cancelada: 'CANCELADA',
+};
 
 function formatDateTime(value) {
   if (!value) return '-';
@@ -20,6 +35,9 @@ function formatDateTime(value) {
 
 export function ReservasGestorPage() {
   const [state, setState] = useState({ loading: true, error: null, items: [] });
+  const [registrosPorReserva, setRegistrosPorReserva] = useState({});
+  const [search, setSearch] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('Todas');
   const [decisionModal, setDecisionModal] = useState({
     action: null,
     motivo: '',
@@ -45,6 +63,95 @@ export function ReservasGestorPage() {
     });
     return () => controller.abort();
   }, [carregarReservas]);
+
+  useEffect(() => {
+    const concluidas = state.items.filter((item) => item.statusReserva === 'CONCLUIDA');
+    if (concluidas.length === 0) {
+      setRegistrosPorReserva({});
+      return undefined;
+    }
+
+    let ignore = false;
+
+    Promise.all(
+      concluidas.map((reserva) =>
+        listarRegistrosPorReserva(reserva.idReserva, reserva).then((registros) => [reserva.idReserva, registros]),
+      ),
+    )
+      .then((entries) => {
+        if (ignore) return;
+        setRegistrosPorReserva(Object.fromEntries(entries));
+      })
+      .catch(() => {
+        if (!ignore) setRegistrosPorReserva({});
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [state.items]);
+
+  const filteredReservas = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    const statusFilter = STATUS_FILTER_MAP[selectedStatus];
+
+    return state.items.filter((reserva) => {
+      const matchesStatus = !statusFilter || reserva.statusReserva === statusFilter;
+      const matchesSearch =
+        term.length === 0 ||
+        String(reserva.idReserva).includes(term) ||
+        (reserva.destino || '').toLowerCase().includes(term) ||
+        (reserva.origem || '').toLowerCase().includes(term) ||
+        (reserva.placaVeiculo || '').toLowerCase().includes(term) ||
+        (reserva.modeloVeiculo || '').toLowerCase().includes(term) ||
+        (reserva.nomeSolicitante || '').toLowerCase().includes(term);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [search, selectedStatus, state.items]);
+
+  const summaryCards = useMemo(() => {
+    const items = state.items;
+    const count = (predicate) => items.filter(predicate).length;
+
+    return [
+      {
+        caption: 'Solicitações monitoradas',
+        icon: 'reservations',
+        title: 'Total',
+        value: pad2(items.length),
+        variant: 'total',
+      },
+      {
+        caption: 'Aguardando decisão',
+        icon: 'alert',
+        title: 'Pendentes',
+        value: pad2(count((item) => item.statusReserva === 'SOLICITADA')),
+        variant: 'maintenance',
+      },
+      {
+        caption: 'Liberadas para uso',
+        icon: 'check',
+        title: 'Aprovadas',
+        value: pad2(count((item) => item.statusReserva === 'APROVADA')),
+        variant: 'active',
+      },
+      {
+        caption: 'Trajetos em andamento',
+        icon: 'fleet',
+        title: 'Em uso',
+        value: pad2(count((item) => item.statusReserva === 'EM_USO')),
+        variant: 'inactive',
+      },
+      {
+        caption: 'Viagens encerradas',
+        icon: 'history',
+        title: 'Concluídas',
+        value: pad2(count((item) => item.statusReserva === 'CONCLUIDA')),
+        variant: 'blocked',
+      },
+    ];
+  }, [state.items]);
 
   function openDecisionModal(reserva, action) {
     setDecisionModal({
@@ -113,14 +220,26 @@ export function ReservasGestorPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        actionIcon="plus"
-        actionLabel="Nova reserva"
-        actionTo="/solicitante/reservas"
         subtitle="Aprovação, reprovação e acompanhamento do ciclo das reservas."
         title="Reservas"
       />
 
-      <SectionCard title="Fila de reservas">
+      <section aria-label="Resumo das reservas" className="stats-grid stats-grid--fleet">
+        {summaryCards.map((stat) => (
+          <StatCard key={stat.title} layout="vertical" {...stat} />
+        ))}
+      </section>
+
+      <SectionCard>
+        <FleetFilters
+          onSearchChange={setSearch}
+          onStatusChange={setSelectedStatus}
+          search={search}
+          searchPlaceholder="Buscar por destino, placa, solicitante ou nº..."
+          selectedStatus={selectedStatus}
+          statusTabs={STATUS_TABS}
+        />
+
         {state.loading ? (
           <div className="admin-dashboard__loading">
             <span className="admin-dashboard__spinner" aria-hidden="true" />
@@ -135,52 +254,21 @@ export function ReservasGestorPage() {
             </div>
           </div>
         ) : (
-          <div className="driver-reservation-list">
-            {state.items.map((reserva) => (
-              <article className="driver-reservation-card" key={reserva.idReserva}>
-                <div className="driver-reservation-card__main">
-                  <div>
-                    <span className="driver-reservation-card__kicker">Reserva #{reserva.idReserva}</span>
-                    <h2>{reserva.destino}</h2>
-                    <p>
-                      {reserva.placaVeiculo} - {reserva.modeloVeiculo}
-                    </p>
-                  </div>
-                  <StatusBadge label={reserva.statusReserva} />
-                </div>
+          <>
+            <div className="table-summary">
+              <span>
+                Mostrando {filteredReservas.length} de {state.items.length} reservas
+              </span>
+              <span>Cards com rota, veículo e ações rápidas de aprovação.</span>
+            </div>
 
-                <dl className="driver-reservation-card__meta">
-                  <div>
-                    <dt>Solicitante</dt>
-                    <dd>{reserva.nomeSolicitante}</dd>
-                  </div>
-                  <div>
-                    <dt>Origem</dt>
-                    <dd>{reserva.origem}</dd>
-                  </div>
-                  <div>
-                    <dt>Início</dt>
-                    <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
-                  </div>
-                  <div>
-                    <dt>Fim previsto</dt>
-                    <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
-                  </div>
-                </dl>
-
-                {reserva.statusReserva === 'SOLICITADA' ? (
-                  <div className="driver-checklist-actions">
-                    <ActionButton icon="check" onClick={() => openDecisionModal(reserva, 'aprovar')}>
-                      Aprovar
-                    </ActionButton>
-                    <ActionButton icon="close" onClick={() => openDecisionModal(reserva, 'reprovar')} variant="secondary">
-                      Reprovar
-                    </ActionButton>
-                  </div>
-                ) : null}
-              </article>
-            ))}
-          </div>
+            <ReservationCardGrid
+              onApprove={(reserva) => openDecisionModal(reserva, 'aprovar')}
+              onReject={(reserva) => openDecisionModal(reserva, 'reprovar')}
+              registrosPorReserva={registrosPorReserva}
+              reservas={filteredReservas}
+            />
+          </>
         )}
       </SectionCard>
 

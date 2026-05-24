@@ -4,6 +4,7 @@ export function FleetFilters({
   onSearchChange,
   onStatusChange,
   search,
+  searchPlaceholder = 'Buscar por placa ou modelo...',
   selectedStatus,
   statusTabs,
 }) {
@@ -14,7 +15,7 @@ export function FleetFilters({
         <input
           id="fleet-search"
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Buscar por placa ou modelo..."
+          placeholder={searchPlaceholder}
           type="search"
           value={search}
         />

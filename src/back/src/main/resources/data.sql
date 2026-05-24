@@ -285,16 +285,16 @@ INSERT INTO registros_uso (
   quilometragem_retorno,
   observacoes_veiculo
 ) VALUES
-(1,  1, 5, 1001, '2026-05-02 08:10:00', 15405.0, '2026-05-02 12:35:00', 15538.4, 'Retorno sem avarias. Veículo entregue limpo.'),
-(2,  1, 6, 1008, '2026-05-08 13:20:00', 15538.4, '2026-05-08 17:55:00', 15622.0, 'Abastecimento recomendado antes da próxima saída.'),
-(3,  2, 5, 1002, '2026-05-03 07:40:00', 32242.0, '2026-05-03 11:15:00', 32318.7, 'Uso institucional concluído sem ocorrências.'),
-(4,  2, 6, 1010, '2026-05-10 09:00:00', 32318.7, '2026-05-10 15:25:00', 32472.1, 'Motorista relatou ruído leve ao frear em baixa velocidade.'),
-(5,  3, 5, 1003, '2026-05-04 10:30:00', 46900.0, '2026-05-04 16:45:00', 47058.2, 'Conferência de documentos realizada no retorno.'),
-(6,  4, 6, 1004, '2026-05-05 08:00:00', 5320.0,  '2026-05-05 10:20:00', 5364.6,  'Sem observações no retorno.'),
-(7,  5, 5, 1005, '2026-05-06 07:30:00', 48254.0, '2026-05-06 18:10:00', 48512.9, 'Viagem longa concluída. Solicitar limpeza interna.'),
-(8,  6, 6, 1006, '2026-05-07 06:50:00', 28095.0, '2026-05-07 14:40:00', 28218.3, 'Veículo liberado com tanque acima de meio.'),
-(9, 10, 5, 1007, '2026-05-09 08:25:00', 1180.0,  '2026-05-09 13:05:00', 1276.8,  'Carga entregue e veículo liberado para nova agenda.'),
-(10, 6, 5, 1011, '2026-05-12 07:15:00', 28218.3, '2026-05-12 12:30:00', 28304.5, 'Pequenos riscos já existentes conferidos no retorno.')
+(101,  1, 5, NULL, '2026-05-02 08:10:00', 15405.0, '2026-05-02 12:35:00', 15538.4, 'Retorno sem avarias. Veículo entregue limpo.'),
+(102,  1, 6, NULL, '2026-05-08 13:20:00', 15538.4, '2026-05-08 17:55:00', 15622.0, 'Abastecimento recomendado antes da próxima saída.'),
+(103,  2, 5, NULL, '2026-05-03 07:40:00', 32242.0, '2026-05-03 11:15:00', 32318.7, 'Uso institucional concluído sem ocorrências.'),
+(104,  2, 6, NULL, '2026-05-10 09:00:00', 32318.7, '2026-05-10 15:25:00', 32472.1, 'Motorista relatou ruído leve ao frear em baixa velocidade.'),
+(105,  3, 5, NULL, '2026-05-04 10:30:00', 46900.0, '2026-05-04 16:45:00', 47058.2, 'Conferência de documentos realizada no retorno.'),
+(106,  4, 6, NULL, '2026-05-05 08:00:00', 5320.0,  '2026-05-05 10:20:00', 5364.6,  'Sem observações no retorno.'),
+(107,  5, 5, NULL, '2026-05-06 07:30:00', 48254.0, '2026-05-06 18:10:00', 48512.9, 'Viagem longa concluída. Solicitar limpeza interna.'),
+(108,  6, 6, NULL, '2026-05-07 06:50:00', 28095.0, '2026-05-07 14:40:00', 28218.3, 'Veículo liberado com tanque acima de meio.'),
+(109, 10, 5, NULL, '2026-05-09 08:25:00', 1180.0,  '2026-05-09 13:05:00', 1276.8,  'Carga entregue e veículo liberado para nova agenda.'),
+(110,  6, 5, NULL, '2026-05-12 07:15:00', 28218.3, '2026-05-12 12:30:00', 28304.5, 'Pequenos riscos já existentes conferidos no retorno.')
 ON CONFLICT (id_uso) DO UPDATE SET
   id_veiculo = EXCLUDED.id_veiculo,
   id_motorista = EXCLUDED.id_motorista,
@@ -417,7 +417,15 @@ INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_sa
 (4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
 (5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
 (6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_uso) DO UPDATE SET
+  id_reserva = EXCLUDED.id_reserva,
+  id_veiculo = EXCLUDED.id_veiculo,
+  id_motorista = EXCLUDED.id_motorista,
+  data_saida = EXCLUDED.data_saida,
+  quilometragem_saida = EXCLUDED.quilometragem_saida,
+  data_retorno = EXCLUDED.data_retorno,
+  quilometragem_retorno = EXCLUDED.quilometragem_retorno,
+  observacoes_veiculo = EXCLUDED.observacoes_veiculo;
 
 UPDATE reservas r
 SET id_motorista = ru.id_motorista

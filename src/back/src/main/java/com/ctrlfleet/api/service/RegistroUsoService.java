@@ -1,12 +1,14 @@
 package com.ctrlfleet.api.service;
 
 import com.ctrlfleet.api.domain.model.RegistroUso;
+import com.ctrlfleet.api.domain.model.Reserva;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.dto.registrouso.FinalizarCorridaRequestDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
+import com.ctrlfleet.api.repository.ReservaRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.time.LocalDateTime;
@@ -19,14 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class RegistroUsoService {
 
     private final RegistroUsoRepository registroUsoRepository;
+    private final ReservaRepository reservaRepository;
     private final VeiculoRepository veiculoRepository;
     private final UsuarioRepository usuarioRepository;
 
     public RegistroUsoService(
             RegistroUsoRepository registroUsoRepository,
+            ReservaRepository reservaRepository,
             VeiculoRepository veiculoRepository,
             UsuarioRepository usuarioRepository) {
         this.registroUsoRepository = registroUsoRepository;
+        this.reservaRepository = reservaRepository;
         this.veiculoRepository = veiculoRepository;
         this.usuarioRepository = usuarioRepository;
     }
@@ -152,19 +157,47 @@ public class RegistroUsoService {
                     registro.getQuilometragemRetorno() - registro.getQuilometragemSaida();
         }
 
+        Veiculo veiculo = registro.getVeiculo();
+        Usuario motorista = registro.getMotorista();
+        String modeloVeiculo = null;
+        if (veiculo != null) {
+            String marca = veiculo.getMarca() != null ? veiculo.getMarca().trim() : "";
+            String modelo = veiculo.getModelo() != null ? veiculo.getModelo().trim() : "";
+            modeloVeiculo = (marca + " " + modelo).trim();
+            if (modeloVeiculo.isEmpty()) {
+                modeloVeiculo = null;
+            }
+        }
+
+        String origem = null;
+        String destino = null;
+        String statusReserva = null;
+        if (registro.getIdReserva() != null) {
+            Reserva reserva = reservaRepository.findById(registro.getIdReserva()).orElse(null);
+            if (reserva != null) {
+                origem = reserva.getOrigem();
+                destino = reserva.getDestino();
+                statusReserva =
+                        reserva.getStatusReserva() != null ? reserva.getStatusReserva().name() : null;
+            }
+        }
+
         return new RegistroUsoResponseDTO(
                 registro.getId(),
-                registro.getVeiculo().getId(),
-                registro.getVeiculo().getPlaca(),
-                registro.getMotorista().getId(),
-                registro.getMotorista().getNome(),
+                veiculo != null ? veiculo.getId() : null,
+                veiculo != null ? veiculo.getPlaca() : null,
+                modeloVeiculo,
+                motorista != null ? motorista.getId() : null,
+                motorista != null ? motorista.getNome() : null,
                 registro.getIdReserva(),
+                origem,
+                destino,
                 registro.getDataSaida(),
                 registro.getQuilometragemSaida(),
                 registro.getDataRetorno(),
                 registro.getQuilometragemRetorno(),
                 registro.getObservacoesVeiculo(),
                 quilometragemPercorrida,
-                registro.getIdReserva() != null ? "CONCLUIDA" : null);
+                statusReserva);
     }
 }
