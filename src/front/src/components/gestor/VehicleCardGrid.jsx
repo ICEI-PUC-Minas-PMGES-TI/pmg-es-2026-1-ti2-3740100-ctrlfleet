@@ -32,6 +32,10 @@ export function VehicleCardGrid({ onDeactivate, vehicles }) {
 
             <dl className="fleet-vehicle-card__meta">
               <div>
+                <dt>Tipo</dt>
+                <dd>{vehicle.vehicleTypeLabel || '—'}</dd>
+              </div>
+              <div>
                 <dt>Ano</dt>
                 <dd>{vehicle.year || '—'}</dd>
               </div>

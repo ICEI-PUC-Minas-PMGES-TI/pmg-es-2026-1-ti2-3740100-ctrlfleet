@@ -41,6 +41,7 @@ export function VehicleCreatePage() {
           secretaria: vehicle.secretaria || 'Garagem Central',
           year: vehicle.ano ? String(vehicle.ano) : '',
           status: STATUS_VEICULO_LABELS[vehicle.status] || 'Ativo',
+          tipoVeiculo: vehicle.tipoVeiculo || 'HATCH',
           ipvaDueDate: documentsByType.IPVA?.dataVencimento || '',
           insuranceDueDate: documentsByType.SEGURO?.dataVencimento || '',
           licenseDueDate: documentsByType.LICENCIAMENTO?.dataVencimento || '',
@@ -65,6 +66,7 @@ export function VehicleCreatePage() {
       secretaria: formState.secretaria || 'Garagem Central',
       ano: Number(formState.year),
       status: STATUS_VEICULO_VALUES[formState.status] || 'DISPONIVEL',
+      tipoVeiculo: formState.tipoVeiculo || 'HATCH',
       documentos: [
         { tipoDocumento: 'IPVA', dataVencimento: formState.ipvaDueDate, statusPagamento: 'PAGO' },
         { tipoDocumento: 'SEGURO', dataVencimento: formState.insuranceDueDate, statusPagamento: 'PAGO' },
@@ -159,6 +161,21 @@ export function VehicleCreatePage() {
                 {vehicleFormOptions.statuses.map((option) => (
                   <option key={option} value={option}>
                     {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="form-field">
+              <span>Tipo de veículo</span>
+              <select
+                onChange={(event) => updateForm({ tipoVeiculo: event.target.value })}
+                required
+                value={formState.tipoVeiculo}
+              >
+                {vehicleFormOptions.vehicleTypes.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -300,6 +317,13 @@ export function VehicleCreatePage() {
             <div>
               <dt>Status</dt>
               <dd>{formState.status}</dd>
+            </div>
+            <div>
+              <dt>Tipo</dt>
+              <dd>
+                {vehicleFormOptions.vehicleTypes.find((option) => option.value === formState.tipoVeiculo)?.label ||
+                  'Não informado'}
+              </dd>
             </div>
             <div>
               <dt>Categoria CNH</dt>

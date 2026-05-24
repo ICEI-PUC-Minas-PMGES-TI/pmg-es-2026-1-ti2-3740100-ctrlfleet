@@ -27,6 +27,10 @@ export function FleetMapVehicleDetail({ onClose, vehicle }) {
 
       <dl className="fleet-map-detail__meta">
         <div>
+          <dt>Tipo</dt>
+          <dd>{vehicle.vehicleTypeLabel || '—'}</dd>
+        </div>
+        <div>
           <dt>Marca</dt>
           <dd>{vehicle.marca || '—'}</dd>
         </div>

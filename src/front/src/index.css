@@ -989,9 +989,40 @@ a {
 
 .fleet-filters {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) auto 220px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.fleet-filters__toolbar {
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   align-items: center;
+}
+
+.fleet-filters__toolbar .filter-tabs {
+  flex: 1 1 280px;
+}
+
+.fleet-filters__type-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 min(100%, 260px);
+}
+
+.fleet-filters__type-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.fleet-filters__type {
+  flex: 1;
+  width: min(100%, 200px);
+  margin: 0;
 }
 
 .admin-user-filters {
@@ -1358,6 +1389,11 @@ a {
   display: block;
 }
 
+.fleet-vehicle-card__photo--tipo {
+  object-fit: cover;
+  object-position: center;
+}
+
 .fleet-vehicle-card__illustration {
   display: flex;
   align-items: center;
@@ -1373,6 +1409,22 @@ a {
 
 .fleet-vehicle-card__illustration--van {
   color: rgba(47, 76, 107, 0.5);
+}
+
+.fleet-vehicle-card__illustration--bus {
+  color: rgba(35, 64, 96, 0.58);
+}
+
+.fleet-vehicle-card__illustration--pickup {
+  color: rgba(56, 88, 72, 0.58);
+}
+
+.fleet-vehicle-card__illustration--hatch {
+  color: rgba(47, 76, 107, 0.48);
+}
+
+.fleet-vehicle-card__illustration--sedan {
+  color: rgba(47, 76, 107, 0.55);
 }
 
 .fleet-vehicle-card__svg {

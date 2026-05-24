@@ -5,6 +5,15 @@ export const STATUS_VEICULO_LABELS = {
   DESATIVADO: 'Inativo',
 };
 
+export const TIPO_VEICULO_LABELS = {
+  SEDAN: 'Sedan',
+  HATCH: 'Hatch',
+  SUV: 'SUV',
+  VAN: 'Van',
+  ONIBUS: 'Ônibus',
+  CAMINHONETE: 'Caminhonete',
+};
+
 export const STATUS_VEICULO_VALUES = {
   Ativo: 'DISPONIVEL',
   Manutencao: 'MANUTENCAO',
@@ -31,9 +40,16 @@ export function buildModelLabel(dto) {
   return parts.join(' ') || (dto?.modelo ?? '-');
 }
 
-const HEAVY_VEHICLE_REGEX = /(sprinter|ducato|master|daily|hilux|sw4|ranger|amarok|s10|toro|frontier|strada)/i;
+const HEAVY_VEHICLE_REGEX = /(sprinter|ducato|master|daily|hilux|sw4|ranger|amarok|s10|toro|frontier|strada|of-1519|volare|apache|paradiso|torino|busscar)/i;
+
+export function resolveTipoVeiculoLabel(dto) {
+  const key = String(dto?.tipoVeiculo || '').toUpperCase();
+  return TIPO_VEICULO_LABELS[key] || null;
+}
 
 export function inferLicenseCategory(dto) {
+  const tipo = String(dto?.tipoVeiculo || '').toUpperCase();
+  if (tipo === 'ONIBUS' || tipo === 'VAN') return 'D';
   const text = `${dto?.marca || ''} ${dto?.modelo || ''}`;
   return HEAVY_VEHICLE_REGEX.test(text) ? 'D' : 'B';
 }
@@ -86,14 +102,14 @@ export function mapBackendDocumentToView(documento) {
 }
 
 export function buildMockDocuments(dto) {
-  const id = Number(dto?.id) || 0;
-  const variant = id % 3;
-  return Object.entries(DOCUMENT_LABELS).map(([tipoDocumento, doc], index) => {
-    let state = 'ok';
-    if (variant === 1 && index === 0) state = 'warning';
-    if (variant === 2 && index === 2) state = 'expired';
-    return { ...doc, id: `mock-${tipoDocumento}`, tipoDocumento, dataVencimento: '', dueDate: 'Pendente', state };
-  });
+  return Object.entries(DOCUMENT_LABELS).map(([tipoDocumento, doc]) => ({
+    ...doc,
+    id: `mock-${dto?.id || 'new'}-${tipoDocumento}`,
+    tipoDocumento,
+    dataVencimento: '',
+    dueDate: 'Pendente',
+    state: 'ok',
+  }));
 }
 
 const FLEET_MAP_CENTER = { lat: -19.9167, lng: -43.9345 };
@@ -129,6 +145,8 @@ export function mapBackendVehicleToView(dto) {
   const persistedStatus = resolveStatusVeiculo(dto);
   const status = persistedStatus === 'Inativo' ? 'Inativo' : hasExpiredDocument(documents) ? 'Bloqueado' : persistedStatus;
 
+  const tipoVeiculo = dto.tipoVeiculo ? String(dto.tipoVeiculo).toUpperCase() : null;
+
   return {
     id: String(dto.id),
     plate: dto.placa || '-',
@@ -136,6 +154,8 @@ export function mapBackendVehicleToView(dto) {
     model: dto.modelo || buildModelLabel(dto),
     year: dto.ano ? String(dto.ano) : '-',
     status,
+    tipoVeiculo,
+    vehicleTypeLabel: resolveTipoVeiculoLabel(dto),
     licenseCategory: inferLicenseCategory(dto),
     documents,
     location: resolveVehicleLocation(dto),

@@ -7,7 +7,7 @@ import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { statusTabs } from '../../../data/fleetData';
+import { statusTabs, vehicleTypeTabs } from '../../../data/fleetData';
 import { desativarVeiculo, listarVeiculos } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView, pad2 } from '../../../services/veiculoMappers';
 
@@ -18,10 +18,18 @@ function filterByStatus(vehicle, status) {
   return vehicle.status === status;
 }
 
+function filterByType(vehicle, type) {
+  if (type === 'Todos') {
+    return true;
+  }
+  return vehicle.vehicleTypeLabel === type;
+}
+
 export function FleetPage() {
   const location = useLocation();
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
+  const [selectedType, setSelectedType] = useState('Todos');
 
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [vehiclesData, setVehiclesData] = useState({
@@ -80,11 +88,15 @@ export function FleetPage() {
       const matchesSearch =
         normalizedSearch.length === 0 ||
         (vehicle.plate || '').toLowerCase().includes(normalizedSearch) ||
-        (vehicle.model || '').toLowerCase().includes(normalizedSearch);
+        (vehicle.model || '').toLowerCase().includes(normalizedSearch) ||
+        (vehicle.marca || '').toLowerCase().includes(normalizedSearch) ||
+        (vehicle.vehicleTypeLabel || '').toLowerCase().includes(normalizedSearch);
 
-      return matchesSearch && filterByStatus(vehicle, selectedStatus);
+      return (
+        matchesSearch && filterByStatus(vehicle, selectedStatus) && filterByType(vehicle, selectedType)
+      );
     });
-  }, [search, selectedStatus, vehiclesData.items]);
+  }, [search, selectedStatus, selectedType, vehiclesData.items]);
 
   const summaryCards = useMemo(() => {
     const items = vehiclesData.items;
@@ -153,9 +165,12 @@ export function FleetPage() {
         <FleetFilters
           onSearchChange={setSearch}
           onStatusChange={setSelectedStatus}
+          onTypeChange={setSelectedType}
           search={search}
           selectedStatus={selectedStatus}
+          selectedType={selectedType}
           statusTabs={statusTabs}
+          vehicleTypeTabs={vehicleTypeTabs}
         />
 
         {vehiclesData.loading ? (
