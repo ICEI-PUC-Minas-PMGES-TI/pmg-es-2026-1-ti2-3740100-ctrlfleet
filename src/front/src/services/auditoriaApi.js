@@ -1,21 +1,6 @@
 import { formatBrDate } from './usuarioMappers';
 
-function getApiBaseUrl() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (typeof fromEnv === 'string' && fromEnv.trim() !== '') {
-    return fromEnv.replace(/\/$/, '');
-  }
-  if (import.meta.env.DEV) {
-    return 'http://127.0.0.1:8080';
-  }
-  return '';
-}
-
-function requestUrl(path) {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  return base ? `${base}${p}` : `/api${p}`;
-}
+import { buildApiUrl } from './apiBase';
 
 function parseJsonSafely(text) {
   if (!text) return null;
@@ -35,7 +20,7 @@ function formatTimestamp(value) {
 }
 
 export async function listarAuditoria({ signal } = {}) {
-  const res = await fetch(requestUrl('/auditoria'), {
+  const res = await fetch(buildApiUrl('/auditoria'), {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,

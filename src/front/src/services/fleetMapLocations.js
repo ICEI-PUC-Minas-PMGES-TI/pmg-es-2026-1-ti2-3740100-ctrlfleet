@@ -4,6 +4,17 @@ export const FLEET_GARAGE = {
   label: 'Garagem Central',
 };
 
+/** Ponto fixo da garagem no mapa de frota (mesmas coordenadas do pin 🏢). */
+export function getFleetGaragePlace() {
+  return {
+    label: FLEET_GARAGE.label,
+    lat: FLEET_GARAGE.lat,
+    lng: FLEET_GARAGE.lng,
+    displayName: FLEET_GARAGE.label,
+    category: 'Garagem da frota',
+  };
+}
+
 function garageOffset(vehicleId) {
   const id = Number(vehicleId) || 1;
   const angle = ((id * 53) % 360) * (Math.PI / 180);

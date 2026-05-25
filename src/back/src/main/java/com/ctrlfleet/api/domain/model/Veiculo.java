@@ -41,6 +41,10 @@ public class Veiculo {
     @Column(name = "tipo_veiculo", nullable = false, length = 30)
     private TipoVeiculo tipoVeiculo = TipoVeiculo.SEDAN;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_motorista")
+    private Usuario motorista;
+
     public Veiculo() {}
 
     public Veiculo(String placa, String modelo, String marca, int ano, String secretaria) {
@@ -75,4 +79,7 @@ public class Veiculo {
 
     public TipoVeiculo getTipoVeiculo() { return tipoVeiculo; }
     public void setTipoVeiculo(TipoVeiculo tipoVeiculo) { this.tipoVeiculo = tipoVeiculo; }
+
+    public Usuario getMotorista() { return motorista; }
+    public void setMotorista(Usuario motorista) { this.motorista = motorista; }
 }

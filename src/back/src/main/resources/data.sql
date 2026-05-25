@@ -103,6 +103,31 @@ INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh) VALUES
 (8, '06234587190', '2026-12-05')
 ON CONFLICT (usuario_id) DO NOTHING;
 
+-- Motoristas adicionais para a frota (10 motoristas ativos no painel do solicitante)
+INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, perfil_acesso, role, data_desligamento, status) VALUES
+(16, 'Marcos Oliveira',     'marcos.oliveira@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0016', 'Motorista Pleno',   '2022-04-11', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(17, 'Renata Freitas',      'renata.freitas@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0017', 'Motorista Pleno',   '2021-08-30', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(18, 'Diego Nascimento',    'diego.nascimento@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0018', 'Motorista Sênior',  '2019-02-14', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(19, 'Camila Rodrigues',    'camila.rodrigues@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0019', 'Motorista Pleno',   '2023-01-09', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(20, 'Thiago Barbosa',      'thiago.barbosa@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0020', 'Motorista Júnior',  '2024-06-17', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(21, 'Aline Correia',       'aline.correia@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0021', 'Motorista Pleno',   '2020-11-25', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(22, 'Gustavo Pires',       'gustavo.pires@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0022', 'Motorista Sênior',  '2018-07-03', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh) VALUES
+(16, '07120593429', '2028-03-15'),
+(17, '08245619074', '2029-06-20'),
+(18, '09356720185', '2030-01-10'),
+(19, '10467831296', '2028-11-28'),
+(20, '11578942307', '2027-05-07'),
+(21, '12689053418', '2029-09-14'),
+(22, '13790164529', '2030-12-01')
+ON CONFLICT (usuario_id) DO NOTHING;
+
+UPDATE usuarios SET status = 'ATIVO' WHERE id IN (5, 6, 8, 16, 17, 18, 19, 20, 21, 22) AND tipo_cadastro = 'motorista';
+
+SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE((SELECT MAX(id) FROM usuarios), 0));
+
 
 -- =====================================================================
 -- 1.3 Remove tabelas de roles em N:N e colunas de CNH em `usuarios`.
@@ -266,6 +291,20 @@ END $$;
 UPDATE veiculos
 SET secretaria = 'Garagem Central'
 WHERE secretaria IS NULL OR btrim(secretaria) = '';
+
+-- Vínculo motorista ↔ veículo (cada motorista com frota própria espalhada na base)
+ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS id_motorista bigint;
+
+UPDATE veiculos SET id_motorista = 5  WHERE id BETWEEN 1  AND 6;
+UPDATE veiculos SET id_motorista = 6  WHERE id BETWEEN 7  AND 12;
+UPDATE veiculos SET id_motorista = 8  WHERE id BETWEEN 13 AND 18;
+UPDATE veiculos SET id_motorista = 16 WHERE id BETWEEN 19 AND 24;
+UPDATE veiculos SET id_motorista = 17 WHERE id BETWEEN 25 AND 30;
+UPDATE veiculos SET id_motorista = 18 WHERE id BETWEEN 31 AND 36;
+UPDATE veiculos SET id_motorista = 19 WHERE id BETWEEN 37 AND 42;
+UPDATE veiculos SET id_motorista = 20 WHERE id BETWEEN 43 AND 48;
+UPDATE veiculos SET id_motorista = 21 WHERE id BETWEEN 49 AND 54;
+UPDATE veiculos SET id_motorista = 22 WHERE id BETWEEN 55 AND 60;
 
 
 -- =====================================================================
@@ -456,18 +495,66 @@ ON CONFLICT DO NOTHING;
 -- =====================================================================
 -- 11. RESERVAS
 -- =====================================================================
-INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, status_reserva) VALUES
-(1, 3,  1, '2026-04-08 16:20:00', '2026-04-10 08:00:00', '2026-04-10 18:00:00', 'Vistoria Regional Norte',         'Garagem Central', 'CONCLUIDA'),
-(2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'CONCLUIDA'),
-(3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'CONCLUIDA'),
-(4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'CONCLUIDA'),
-(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'APROVADA'),
-(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'APROVADA'),
-(7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'SOLICITADA'),
-(8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'SOLICITADA')
+-- Bancos criados antes da entidade Reserva completa podem não ter estas colunas
+-- (ddl-auto=update nem sempre adiciona em tabelas já existentes).
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS justificativa TEXT;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS matricula_solicitante VARCHAR(30);
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lat DOUBLE PRECISION;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lng DOUBLE PRECISION;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lat DOUBLE PRECISION;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lng DOUBLE PRECISION;
+
+UPDATE reservas
+SET justificativa = 'Viagem de serviço'
+WHERE justificativa IS NULL OR TRIM(justificativa) = '';
+
+UPDATE reservas r
+SET matricula_solicitante = u.matricula
+FROM usuarios u
+WHERE r.id_usuario = u.id
+  AND (r.matricula_solicitante IS NULL OR TRIM(r.matricula_solicitante) = '');
+
+INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, justificativa, status_reserva) VALUES
+(1, 3,  1, '2026-04-08 16:20:00', '2026-04-10 08:00:00', '2026-04-10 18:00:00', 'Vistoria Regional Norte',         'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'Viagem de serviço', 'APROVADA'),
+(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'Viagem de serviço', 'APROVADA'),
+(7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'Viagem de serviço', 'SOLICITADA'),
+(8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'Viagem de serviço', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+
+-- Coordenadas do trajeto (garagem da frota + destinos aproximados em BH)
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.8820, destino_lng = -43.9200
+WHERE id_reserva = 1 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9240, destino_lng = -43.9370
+WHERE id_reserva = 2 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9650, destino_lng = -43.9680
+WHERE id_reserva = 3 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9310, destino_lng = -43.9380
+WHERE id_reserva = 4 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9150, destino_lng = -43.9290
+WHERE id_reserva = 5 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9200, destino_lng = -43.9500
+WHERE id_reserva = 6 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.8780, destino_lng = -43.9280
+WHERE id_reserva = 7 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9050, destino_lng = -43.9420
+WHERE id_reserva = 8 AND (origem_lat IS NULL OR destino_lat IS NULL);
+
+-- Demais reservas: origem na garagem quando texto for Garagem Central
+UPDATE reservas
+SET origem_lat = -19.9167, origem_lng = -43.9345
+WHERE origem_lat IS NULL AND origem ILIKE '%Garagem Central%';
+
+UPDATE reservas
+SET justificativa = 'Viagem de serviço'
+WHERE justificativa IS NULL OR TRIM(justificativa) = '';
+
+ALTER TABLE reservas ALTER COLUMN justificativa SET NOT NULL;
 
 
 -- =====================================================================
