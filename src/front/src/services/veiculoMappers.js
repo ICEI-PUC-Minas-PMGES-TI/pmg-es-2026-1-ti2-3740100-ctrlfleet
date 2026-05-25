@@ -147,6 +147,8 @@ export function mapBackendVehicleToView(dto) {
 
   const tipoVeiculo = dto.tipoVeiculo ? String(dto.tipoVeiculo).toUpperCase() : null;
 
+  const availabilityStatus = dto.status ? String(dto.status).toUpperCase() : 'DISPONIVEL';
+
   return {
     id: String(dto.id),
     plate: dto.placa || '-',
@@ -154,8 +156,10 @@ export function mapBackendVehicleToView(dto) {
     model: dto.modelo || buildModelLabel(dto),
     year: dto.ano ? String(dto.ano) : '-',
     status,
+    availabilityStatus,
+    isDisponivel: availabilityStatus === 'DISPONIVEL' && status !== 'Bloqueado' && status !== 'Inativo',
     tipoVeiculo,
-    vehicleTypeLabel: resolveTipoVeiculoLabel(dto),
+    vehicleTypeLabel: resolveTipoVeiculoLabel(dto) || 'Outros',
     licenseCategory: inferLicenseCategory(dto),
     documents,
     location: resolveVehicleLocation(dto),

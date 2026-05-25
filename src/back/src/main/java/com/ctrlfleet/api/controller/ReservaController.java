@@ -27,8 +27,9 @@ public class ReservaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservaResponseDTO>> listar(@RequestParam(required = false) String status) {
-        return ResponseEntity.ok(reservaService.listar(status));
+    public ResponseEntity<List<ReservaResponseDTO>> listar(
+            @RequestParam(required = false) String status, @RequestParam(required = false) Long idUsuario) {
+        return ResponseEntity.ok(reservaService.listar(status, idUsuario));
     }
 
     @PostMapping

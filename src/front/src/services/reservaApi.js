@@ -34,8 +34,19 @@ async function request(path, options = {}) {
 }
 
 export async function listarReservas(status, options = {}) {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (options.idUsuario != null) params.set('idUsuario', String(options.idUsuario));
+  const query = params.toString() ? `?${params}` : '';
   return request(`/reservas${query}`, { signal: options.signal });
+}
+
+export async function cancelarReserva(reservaId, payload = {}) {
+  return request(`/reservas/${reservaId}/cancelar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function criarReserva(payload) {

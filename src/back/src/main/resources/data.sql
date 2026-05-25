@@ -469,6 +469,33 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
 
+UPDATE reservas
+SET justificativa = 'Viagem de serviço'
+WHERE justificativa IS NULL OR TRIM(justificativa) = '';
+
+-- Coordenadas do trajeto (garagem da frota + destinos aproximados em BH)
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.8820, destino_lng = -43.9200
+WHERE id_reserva = 1 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9240, destino_lng = -43.9370
+WHERE id_reserva = 2 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9650, destino_lng = -43.9680
+WHERE id_reserva = 3 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9310, destino_lng = -43.9380
+WHERE id_reserva = 4 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9150, destino_lng = -43.9290
+WHERE id_reserva = 5 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9200, destino_lng = -43.9500
+WHERE id_reserva = 6 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.8780, destino_lng = -43.9280
+WHERE id_reserva = 7 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9050, destino_lng = -43.9420
+WHERE id_reserva = 8 AND (origem_lat IS NULL OR destino_lat IS NULL);
+
+-- Demais reservas: origem na garagem quando texto for Garagem Central
+UPDATE reservas
+SET origem_lat = -19.9167, origem_lng = -43.9345
+WHERE origem_lat IS NULL AND origem ILIKE '%Garagem Central%';
+
 
 -- =====================================================================
 -- 12. REGISTROS_USO

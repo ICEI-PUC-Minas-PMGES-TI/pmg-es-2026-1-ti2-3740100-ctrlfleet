@@ -46,6 +46,24 @@ public class Reserva {
     @Column(nullable = false)
     private String origem;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String justificativa;
+
+    @Column(name = "matricula_solicitante", length = 30)
+    private String matriculaSolicitante;
+
+    @Column(name = "origem_lat")
+    private Double origemLat;
+
+    @Column(name = "origem_lng")
+    private Double origemLng;
+
+    @Column(name = "destino_lat")
+    private Double destinoLat;
+
+    @Column(name = "destino_lng")
+    private Double destinoLng;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status_reserva", nullable = false, length = 30)
     private StatusReserva statusReserva = StatusReserva.SOLICITADA;
@@ -85,6 +103,30 @@ public class Reserva {
         return origem;
     }
 
+    public String getJustificativa() {
+        return justificativa;
+    }
+
+    public String getMatriculaSolicitante() {
+        return matriculaSolicitante;
+    }
+
+    public Double getOrigemLat() {
+        return origemLat;
+    }
+
+    public Double getOrigemLng() {
+        return origemLng;
+    }
+
+    public Double getDestinoLat() {
+        return destinoLat;
+    }
+
+    public Double getDestinoLng() {
+        return destinoLng;
+    }
+
     public StatusReserva getStatusReserva() {
         return statusReserva;
     }
@@ -115,6 +157,30 @@ public class Reserva {
 
     public void setOrigem(String origem) {
         this.origem = origem;
+    }
+
+    public void setJustificativa(String justificativa) {
+        this.justificativa = justificativa;
+    }
+
+    public void setMatriculaSolicitante(String matriculaSolicitante) {
+        this.matriculaSolicitante = matriculaSolicitante;
+    }
+
+    public void setOrigemLat(Double origemLat) {
+        this.origemLat = origemLat;
+    }
+
+    public void setOrigemLng(Double origemLng) {
+        this.origemLng = origemLng;
+    }
+
+    public void setDestinoLat(Double destinoLat) {
+        this.destinoLat = destinoLat;
+    }
+
+    public void setDestinoLng(Double destinoLng) {
+        this.destinoLng = destinoLng;
     }
 
     public void setStatusReserva(StatusReserva statusReserva) {

@@ -13,6 +13,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findByStatusReservaOrderByDataHoraInicioPrevistaDesc(StatusReserva statusReserva);
 
+    List<Reserva> findByUsuario_IdOrderByDataHoraInicioPrevistaDesc(Long usuarioId);
+
+    List<Reserva> findByUsuario_IdAndStatusReservaOrderByDataHoraInicioPrevistaDesc(
+            Long usuarioId, StatusReserva statusReserva);
+
     @Query("""
             select r
             from Reserva r

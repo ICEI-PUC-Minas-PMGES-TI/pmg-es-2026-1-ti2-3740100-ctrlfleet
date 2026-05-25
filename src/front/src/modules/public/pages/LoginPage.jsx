@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
+import { setCurrentSolicitante } from '../../../services/currentSolicitante';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -14,6 +15,10 @@ export function LoginPage() {
       gestor: '/gestor/dashboard',
       solicitante: '/solicitante/reservas',
     };
+
+    if (profile === 'solicitante') {
+      setCurrentSolicitante({ id: 10, matricula: 'MAT-0010' });
+    }
 
     navigate(profileHome[profile]);
   }

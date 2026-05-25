@@ -5703,3 +5703,801 @@ a {
     justify-content: center;
   }
 }
+
+/* —— Solicitante: reservas e mapa de trajeto —— */
+.requester-page .stats-grid.requester-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.requester-create-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 42%);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.requester-create-layout__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.requester-panel {
+  padding: 1.25rem 1.35rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(15, 17, 23, 0.04);
+}
+
+.requester-panel__head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.requester-panel__head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.requester-panel__head p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.requester-panel__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.requester-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.requester-justificativa-field textarea {
+  width: 100%;
+  min-height: 5.5rem;
+  resize: vertical;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  line-height: 1.45;
+}
+
+.requester-route-fields {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.requester-route-address input[readonly] {
+  cursor: default;
+  background: var(--surface-2, #f8fafc);
+  color: var(--text);
+}
+
+.requester-coords {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.requester-link-btn {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1d4ed8;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.requester-summary {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(37, 99, 235, 0.06), rgba(13, 122, 95, 0.05));
+  border: 1px solid rgba(37, 99, 235, 0.14);
+}
+
+.requester-summary h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+.requester-summary dl {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.requester-summary dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.requester-summary dd {
+  margin: 0.1rem 0 0;
+  font-weight: 600;
+}
+
+.requester-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.requester-create-layout__map {
+  position: sticky;
+  top: 1rem;
+  min-height: 520px;
+}
+
+.route-map-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  height: 100%;
+  min-height: 520px;
+  padding: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgba(15, 17, 23, 0.06);
+}
+
+.route-map-picker__toolbar {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.route-map-picker__point-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.route-map-picker__point-tab {
+  flex: 1;
+  min-width: 7.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2, #f8fafc);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.route-map-picker__point-tab--active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.route-map-picker__click-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.route-map-picker__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.route-map-picker__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.route-map-picker__meta {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.requester-field-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.requester-field-hint--error {
+  color: #b45309;
+}
+
+.requester-solicitante-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.requester-solicitante-field__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.requester-solicitante-field__value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+}
+
+.requester-solicitante-field__value strong {
+  font-size: 1rem;
+}
+
+.requester-solicitante-field__matricula {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(15, 17, 23, 0.08);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #1d4ed8;
+}
+
+.requester-section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.place-autocomplete__wrap {
+  position: relative;
+}
+
+.place-autocomplete__wrap input {
+  width: 100%;
+  padding-right: 2.25rem;
+}
+
+.place-autocomplete__spinner {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  width: 1rem;
+  height: 1rem;
+  margin-top: -0.5rem;
+  border: 2px solid rgba(37, 99, 235, 0.2);
+  border-top-color: #2563eb;
+  border-radius: 999px;
+  animation: admin-spin 0.7s linear infinite;
+}
+
+.place-autocomplete__list {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(15, 17, 23, 0.14);
+}
+
+.place-autocomplete__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.place-autocomplete__option-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  width: 100%;
+}
+
+.place-autocomplete__option strong {
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.place-autocomplete__category {
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.place-autocomplete__option span {
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.place-autocomplete__option:hover,
+.place-autocomplete__option.is-active {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.requester-form-grid--single {
+  grid-template-columns: 1fr;
+  margin-bottom: 0.85rem;
+}
+
+.vehicle-type-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.vehicle-type-picker--empty {
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+.vehicle-type-picker--empty p {
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.vehicle-type-picker--empty span {
+  font-size: 0.84rem;
+}
+
+.vehicle-type-picker__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.vehicle-type-picker__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.vehicle-type-picker__tab.is-active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.vehicle-type-picker__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: rgba(15, 17, 23, 0.08);
+  font-size: 0.72rem;
+}
+
+.vehicle-type-picker__tab.is-active .vehicle-type-picker__count {
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.vehicle-type-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.55rem;
+}
+
+.vehicle-type-picker__card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.vehicle-type-picker__card:hover {
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.vehicle-type-picker__card.is-selected {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.06);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+}
+
+.vehicle-type-picker__card-type {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.vehicle-type-picker__card strong {
+  font-size: 0.95rem;
+}
+
+.vehicle-type-picker__card span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.vehicle-type-picker__card small {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.route-map-picker__canvas,
+.route-map-preview {
+  flex: 1;
+  min-height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.route-map-picker__canvas--clickable,
+.route-map-picker__canvas--clickable .leaflet-container {
+  cursor: crosshair;
+}
+
+.route-map-picker__canvas--loading,
+.route-map-preview--loading {
+  display: grid;
+  place-items: center;
+  background: #eef1f6;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.route-map-marker-wrap {
+  background: transparent;
+  border: 0;
+}
+
+.route-map-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.route-map-marker__dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--route-pin, #2563eb);
+  border: 3px solid #fff;
+  box-shadow: 0 6px 14px rgba(15, 17, 23, 0.25);
+}
+
+.route-map-marker__label {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--route-pin, #2563eb);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.requester-list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.requester-status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.requester-status-tabs__btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.requester-status-tabs__btn.is-active {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.requester-list-toolbar__count {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.requester-reservation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+}
+
+.requester-reservation-card {
+  display: grid;
+  grid-template-rows: 180px auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(15, 17, 23, 0.05);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.requester-reservation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(15, 17, 23, 0.08);
+}
+
+.requester-reservation-card__map,
+.requester-reservation-card__map .route-map-preview {
+  min-height: 200px;
+  height: 200px;
+}
+
+.requester-reservation-card__map .route-map-preview--loading {
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: linear-gradient(160deg, #eef2f7, #e8edf4);
+}
+
+.requester-reservation-card__map-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 100%;
+  background: linear-gradient(160deg, #eef2f7, #e8edf4);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.requester-reservation-card__body {
+  padding: 1rem 1.1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.requester-reservation-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.requester-reservation-card__id {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.requester-reservation-card__header h3 {
+  margin: 0.15rem 0 0;
+  font-size: 1.02rem;
+}
+
+.requester-reservation-card__header p {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.requester-reservation-card__route {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.requester-reservation-card__route-point {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.requester-reservation-card__route-point span {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.requester-reservation-card__route-point strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.requester-reservation-card__route-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+}
+
+.requester-reservation-card__route-dot--origin {
+  background: #0d7a5f;
+}
+
+.requester-reservation-card__route-dot--dest {
+  background: #c2410c;
+}
+
+.requester-reservation-card__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.requester-reservation-card__meta dt {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.requester-reservation-card__meta dd {
+  margin: 0.12rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.requester-reservation-card__cancel {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(194, 65, 12, 0.35);
+  background: rgba(194, 65, 12, 0.06);
+  color: #9a3412;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.requester-reservation-card__cancel:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.requester-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 3rem 1.5rem;
+  border-radius: 16px;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  text-align: center;
+}
+
+.requester-empty h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.requester-empty p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 36ch;
+}
+
+@media (max-width: 1100px) {
+  .requester-create-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .requester-create-layout__map {
+    position: static;
+    min-height: 400px;
+  }
+
+  .route-map-picker {
+    min-height: 400px;
+  }
+
+  .requester-page .stats-grid.requester-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .requester-form-grid,
+  .requester-reservation-card__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .requester-reservation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .requester-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .requester-form-actions .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

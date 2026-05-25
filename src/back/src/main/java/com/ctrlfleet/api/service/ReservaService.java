@@ -36,7 +36,20 @@ public class ReservaService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservaResponseDTO> listar(String status) {
+    public List<ReservaResponseDTO> listar(String status, Long idUsuario) {
+        if (idUsuario != null) {
+            if (status == null || status.isBlank()) {
+                return reservaRepository.findByUsuario_IdOrderByDataHoraInicioPrevistaDesc(idUsuario).stream()
+                        .map(ReservaResponseDTO::fromEntity)
+                        .toList();
+            }
+            StatusReserva statusReserva = parseStatus(status);
+            return reservaRepository
+                    .findByUsuario_IdAndStatusReservaOrderByDataHoraInicioPrevistaDesc(idUsuario, statusReserva)
+                    .stream()
+                    .map(ReservaResponseDTO::fromEntity)
+                    .toList();
+        }
         if (status == null || status.isBlank()) {
             return reservaRepository.findAllByOrderByDataHoraInicioPrevistaDesc().stream()
                     .map(ReservaResponseDTO::fromEntity)
@@ -52,6 +65,16 @@ public class ReservaService {
     public ReservaResponseDTO criar(ReservaRequestDTO dto) {
         Usuario solicitante = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new IllegalArgumentException("Solicitante nao encontrado com id: " + dto.getIdUsuario()));
+        String matriculaInformada = dto.getMatriculaSolicitante() == null
+                ? ""
+                : dto.getMatriculaSolicitante().trim();
+        if (matriculaInformada.isEmpty()) {
+            throw new IllegalArgumentException("Matricula do solicitante e obrigatoria");
+        }
+        if (solicitante.getMatricula() == null
+                || !matriculaInformada.equalsIgnoreCase(solicitante.getMatricula().trim())) {
+            throw new IllegalArgumentException("Matricula informada nao confere com o solicitante");
+        }
         Veiculo veiculo = veiculoRepository.findById(dto.getIdVeiculo())
                 .orElseThrow(() -> new IllegalArgumentException("Veiculo nao encontrado com id: " + dto.getIdVeiculo()));
 
@@ -63,12 +86,23 @@ public class ReservaService {
 
         Reserva reserva = new Reserva();
         reserva.setUsuario(solicitante);
+        reserva.setMatriculaSolicitante(solicitante.getMatricula().trim());
         reserva.setVeiculo(veiculo);
         reserva.setDataHoraSolicitacao(LocalDateTime.now());
         reserva.setDataHoraInicioPrevista(inicio);
         reserva.setDataHoraFimEstimada(fim);
+        String justificativa = dto.getJustificativa() == null ? "" : dto.getJustificativa().trim();
+        if (justificativa.isEmpty()) {
+            throw new IllegalArgumentException("Justificativa e obrigatoria");
+        }
+
         reserva.setOrigem(dto.getOrigem().trim());
         reserva.setDestino(dto.getDestino().trim());
+        reserva.setJustificativa(justificativa);
+        reserva.setOrigemLat(dto.getOrigemLat());
+        reserva.setOrigemLng(dto.getOrigemLng());
+        reserva.setDestinoLat(dto.getDestinoLat());
+        reserva.setDestinoLng(dto.getDestinoLng());
         reserva.setStatusReserva(StatusReserva.SOLICITADA);
 
         Reserva salva = reservaRepository.save(reserva);
