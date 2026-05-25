@@ -49,8 +49,8 @@ export function VehicleTypePicker({ disabled, onSelect, selectedId, vehicles = [
     return (
       <div className="vehicle-type-picker vehicle-type-picker--empty">
         <Icon name="fleet" />
-        <p>Nenhum veículo disponível no momento.</p>
-        <span>Aguarde liberação pela frota ou escolha outro período.</span>
+        <p>Nenhum veículo disponível para este motorista.</p>
+        <span>Escolha outro motorista ou aguarde liberação de veículos na frota.</span>
       </div>
     );
   }

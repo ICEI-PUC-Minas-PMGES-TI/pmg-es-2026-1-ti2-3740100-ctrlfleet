@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
+import { DriverPicker } from '../../../components/solicitante/DriverPicker';
+import { RouteAddressSearch } from '../../../components/solicitante/RouteAddressSearch';
 import { RouteMapPicker } from '../../../components/solicitante/RouteMapPicker';
 import { VehicleTypePicker } from '../../../components/solicitante/VehicleTypePicker';
+import { listarMotoristasAtivos, listarVeiculosDoMotorista, mapMotoristaToView } from '../../../services/motoristaFrotaApi';
 import {
   getCurrentSolicitanteId,
   getCurrentSolicitanteMatricula,
@@ -15,7 +18,6 @@ import { FLEET_GARAGE, getFleetGaragePlace } from '../../../services/fleetMapLoc
 import { criarReserva } from '../../../services/reservaApi';
 import { listarUsuarios } from '../../../services/usuarioApi';
 import { mapBackendUserToView } from '../../../services/usuarioMappers';
-import { listarVeiculos } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView } from '../../../services/veiculoMappers';
 
 function formatPreviewDateTime(value) {
@@ -46,6 +48,7 @@ export function RequesterReservationCreatePage() {
   const [form, setForm] = useState({
     idUsuario: String(getCurrentSolicitanteId()),
     matriculaSolicitante: getCurrentSolicitanteMatricula(),
+    idMotorista: '',
     idVeiculo: '',
     dataHoraInicioPrevista: '',
     dataHoraFimEstimada: '',
@@ -58,7 +61,14 @@ export function RequesterReservationCreatePage() {
     destinoLng: null,
   });
 
-  const [optionsData, setOptionsData] = useState({ loading: true, error: null, users: [], vehicles: [] });
+  const [optionsData, setOptionsData] = useState({
+    loading: true,
+    error: null,
+    users: [],
+    drivers: [],
+    vehicles: [],
+    vehiclesLoading: false,
+  });
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
   const [geocodeStatus, setGeocodeStatus] = useState({ origem: 'idle', destino: 'idle' });
   const [geocodeErrors, setGeocodeErrors] = useState({ origem: null, destino: null });
@@ -70,15 +80,24 @@ export function RequesterReservationCreatePage() {
     const controller = new AbortController();
     Promise.all([
       listarUsuarios({ signal: controller.signal }),
-      listarVeiculos({ signal: controller.signal }),
+      listarMotoristasAtivos({ signal: controller.signal }),
     ])
-      .then(([users, vehicles]) => {
+      .then(([users, drivers]) => {
+        const mappedDrivers = (drivers || []).map(mapMotoristaToView);
         setOptionsData({
           loading: false,
           error: null,
           users: users.map(mapBackendUserToView),
-          vehicles: vehicles.map(mapBackendVehicleToView),
+          drivers: mappedDrivers,
+          vehicles: [],
+          vehiclesLoading: false,
         });
+        if (mappedDrivers.length === 1) {
+          setForm((current) => ({
+            ...current,
+            idMotorista: String(mappedDrivers[0].id),
+          }));
+        }
       })
       .catch((error) => {
         if (error.name === 'AbortError') return;
@@ -86,11 +105,53 @@ export function RequesterReservationCreatePage() {
           loading: false,
           error: error.message || 'Não foi possível carregar dados para a reserva.',
           users: [],
+          drivers: [],
           vehicles: [],
+          vehiclesLoading: false,
         });
       });
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    const motoristaId = form.idMotorista;
+    if (!motoristaId) {
+      setOptionsData((current) => ({ ...current, vehicles: [], vehiclesLoading: false }));
+      setForm((current) => ({ ...current, idVeiculo: '' }));
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    setOptionsData((current) => ({ ...current, vehiclesLoading: true }));
+
+    listarVeiculosDoMotorista(Number(motoristaId), { signal: controller.signal })
+      .then((vehicles) => {
+        const mapped = (vehicles || []).map(mapBackendVehicleToView);
+        setOptionsData((current) => ({
+          ...current,
+          vehicles: mapped,
+          vehiclesLoading: false,
+        }));
+        setForm((current) => {
+          const stillValid = mapped.some((vehicle) => String(vehicle.id) === current.idVeiculo);
+          return {
+            ...current,
+            idVeiculo: stillValid ? current.idVeiculo : String(mapped[0]?.id ?? ''),
+          };
+        });
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setOptionsData((current) => ({
+          ...current,
+          vehicles: [],
+          vehiclesLoading: false,
+        }));
+        setForm((current) => ({ ...current, idVeiculo: '' }));
+      });
+
+    return () => controller.abort();
+  }, [form.idMotorista]);
 
   const solicitantes = useMemo(
     () =>
@@ -100,9 +161,11 @@ export function RequesterReservationCreatePage() {
     [optionsData.users],
   );
 
-  const veiculosDisponiveis = useMemo(
-    () => optionsData.vehicles.filter((vehicle) => vehicle.isDisponivel),
-    [optionsData.vehicles],
+  const veiculosDisponiveis = useMemo(() => optionsData.vehicles, [optionsData.vehicles]);
+
+  const selectedDriver = useMemo(
+    () => optionsData.drivers.find((driver) => String(driver.id) === form.idMotorista) ?? null,
+    [form.idMotorista, optionsData.drivers],
   );
 
   const currentSolicitante = useMemo(() => {
@@ -123,16 +186,12 @@ export function RequesterReservationCreatePage() {
       matricula: currentSolicitante.matricula,
     });
 
-    setForm((current) => {
-      const stillValid = veiculosDisponiveis.some((vehicle) => String(vehicle.id) === current.idVeiculo);
-      return {
-        ...current,
-        idUsuario: String(currentSolicitante.id),
-        matriculaSolicitante: currentSolicitante.matricula,
-        idVeiculo: stillValid ? current.idVeiculo : String(veiculosDisponiveis[0]?.id ?? ''),
-      };
-    });
-  }, [currentSolicitante, veiculosDisponiveis]);
+    setForm((current) => ({
+      ...current,
+      idUsuario: String(currentSolicitante.id),
+      matriculaSolicitante: currentSolicitante.matricula,
+    }));
+  }, [currentSolicitante]);
 
   const selectedVehicle = useMemo(
     () => veiculosDisponiveis.find((vehicle) => String(vehicle.id) === form.idVeiculo) ?? null,
@@ -231,6 +290,15 @@ export function RequesterReservationCreatePage() {
     setActiveMapPoint('destino');
   }
 
+  const handleAddressPlaceFound = useCallback((place, point) => {
+    if (point === 'origem') {
+      applyOrigemPlace(place);
+      setActiveMapPoint('destino');
+    } else {
+      applyDestinoPlace(place);
+    }
+  }, []);
+
   async function handleMapPointSelect(lat, lng) {
     const point = activeMapPoint;
     const requestId = ++reverseRequestRef.current;
@@ -311,6 +379,7 @@ export function RequesterReservationCreatePage() {
       await criarReserva({
         idUsuario: Number(form.idUsuario),
         matriculaSolicitante: form.matriculaSolicitante.trim(),
+        idMotorista: Number(form.idMotorista),
         idVeiculo: Number(form.idVeiculo),
         dataHoraInicioPrevista: toIsoDateTime(form.dataHoraInicioPrevista),
         dataHoraFimEstimada: toIsoDateTime(form.dataHoraFimEstimada),
@@ -338,7 +407,7 @@ export function RequesterReservationCreatePage() {
     <div className="page-stack requester-page">
       <PageHeader
         eyebrow="Área do solicitante"
-        subtitle="Escolha o veículo, marque origem e destino no mapa e confira o endereço e a rota automaticamente."
+        subtitle="Escolha o motorista e o veículo vinculado, depois informe o trajeto no mapa."
         title="Solicitar Nova Reserva"
       />
 
@@ -348,8 +417,8 @@ export function RequesterReservationCreatePage() {
             <header className="requester-panel__head">
               <span className="requester-panel__step">1</span>
               <div>
-                <h2>Veículo e período</h2>
-                <p>Selecione a categoria e um veículo com status disponível na frota.</p>
+                <h2>Motorista, veículo e período</h2>
+                <p>Primeiro escolha o motorista; em seguida aparecem os veículos vinculados a ele.</p>
               </div>
             </header>
 
@@ -379,13 +448,34 @@ export function RequesterReservationCreatePage() {
               <input name="matriculaSolicitante" type="hidden" value={form.matriculaSolicitante} />
             </div>
 
-            <h3 className="requester-section-title">Selecionar veículo</h3>
-            <VehicleTypePicker
+            <h3 className="requester-section-title">Selecionar motorista</h3>
+            <DriverPicker
               disabled={optionsData.loading || Boolean(optionsData.error)}
-              onSelect={(vehicleId) => updateField('idVeiculo', String(vehicleId))}
-              selectedId={form.idVeiculo}
-              vehicles={veiculosDisponiveis}
+              drivers={optionsData.drivers}
+              onSelect={(driverId) => updateField('idMotorista', String(driverId))}
+              selectedId={form.idMotorista}
             />
+
+            {form.idMotorista ? (
+              <>
+                <h3 className="requester-section-title">
+                  Veículos de {selectedDriver?.name ?? 'motorista selecionado'}
+                </h3>
+                {optionsData.vehiclesLoading ? (
+                  <div className="admin-dashboard__loading">
+                    <span className="admin-dashboard__spinner" aria-hidden="true" />
+                    <p>Carregando veículos vinculados...</p>
+                  </div>
+                ) : (
+                  <VehicleTypePicker
+                    disabled={optionsData.loading || Boolean(optionsData.error)}
+                    onSelect={(vehicleId) => updateField('idVeiculo', String(vehicleId))}
+                    selectedId={form.idVeiculo}
+                    vehicles={veiculosDisponiveis}
+                  />
+                )}
+              </>
+            ) : null}
 
             <div className="requester-form-grid">
               <label className="form-field">
@@ -427,7 +517,7 @@ export function RequesterReservationCreatePage() {
               <span className="requester-panel__step">2</span>
               <div>
                 <h2>Trajeto</h2>
-                <p>Clique no mapa para marcar A e B — o endereço é preenchido automaticamente e a rota é traçada.</p>
+                <p>Busque o endereço acima do mapa (com sugestões) ou clique no mapa para marcar A e B.</p>
               </div>
             </header>
 
@@ -472,54 +562,6 @@ export function RequesterReservationCreatePage() {
             </div>
           </section>
 
-          <aside className="requester-summary">
-            <h3>Resumo</h3>
-            <dl>
-              <div>
-                <dt>Solicitante</dt>
-                <dd>
-                  {currentSolicitante
-                    ? `${currentSolicitante.name} · ${currentSolicitante.matricula}`
-                    : '—'}
-                </dd>
-              </div>
-              <div>
-                <dt>Veículo</dt>
-                <dd>
-                  {selectedVehicle
-                    ? `${selectedVehicle.vehicleTypeLabel} · ${selectedVehicle.plate} — ${selectedVehicle.model}`
-                    : '—'}
-                </dd>
-              </div>
-              <div>
-                <dt>Período</dt>
-                <dd>
-                  {formatPreviewDateTime(form.dataHoraInicioPrevista)} → {formatPreviewDateTime(form.dataHoraFimEstimada)}
-                </dd>
-              </div>
-              <div>
-                <dt>Justificativa</dt>
-                <dd>{form.justificativa.trim() || '—'}</dd>
-              </div>
-              <div>
-                <dt>Trajeto</dt>
-                <dd>
-                  {form.origem || '—'} → {form.destino || '—'}
-                </dd>
-              </div>
-              <div>
-                <dt>Rota estimada</dt>
-                <dd>
-                  {routeMeta?.distanceKm != null
-                    ? `~${routeMeta.distanceKm.toFixed(1)} km${routeMeta.durationMin != null ? ` · ~${routeMeta.durationMin} min` : ''}`
-                    : routeReady
-                      ? 'Calculando…'
-                      : 'Marque origem e destino no mapa'}
-                </dd>
-              </div>
-            </dl>
-          </aside>
-
           {submitState.error ? <div className="admin-user-create__error">{submitState.error}</div> : null}
 
           <div className="requester-form-actions">
@@ -532,6 +574,7 @@ export function RequesterReservationCreatePage() {
                 submitState.loading ||
                 !routeReady ||
                 !form.justificativa.trim() ||
+                !form.idMotorista ||
                 !form.idVeiculo ||
                 !form.matriculaSolicitante ||
                 !currentSolicitante ||
@@ -546,19 +589,85 @@ export function RequesterReservationCreatePage() {
         </div>
 
         <div className="requester-create-layout__map">
-          <RouteMapPicker
-            activePoint={activeMapPoint}
-            destinoCoords={destinoCoords}
-            destinoLabel={form.destino}
-            geocodeStatus={geocodeStatus}
-            onActivePointChange={setActiveMapPoint}
-            onMapClick={handleMapPointSelect}
-            origemCoords={origemCoords}
-            origemLabel={form.origem}
-            routeMeta={routeMeta}
-            routePositions={routePositions}
-            routeStatus={routeStatus}
-          />
+          <div className="requester-map-column">
+            <RouteAddressSearch
+              activePoint={activeMapPoint}
+              disabled={optionsData.loading}
+              onActivePointChange={setActiveMapPoint}
+              onPlaceFound={handleAddressPlaceFound}
+            />
+
+            <RouteMapPicker
+              activePoint={activeMapPoint}
+              destinoCoords={destinoCoords}
+              destinoLabel={form.destino}
+              geocodeStatus={geocodeStatus}
+              onActivePointChange={setActiveMapPoint}
+              onMapClick={handleMapPointSelect}
+              origemCoords={origemCoords}
+              origemLabel={form.origem}
+              routeMeta={routeMeta}
+              routePositions={routePositions}
+              routeStatus={routeStatus}
+            />
+
+            <aside className="requester-summary">
+              <h3>Resumo da solicitação</h3>
+              <dl>
+                <div>
+                  <dt>Solicitante</dt>
+                  <dd>
+                    {currentSolicitante
+                      ? `${currentSolicitante.name} · ${currentSolicitante.matricula}`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Motorista</dt>
+                  <dd>
+                    {selectedDriver
+                      ? `${selectedDriver.name} · ${selectedDriver.matricula}`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Veículo</dt>
+                  <dd>
+                    {selectedVehicle
+                      ? `${selectedVehicle.vehicleTypeLabel} · ${selectedVehicle.plate} — ${selectedVehicle.model}`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Período</dt>
+                  <dd>
+                    {formatPreviewDateTime(form.dataHoraInicioPrevista)} →{' '}
+                    {formatPreviewDateTime(form.dataHoraFimEstimada)}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Justificativa</dt>
+                  <dd>{form.justificativa.trim() || '—'}</dd>
+                </div>
+                <div>
+                  <dt>Trajeto</dt>
+                  <dd>
+                    {form.origem || '—'} → {form.destino || '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Rota estimada</dt>
+                  <dd>
+                    {routeMeta?.distanceKm != null
+                      ? `~${routeMeta.distanceKm.toFixed(1)} km${routeMeta.durationMin != null ? ` · ~${routeMeta.durationMin} min` : ''}`
+                      : routeReady
+                        ? 'Calculando…'
+                        : 'Informe origem e destino'}
+                  </dd>
+                </div>
+              </dl>
+            </aside>
+          </div>
         </div>
       </form>
     </div>

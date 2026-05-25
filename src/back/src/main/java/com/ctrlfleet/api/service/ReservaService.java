@@ -1,12 +1,15 @@
 package com.ctrlfleet.api.service;
 
+import com.ctrlfleet.api.domain.enums.PapelUsuario;
 import com.ctrlfleet.api.domain.enums.StatusReserva;
+import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.domain.model.Reserva;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.dto.reserva.DecisaoReservaRequestDTO;
 import com.ctrlfleet.api.dto.reserva.ReservaRequestDTO;
 import com.ctrlfleet.api.dto.reserva.ReservaResponseDTO;
+import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.ReservaRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
@@ -20,16 +23,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
+    private final RegistroUsoRepository registroUsoRepository;
     private final UsuarioRepository usuarioRepository;
     private final VeiculoRepository veiculoRepository;
     private final AuditoriaService auditoriaService;
 
     public ReservaService(
             ReservaRepository reservaRepository,
+            RegistroUsoRepository registroUsoRepository,
             UsuarioRepository usuarioRepository,
             VeiculoRepository veiculoRepository,
             AuditoriaService auditoriaService) {
         this.reservaRepository = reservaRepository;
+        this.registroUsoRepository = registroUsoRepository;
         this.usuarioRepository = usuarioRepository;
         this.veiculoRepository = veiculoRepository;
         this.auditoriaService = auditoriaService;
@@ -75,8 +81,27 @@ public class ReservaService {
                 || !matriculaInformada.equalsIgnoreCase(solicitante.getMatricula().trim())) {
             throw new IllegalArgumentException("Matricula informada nao confere com o solicitante");
         }
+        if (dto.getIdMotorista() == null) {
+            throw new IllegalArgumentException("Motorista e obrigatorio");
+        }
+
+        Usuario motorista = usuarioRepository.findById(dto.getIdMotorista())
+                .orElseThrow(() -> new IllegalArgumentException("Motorista nao encontrado com id: " + dto.getIdMotorista()));
+        if (motorista.getPapel() != PapelUsuario.ROLE_MOTORISTA
+                || !"ATIVO".equalsIgnoreCase(motorista.getStatus())) {
+            throw new IllegalArgumentException("Motorista informado invalido ou inativo");
+        }
+
         Veiculo veiculo = veiculoRepository.findById(dto.getIdVeiculo())
                 .orElseThrow(() -> new IllegalArgumentException("Veiculo nao encontrado com id: " + dto.getIdVeiculo()));
+
+        if (veiculo.getMotorista() == null
+                || !motorista.getId().equals(veiculo.getMotorista().getId())) {
+            throw new IllegalArgumentException("Veiculo nao esta vinculado ao motorista selecionado");
+        }
+        if (veiculo.getStatus() != StatusVeiculo.DISPONIVEL) {
+            throw new IllegalArgumentException("Veiculo selecionado nao esta disponivel");
+        }
 
         LocalDateTime inicio = parseDateTime(dto.getDataHoraInicioPrevista(), "dataHoraInicioPrevista");
         LocalDateTime fim = parseDateTime(dto.getDataHoraFimEstimada(), "dataHoraFimEstimada");
@@ -143,6 +168,35 @@ public class ReservaService {
         reserva.setStatusReserva(StatusReserva.CANCELADA);
         registrarDecisao("RESERVA_CANCELADA", reserva, dto, "Cancelada", "warning");
         return ReservaResponseDTO.fromEntity(reserva);
+    }
+
+    @Transactional
+    public void excluirDoHistorico(Long reservaId, Long idUsuario) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva nao encontrada com id: " + reservaId));
+
+        if (reserva.getStatusReserva() != StatusReserva.CANCELADA) {
+            throw new IllegalArgumentException("Apenas reservas canceladas podem ser removidas do historico");
+        }
+
+        if (idUsuario != null && !idUsuario.equals(reserva.getUsuario().getId())) {
+            throw new IllegalArgumentException("Reserva nao pertence ao solicitante informado");
+        }
+
+        if (registroUsoRepository.existsByIdReserva(reservaId)) {
+            throw new IllegalArgumentException("Reserva com registro de uso nao pode ser removida do historico");
+        }
+
+        auditoriaService.registrar(
+                "RESERVA_EXCLUIDA_HISTORICO",
+                reserva.getUsuario().getNome(),
+                "Reserva #" + reserva.getId(),
+                "Removida",
+                "info",
+                null,
+                "Solicitante removeu reserva cancelada do historico");
+
+        reservaRepository.delete(reserva);
     }
 
     private Reserva buscarSolicitada(Long reservaId) {

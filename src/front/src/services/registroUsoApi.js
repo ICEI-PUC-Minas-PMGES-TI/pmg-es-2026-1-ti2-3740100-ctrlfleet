@@ -1,30 +1,7 @@
 import { resolveRegistrosUsoForReserva } from '../utils/mockRegistroUso';
 import { mapRegistroUsoFromApi, mapRegistrosUsoFromApi } from '../utils/registroUsoMappers';
 
-/**
- * Em desenvolvimento usa URL direta do Spring Boot (evita 502 do proxy quando o
- * backend não está acessível via `localhost` ou está desligado).
- * Em produção: defina `VITE_API_BASE_URL` no build ou use `/api` com reverse proxy.
- */
-function getApiBaseUrl() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (typeof fromEnv === 'string' && fromEnv.trim() !== '') {
-    return fromEnv.replace(/\/$/, '');
-  }
-  if (import.meta.env.DEV) {
-    return 'http://127.0.0.1:8080';
-  }
-  return '';
-}
-
-function requestUrl(path) {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  if (base) {
-    return `${base}${p}`;
-  }
-  return `/api${p}`;
-}
+import { buildApiUrl } from './apiBase';
 
 function parseJsonSafely(text) {
   if (!text) return null;
@@ -41,7 +18,7 @@ function parseJsonSafely(text) {
  * @returns {Promise<Array>}
  */
 export async function listarRegistrosPorVeiculo(veiculoId) {
-  const res = await fetch(requestUrl(`/registros-uso/veiculo/${veiculoId}`));
+  const res = await fetch(buildApiUrl(`/registros-uso/veiculo/${veiculoId}`));
 
   const data = parseJsonSafely(await res.text());
 
@@ -64,7 +41,7 @@ export async function listarRegistrosPorVeiculo(veiculoId) {
  * @returns {Promise<Array>}
  */
 export async function listarRegistrosPorReserva(reservaId, reserva = null) {
-  const res = await fetch(requestUrl(`/registros-uso/reserva/${reservaId}`));
+  const res = await fetch(buildApiUrl(`/registros-uso/reserva/${reservaId}`));
 
   const data = parseJsonSafely(await res.text());
 
@@ -89,7 +66,7 @@ export async function listarRegistrosPorReserva(reservaId, reserva = null) {
  * @returns {Promise<object>}
  */
 export async function finalizarCorrida(payload) {
-  const res = await fetch(requestUrl('/registros-uso/finalizar'), {
+  const res = await fetch(buildApiUrl('/registros-uso/finalizar'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

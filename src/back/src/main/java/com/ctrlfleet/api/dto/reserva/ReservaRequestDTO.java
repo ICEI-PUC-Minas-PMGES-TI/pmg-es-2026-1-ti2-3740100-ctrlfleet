@@ -10,6 +10,9 @@ public class ReservaRequestDTO {
     @NotBlank(message = "Matricula do solicitante e obrigatoria")
     private String matriculaSolicitante;
 
+    @NotNull(message = "Motorista e obrigatorio")
+    private Long idMotorista;
+
     @NotNull(message = "Veiculo e obrigatorio")
     private Long idVeiculo;
 
@@ -37,6 +40,8 @@ public class ReservaRequestDTO {
     public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
     public String getMatriculaSolicitante() { return matriculaSolicitante; }
     public void setMatriculaSolicitante(String matriculaSolicitante) { this.matriculaSolicitante = matriculaSolicitante; }
+    public Long getIdMotorista() { return idMotorista; }
+    public void setIdMotorista(Long idMotorista) { this.idMotorista = idMotorista; }
     public Long getIdVeiculo() { return idVeiculo; }
     public void setIdVeiculo(Long idVeiculo) { this.idVeiculo = idVeiculo; }
     public String getDataHoraInicioPrevista() { return dataHoraInicioPrevista; }

@@ -1,8 +1,16 @@
 import { FLEET_GARAGE } from './fleetMapLocations';
 
-const PHOTON_URL = 'https://photon.komoot.io/api/';
-const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
-const NOMINATIM_REVERSE_URL = 'https://nominatim.openstreetmap.org/reverse';
+/** Em dev o Vite faz proxy para evitar CORS; em produção use reverse proxy nos mesmos paths. */
+const GEOCODE_VIA_PROXY =
+  import.meta.env.VITE_GEOCODE_PROXY === 'true' || import.meta.env.DEV;
+
+const PHOTON_URL = GEOCODE_VIA_PROXY ? '/geocode/photon/' : 'https://photon.komoot.io/api/';
+const NOMINATIM_URL = GEOCODE_VIA_PROXY
+  ? '/geocode/nominatim/search'
+  : 'https://nominatim.openstreetmap.org/search';
+const NOMINATIM_REVERSE_URL = GEOCODE_VIA_PROXY
+  ? '/geocode/nominatim/reverse'
+  : 'https://nominatim.openstreetmap.org/reverse';
 const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving';
 
 const GEOCODE_HEADERS = {
@@ -212,17 +220,21 @@ async function searchPlacesPhoton(query, options = {}) {
     lat: String(FLEET_GARAGE.lat),
     lon: String(FLEET_GARAGE.lng),
     limit: String(options.limit ?? 10),
-    lang: 'pt',
     bbox: BH_BBOX,
   });
 
-  const response = await fetch(`${PHOTON_URL}?${params}`, { signal: options.signal });
-  if (!response.ok) return [];
+  try {
+    const response = await fetch(`${PHOTON_URL}?${params}`, { signal: options.signal });
+    if (!response.ok) return [];
 
-  const data = await response.json();
-  if (!Array.isArray(data?.features)) return [];
+    const data = await response.json();
+    if (!Array.isArray(data?.features)) return [];
 
-  return data.features.map(mapPhotonFeature);
+    return data.features.map(mapPhotonFeature);
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    return [];
+  }
 }
 
 async function searchPlacesNominatim(query, options = {}) {
@@ -238,17 +250,22 @@ async function searchPlacesNominatim(query, options = {}) {
     bounded: '0',
   });
 
-  const response = await fetch(`${NOMINATIM_URL}?${params}`, {
-    headers: GEOCODE_HEADERS,
-    signal: options.signal,
-  });
+  try {
+    const response = await fetch(`${NOMINATIM_URL}?${params}`, {
+      headers: GEOCODE_HEADERS,
+      signal: options.signal,
+    });
 
-  if (!response.ok) return [];
+    if (!response.ok) return [];
 
-  const results = await response.json();
-  if (!Array.isArray(results)) return [];
+    const results = await response.json();
+    if (!Array.isArray(results)) return [];
 
-  return results.map(mapNominatimResult);
+    return results.map(mapNominatimResult);
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    return [];
+  }
 }
 
 export async function searchPlaces(query, options = {}) {
@@ -264,9 +281,14 @@ export async function searchPlaces(query, options = {}) {
 
   const photonItems = photonResult.status === 'fulfilled' ? photonResult.value : [];
   const nominatimItems = nominatimResult.status === 'fulfilled' ? nominatimResult.value : [];
+  const bothProvidersFailed =
+    photonResult.status === 'rejected' && nominatimResult.status === 'rejected';
 
   if (photonItems.length === 0 && nominatimItems.length === 0) {
-    throw new Error('Não foi possível buscar sugestões de locais.');
+    if (bothProvidersFailed) {
+      throw new Error('Serviço de busca indisponível. Verifique sua conexão e tente novamente.');
+    }
+    throw new Error('Nenhum local encontrado. Tente outro termo de busca.');
   }
 
   const merged = dedupePlaces([...photonItems, ...nominatimItems])

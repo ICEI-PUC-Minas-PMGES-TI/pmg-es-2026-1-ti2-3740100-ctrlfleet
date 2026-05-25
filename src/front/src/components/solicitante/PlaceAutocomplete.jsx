@@ -192,7 +192,7 @@ export function PlaceAutocomplete({
       ) : null}
       {!isLoading && !hintMessage && value.trim().length >= 2 ? (
         <small className="requester-field-hint">
-          Lojas, shoppings, órgãos públicos, ruas e outros locais — escolha uma sugestão.
+          Escolha uma sugestão da lista para marcar no mapa. O número pode ser informado depois, se quiser.
         </small>
       ) : null}
     </label>
