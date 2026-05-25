@@ -1,27 +1,7 @@
-/**
- * Em desenvolvimento usa URL direta do Spring Boot (evita 502 do proxy quando o
- * backend não está acessível via `localhost` ou está desligado).
- * Em produção: defina `VITE_API_BASE_URL` no build ou use `/api` com reverse proxy.
- */
-function getApiBaseUrl() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (typeof fromEnv === 'string' && fromEnv.trim() !== '') {
-    return fromEnv.replace(/\/$/, '');
-  }
-  if (import.meta.env.DEV) {
-    return 'http://127.0.0.1:8080';
-  }
-  return '';
-}
+import { resolveRegistrosUsoForReserva } from '../utils/mockRegistroUso';
+import { mapRegistroUsoFromApi, mapRegistrosUsoFromApi } from '../utils/registroUsoMappers';
 
-function requestUrl(path) {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  if (base) {
-    return `${base}${p}`;
-  }
-  return `/api${p}`;
-}
+import { buildApiUrl } from './apiBase';
 
 function parseJsonSafely(text) {
   if (!text) return null;
@@ -38,7 +18,7 @@ function parseJsonSafely(text) {
  * @returns {Promise<Array>}
  */
 export async function listarRegistrosPorVeiculo(veiculoId) {
-  const res = await fetch(requestUrl(`/registros-uso/veiculo/${veiculoId}`));
+  const res = await fetch(buildApiUrl(`/registros-uso/veiculo/${veiculoId}`));
 
   const data = parseJsonSafely(await res.text());
 
@@ -50,7 +30,34 @@ export async function listarRegistrosPorVeiculo(veiculoId) {
     throw new Error(msg);
   }
 
-  return data || [];
+  return mapRegistrosUsoFromApi(data || []);
+}
+
+/**
+ * Lista os registros vinculados a uma reserva.
+ * Para reservas concluídas sem vínculo no backend, preenche com dados de apoio do seed.
+ * @param {number|string} reservaId
+ * @param {object|null} reserva metadados da reserva (status, datas, veículo…)
+ * @returns {Promise<Array>}
+ */
+export async function listarRegistrosPorReserva(reservaId, reserva = null) {
+  const res = await fetch(buildApiUrl(`/registros-uso/reserva/${reservaId}`));
+
+  const data = parseJsonSafely(await res.text());
+
+  if (!res.ok) {
+    if (reserva?.statusReserva === 'CONCLUIDA') {
+      return resolveRegistrosUsoForReserva(reserva, []);
+    }
+    const msg =
+      (data && typeof data.mensagem === 'string' && data.mensagem) ||
+      (data && typeof data.message === 'string' && data.message) ||
+      `Não foi possível carregar o histórico da reserva (${res.status})`;
+    throw new Error(msg);
+  }
+
+  const registros = mapRegistrosUsoFromApi(Array.isArray(data) ? data : []);
+  return resolveRegistrosUsoForReserva(reserva, registros);
 }
 
 /**
@@ -59,7 +66,7 @@ export async function listarRegistrosPorVeiculo(veiculoId) {
  * @returns {Promise<object>}
  */
 export async function finalizarCorrida(payload) {
-  const res = await fetch(requestUrl('/registros-uso/finalizar'), {
+  const res = await fetch(buildApiUrl('/registros-uso/finalizar'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -75,5 +82,5 @@ export async function finalizarCorrida(payload) {
     throw new Error(msg);
   }
 
-  return data;
+  return mapRegistroUsoFromApi(data);
 }

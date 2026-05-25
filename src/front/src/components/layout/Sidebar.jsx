@@ -2,14 +2,26 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
-import { fleetNavigationItems } from '../../data/fleetData';
+import { driverNavigationItems, fleetNavigationItems, requesterNavigationItems } from '../../data/fleetData';
 import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const isAdminArea = location.pathname.startsWith('/admin');
+  const isDriverArea = location.pathname.startsWith('/motorista');
+  const isRequesterArea = location.pathname.startsWith('/solicitante');
+  const motoristaId = location.pathname.match(/^\/motorista\/(\d+)/)?.[1] || '5';
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
+
   const navigationItems = useMemo(() => {
+    if (isDriverArea) {
+      return driverNavigationItems.map((item) => ({
+        ...item,
+        to: item.to.replace(':motoristaId', motoristaId),
+      }));
+    }
+
+    if (isRequesterArea) return requesterNavigationItems;
     if (!isAdminArea) return fleetNavigationItems;
 
     return adminNavigationItems.map((item) => {
@@ -19,12 +31,25 @@ export function Sidebar({ isOpen, onClose }) {
         badge: pendingUsersCount > 0 ? pendingUsersCount : null,
       };
     });
-  }, [isAdminArea, pendingUsersCount]);
-  const navigationLabel = isAdminArea ? 'Administração' : 'Gestor de Frotas';
+  }, [isAdminArea, isDriverArea, isRequesterArea, motoristaId, pendingUsersCount]);
+
+  const navigationLabel = isAdminArea
+    ? 'Administração'
+    : isDriverArea
+      ? 'Motorista'
+      : isRequesterArea
+        ? 'Solicitante'
+        : 'Gestor de Frotas';
+  const accessLabel = isAdminArea
+    ? 'Área administrativa'
+    : isDriverArea
+      ? 'Área do motorista'
+      : isRequesterArea
+        ? 'Área do solicitante'
+        : 'Área do gestor';
 
   useEffect(() => {
     if (!isAdminArea) {
-      setPendingUsersCount(0);
       return undefined;
     }
 
@@ -71,6 +96,7 @@ export function Sidebar({ isOpen, onClose }) {
         {navigationItems.map((item) => (
           <NavLink
             className={({ isActive }) => `sidebar__link ${isActive ? 'is-active' : ''}`}
+            end={item.end}
             key={item.to}
             onClick={onClose}
             to={item.to}
@@ -87,11 +113,15 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">{isAdminArea ? 'AS' : 'AC'}</span>
+            <span className="avatar-initials">
+              {isAdminArea ? 'AS' : isRequesterArea ? 'MS' : isDriverArea ? 'CF' : 'AC'}
+            </span>
           </span>
           <div>
-            <strong>{isAdminArea ? 'Ana Souza' : 'Ana Costa'}</strong>
-            <span>{isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
+            <strong>
+              {isAdminArea ? 'Ana Souza' : isRequesterArea ? 'Marina Silva' : isDriverArea ? 'CtrlFleet' : 'Ana Costa'}
+            </strong>
+            <span>{isDriverArea ? accessLabel : isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
           </div>
         </div>
         <Link className="sidebar__logout" to="/login">

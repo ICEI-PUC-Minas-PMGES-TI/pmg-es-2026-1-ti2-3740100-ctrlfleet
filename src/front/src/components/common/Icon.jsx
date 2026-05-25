@@ -159,6 +159,25 @@ const iconMap = {
       <path d="M6.8 16.8v1.7M17.2 16.8v1.7M7.5 10.7h9" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </>
   ),
+  history: (
+    <>
+      <path
+        d="M4 12a8 8 0 1 0 2.4-5.7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M4 5.2v4.2h4.2M12 7.8v4.7l3.2 1.9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </>
+  ),
   logout: (
     <>
       <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
@@ -185,6 +204,24 @@ const iconMap = {
         strokeLinejoin="round"
         strokeWidth="1.8"
       />
+    </>
+  ),
+  map: (
+    <>
+      <path
+        d="M4.5 6.8c0-1.2 1-2.1 2.2-1.9l11.1 2.2c.9.2 1.6 1 1.6 1.9v8.4c0 1.2-1 2.1-2.2 1.9L6.7 17.1c-.9-.2-1.6-1-1.6-1.9V6.8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M9.2 8.8c0 1.5-1.2 2.7-2.7 2.7S3.8 10.3 3.8 8.8s1.2-2.7 2.7-2.7 2.7 1.2 2.7 2.7ZM20.2 11.8c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7 1.2-2.7 2.7-2.7 2.7 1.2 2.7 2.7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path d="M7.2 10.2 16.8 13.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </>
   ),
   maintenance: (
@@ -298,7 +335,9 @@ export function Icon({ className, name }) {
       aria-hidden="true"
       className={className}
       fill="none"
+      height="1em"
       viewBox="0 0 24 24"
+      width="1em"
       xmlns="http://www.w3.org/2000/svg"
     >
       {iconMap[name] ?? iconMap.dashboard}

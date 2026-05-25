@@ -1,27 +1,4 @@
-/**
- * Em desenvolvimento usa URL direta do Spring Boot (evita 502 do proxy quando o
- * backend não está acessível via `localhost` ou está desligado).
- * Em produção: defina `VITE_API_BASE_URL` no build ou use `/api` com reverse proxy.
- */
-function getApiBaseUrl() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (typeof fromEnv === 'string' && fromEnv.trim() !== '') {
-    return fromEnv.replace(/\/$/, '');
-  }
-  if (import.meta.env.DEV) {
-    return 'http://127.0.0.1:8080';
-  }
-  return '';
-}
-
-function requestUrl(path) {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  if (base) {
-    return `${base}${p}`;
-  }
-  return `/api${p}`;
-}
+import { buildApiUrl } from './apiBase';
 
 function parseJsonSafely(text) {
   if (!text) return null;
@@ -37,7 +14,7 @@ function parseJsonSafely(text) {
  * @returns {Promise<{ id: number, nome: string, email: string }>}
  */
 export async function criarUsuario(payload) {
-  const res = await fetch(requestUrl('/usuarios'), {
+  const res = await fetch(buildApiUrl('/usuarios'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -57,7 +34,7 @@ export async function criarUsuario(payload) {
 }
 
 export async function buscarUsuario(id, { signal } = {}) {
-  const res = await fetch(requestUrl(`/usuarios/${id}`), {
+  const res = await fetch(buildApiUrl(`/usuarios/${id}`), {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
@@ -77,7 +54,7 @@ export async function buscarUsuario(id, { signal } = {}) {
 }
 
 export async function atualizarUsuario(id, payload) {
-  const res = await fetch(requestUrl(`/usuarios/${id}`), {
+  const res = await fetch(buildApiUrl(`/usuarios/${id}`), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -97,7 +74,7 @@ export async function atualizarUsuario(id, payload) {
 }
 
 export async function desativarUsuario(id) {
-  const res = await fetch(requestUrl(`/usuarios/${id}/desativar`), {
+  const res = await fetch(buildApiUrl(`/usuarios/${id}/desativar`), {
     method: 'PATCH',
     headers: { Accept: 'application/json' },
   });
@@ -131,7 +108,7 @@ export async function desativarUsuario(id) {
  * }>>}
  */
 export async function listarUsuarios({ signal } = {}) {
-  const res = await fetch(requestUrl('/usuarios'), {
+  const res = await fetch(buildApiUrl('/usuarios'), {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
@@ -151,7 +128,7 @@ export async function listarUsuarios({ signal } = {}) {
 }
 
 async function acaoUsuario(id, path, method = 'PATCH') {
-  const res = await fetch(requestUrl(`/usuarios/${id}${path}`), {
+  const res = await fetch(buildApiUrl(`/usuarios/${id}${path}`), {
     method,
     headers: { Accept: 'application/json' },
   });

@@ -1,26 +1,7 @@
 import { useEffect, useState } from 'react';
 import { SectionCard } from '../common/SectionCard';
 import { listarRegistrosPorVeiculo } from '../../services/registroUsoApi';
-
-function formatDateTime(isoString) {
-  if (!isoString) return '—';
-  const date = new Date(isoString);
-  return date.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatKm(value) {
-  if (value == null) return '—';
-  return Number(value).toLocaleString('pt-BR', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
-  }) + ' km';
-}
+import { formatDateTime, formatKm } from '../../utils/registroUsoFormatters';
 
 export function RegistroUsoSection({ veiculoId }) {
   const [registros, setRegistros] = useState([]);
@@ -31,8 +12,6 @@ export function RegistroUsoSection({ veiculoId }) {
     if (!veiculoId) return;
 
     let cancelado = false;
-    setLoading(true);
-    setErro(null);
 
     listarRegistrosPorVeiculo(veiculoId)
       .then((data) => {
@@ -104,10 +83,7 @@ export function RegistroUsoSection({ veiculoId }) {
               </thead>
               <tbody>
                 {registros.map((reg) => {
-                  const kmRodados =
-                    reg.quilometragemRetorno != null && reg.quilometragemSaida != null
-                      ? reg.quilometragemRetorno - reg.quilometragemSaida
-                      : null;
+                  const kmRodados = reg.quilometragemPercorrida;
 
                   return (
                     <tr key={reg.id}>
@@ -134,10 +110,7 @@ export function RegistroUsoSection({ veiculoId }) {
           {/* Mobile: cards */}
           <div className="registro-uso-card-list">
             {registros.map((reg) => {
-              const kmRodados =
-                reg.quilometragemRetorno != null && reg.quilometragemSaida != null
-                  ? reg.quilometragemRetorno - reg.quilometragemSaida
-                  : null;
+              const kmRodados = reg.quilometragemPercorrida;
 
               return (
                 <article className="registro-uso-card" key={reg.id}>

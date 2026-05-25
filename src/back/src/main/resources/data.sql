@@ -103,6 +103,31 @@ INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh) VALUES
 (8, '06234587190', '2026-12-05')
 ON CONFLICT (usuario_id) DO NOTHING;
 
+-- Motoristas adicionais para a frota (10 motoristas ativos no painel do solicitante)
+INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, perfil_acesso, role, data_desligamento, status) VALUES
+(16, 'Marcos Oliveira',     'marcos.oliveira@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0016', 'Motorista Pleno',   '2022-04-11', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(17, 'Renata Freitas',      'renata.freitas@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0017', 'Motorista Pleno',   '2021-08-30', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(18, 'Diego Nascimento',    'diego.nascimento@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0018', 'Motorista Sênior',  '2019-02-14', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(19, 'Camila Rodrigues',    'camila.rodrigues@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0019', 'Motorista Pleno',   '2023-01-09', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(20, 'Thiago Barbosa',      'thiago.barbosa@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0020', 'Motorista Júnior',  '2024-06-17', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(21, 'Aline Correia',       'aline.correia@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0021', 'Motorista Pleno',   '2020-11-25', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(22, 'Gustavo Pires',       'gustavo.pires@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0022', 'Motorista Sênior',  '2018-07-03', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh) VALUES
+(16, '07120593429', '2028-03-15'),
+(17, '08245619074', '2029-06-20'),
+(18, '09356720185', '2030-01-10'),
+(19, '10467831296', '2028-11-28'),
+(20, '11578942307', '2027-05-07'),
+(21, '12689053418', '2029-09-14'),
+(22, '13790164529', '2030-12-01')
+ON CONFLICT (usuario_id) DO NOTHING;
+
+UPDATE usuarios SET status = 'ATIVO' WHERE id IN (5, 6, 8, 16, 17, 18, 19, 20, 21, 22) AND tipo_cadastro = 'motorista';
+
+SELECT setval(pg_get_serial_sequence('usuarios', 'id'), COALESCE((SELECT MAX(id) FROM usuarios), 0));
+
 
 -- =====================================================================
 -- 1.3 Remove tabelas de roles em N:N e colunas de CNH em `usuarios`.
@@ -148,6 +173,17 @@ ON CONFLICT DO NOTHING;
 -- =====================================================================
 -- Migração: versões antigas do Hibernate criavam a tabela citada "Veiculos";
 -- a entidade usa `veiculos` (minúsculas). Copia dados e remove a tabela legada.
+-- Migração: bancos criados antes do campo `secretaria` precisam receber a coluna
+-- antes dos SELECTs/INSERTs da entidade atual.
+ALTER TABLE IF EXISTS veiculos ADD COLUMN IF NOT EXISTS secretaria varchar(255);
+UPDATE veiculos
+SET secretaria = 'Garagem Central'
+WHERE secretaria IS NULL OR btrim(secretaria) = '';
+ALTER TABLE IF EXISTS veiculos ALTER COLUMN secretaria SET NOT NULL;
+
+ALTER TABLE IF EXISTS veiculos ADD COLUMN IF NOT EXISTS tipo_veiculo varchar(30);
+UPDATE veiculos SET tipo_veiculo = 'SEDAN' WHERE tipo_veiculo IS NULL OR btrim(tipo_veiculo) = '';
+
 DO $$
 BEGIN
   IF EXISTS (
@@ -163,18 +199,75 @@ BEGIN
   END IF;
 END $$;
 
-INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria) VALUES
-(1,  'ABC1A23', 'Onix',              'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central'),
-(2,  'XYZ5B67', 'HB20',              'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central'),
-(3,  'LMN9C12', 'Corsa',             'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central'),
-(4,  'VXY8D01', 'March',             'Nissan',     2023, 'DISPONIVEL', 'Garagem Central'),
-(5,  'DEF3E56', 'Prisma',            'Chevrolet',  2020, 'EM_USO', 'Garagem Central'),
-(6,  'GHI7F90', 'Gol',               'Volkswagen', 2022, 'EM_USO', 'Garagem Central'),
-(7,  'JKL2G45', 'Celta',             'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central'),
-(8,  'OPQ6H89', 'Fit',               'Honda',      2021, 'MANUTENCAO', 'Garagem Central'),
-(9,  'RST0I23', 'Palio',             'Fiat',       2015, 'DESATIVADO', 'Garagem Central'),
-(10, 'UVW4J56', 'Strada',            'Fiat',       2024, 'DISPONIVEL', 'Garagem Central')
-ON CONFLICT DO NOTHING;
+INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_veiculo) VALUES
+(1,  'ABC1A23', 'Onix',         'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(2,  'XYZ5B67', 'HB20',         'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(3,  'LMN9C12', 'Corsa',        'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(4,  'VXY8D01', 'March',        'Nissan',     2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'EM_USO',     'Garagem Central',               'SEDAN'),
+(6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'EM_USO',     'Garagem Central',               'HATCH'),
+(7,  'JKL2G45', 'Celta',        'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central',               'HATCH'),
+(8,  'OPQ6H89', 'Fit',          'Honda',      2021, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
+(9,  'RST0I23', 'Palio',        'Fiat',       2015, 'DESATIVADO', 'Garagem Central',               'HATCH'),
+(10, 'UVW4J56', 'Strada',       'Fiat',       2024, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(11, 'RKM1A11', 'Polo',         'Volkswagen', 2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(12, 'TBN2B22', 'Argo',         'Fiat',       2022, 'DISPONIVEL', 'Secretaria de Educacao',      'HATCH'),
+(13, 'FCH3C33', 'Mobi',         'Fiat',       2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(14, 'JLP4D44', 'Kwid',         'Renault',    2023, 'EM_USO',     'Secretaria de Obras',         'HATCH'),
+(15, 'MNR5E55', 'Sandero',      'Renault',    2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(16, 'QST6F66', 'Ka',           'Ford',       2020, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'HATCH'),
+(17, 'VWX7G77', 'Yaris',        'Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(18, 'YZA8H88', 'Etios',        'Toyota',     2019, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
+(19, 'BCD9I99', 'Up!',          'Volkswagen', 2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(20, 'EFG0J00', 'Picanto',      'Kia',        2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
+(21, 'HIJ1K11', 'Compass',      'Jeep',       2024, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(22, 'KLM2L22', 'Creta',        'Hyundai',    2023, 'DISPONIVEL', 'Secretaria de Educacao',      'SUV'),
+(23, 'NOP3M33', 'Tracker',      'Chevrolet',  2022, 'EM_USO',     'Garagem Central',               'SUV'),
+(24, 'QRS4N44', 'T-Cross',      'Volkswagen', 2023, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(25, 'TUV5O55', 'Duster',       'Renault',    2021, 'DISPONIVEL', 'Secretaria de Obras',         'SUV'),
+(26, 'WXY6P66', 'Corolla Cross','Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(27, 'ZAB7Q77', 'HR-V',         'Honda',      2022, 'DISPONIVEL', 'Secretaria de Saude',         'SUV'),
+(28, 'CDE8R88', 'Sportage',     'Kia',        2023, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(29, 'FGH9S99', 'Nivus',        'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'SUV'),
+(30, 'IJK0T10', 'Sprinter',     'Mercedes-Benz',2022,'DISPONIVEL','Garagem Central',               'VAN'),
+(31, 'LMN1U21', 'Ducato',       'Fiat',       2021, 'DISPONIVEL', 'Secretaria de Educacao',      'VAN'),
+(32, 'OPQ2V32', 'Master',       'Renault',    2023, 'EM_USO',     'Secretaria de Obras',         'VAN'),
+(33, 'RST3W43', 'Daily',        'Iveco',      2020, 'DISPONIVEL', 'Garagem Central',               'VAN'),
+(34, 'UVW4X54', 'Kombi',        'Volkswagen', 2014, 'MANUTENCAO', 'Garagem Central',               'VAN'),
+(35, 'XYZ5Y65', 'Fiorino',      'Fiat',       2022, 'DISPONIVEL', 'Secretaria de Saude',         'VAN'),
+(36, 'ABC6Z76', 'Partner',      'Peugeot',    2021, 'DISPONIVEL', 'Garagem Central',               'VAN'),
+(37, 'DEF7A87', 'Expert',       'Peugeot',    2023, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'VAN'),
+(38, 'GHI8B98', 'OF-1519',      'Mercedes-Benz',2019,'DISPONIVEL','Secretaria de Educacao',      'ONIBUS'),
+(39, 'JKL9C09', 'Volare W9',    'Marcopolo',  2020, 'DISPONIVEL', 'Garagem Central',               'ONIBUS'),
+(40, 'MNO0D10', 'Apache U',     'Volkswagen', 2018, 'EM_USO',     'Secretaria de Obras',         'ONIBUS'),
+(41, 'PQR1E21', 'Paradiso',     'Marcopolo',  2021, 'DISPONIVEL', 'Garagem Central',               'ONIBUS'),
+(42, 'STU2F32', 'Torino',       'Caio',       2022, 'MANUTENCAO', 'Garagem Central',               'ONIBUS'),
+(43, 'VWX3G43', 'Millennium',   'Busscar',    2017, 'DESATIVADO', 'Garagem Central',               'ONIBUS'),
+(44, 'YZA4H54', 'Corolla',      'Toyota',     2023, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(45, 'BCD5I65', 'Civic',        'Honda',      2022, 'DISPONIVEL', 'Secretaria de Saude',         'SEDAN'),
+(46, 'EFG6J76', 'Virtus',       'Volkswagen', 2024, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(47, 'HIJ7K87', 'Cronos',       'Fiat',       2021, 'EM_USO',     'Secretaria de Educacao',      'SEDAN'),
+(48, 'KLM8L98', 'Sentra',       'Nissan',     2022, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(49, 'NOP9M09', 'Jetta',        'Volkswagen', 2020, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(50, 'QRS0N10', 'Cruze',        'Chevrolet',  2023, 'DISPONIVEL', 'Secretaria de Obras',         'SEDAN'),
+(51, 'TUV1O21', 'Logan',        'Renault',    2019, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(52, 'WXY2P32', 'Voyage',       'Volkswagen', 2021, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(53, 'ZAB3Q43', 'Hilux',        'Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(54, 'CDE4R54', 'Ranger',       'Ford',       2023, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'CAMINHONETE'),
+(55, 'FGH5S65', 'S10',          'Chevrolet',  2022, 'EM_USO',     'Garagem Central',               'CAMINHONETE'),
+(56, 'IJK6T76', 'Amarok',       'Volkswagen', 2021, 'DISPONIVEL', 'Secretaria de Obras',         'CAMINHONETE'),
+(57, 'LMN7U87', 'Toro',         'Fiat',       2023, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(58, 'OPQ8V98', 'Frontier',     'Nissan',     2022, 'DISPONIVEL', 'Secretaria de Educacao',      'CAMINHONETE'),
+(59, 'RST9W09', 'L200',         'Mitsubishi', 2020, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
+(60, 'UVW0X10', 'Saveiro',      'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE')
+ON CONFLICT (id) DO UPDATE SET
+  placa = EXCLUDED.placa,
+  modelo = EXCLUDED.modelo,
+  marca = EXCLUDED.marca,
+  ano = EXCLUDED.ano,
+  status = EXCLUDED.status,
+  secretaria = EXCLUDED.secretaria,
+  tipo_veiculo = EXCLUDED.tipo_veiculo;
 
 -- Avança a sequence do IDENTITY (só se existir; evita erro se pg_get_serial_sequence for NULL).
 DO $$
@@ -198,6 +291,20 @@ END $$;
 UPDATE veiculos
 SET secretaria = 'Garagem Central'
 WHERE secretaria IS NULL OR btrim(secretaria) = '';
+
+-- Vínculo motorista ↔ veículo (cada motorista com frota própria espalhada na base)
+ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS id_motorista bigint;
+
+UPDATE veiculos SET id_motorista = 5  WHERE id BETWEEN 1  AND 6;
+UPDATE veiculos SET id_motorista = 6  WHERE id BETWEEN 7  AND 12;
+UPDATE veiculos SET id_motorista = 8  WHERE id BETWEEN 13 AND 18;
+UPDATE veiculos SET id_motorista = 16 WHERE id BETWEEN 19 AND 24;
+UPDATE veiculos SET id_motorista = 17 WHERE id BETWEEN 25 AND 30;
+UPDATE veiculos SET id_motorista = 18 WHERE id BETWEEN 31 AND 36;
+UPDATE veiculos SET id_motorista = 19 WHERE id BETWEEN 37 AND 42;
+UPDATE veiculos SET id_motorista = 20 WHERE id BETWEEN 43 AND 48;
+UPDATE veiculos SET id_motorista = 21 WHERE id BETWEEN 49 AND 54;
+UPDATE veiculos SET id_motorista = 22 WHERE id BETWEEN 55 AND 60;
 
 
 -- =====================================================================
@@ -234,35 +341,95 @@ ON CONFLICT DO NOTHING;
 -- 6. DOCUMENTACAO
 -- =====================================================================
 INSERT INTO documentacao (id_documento, id_veiculo, tipo_documento, data_vencimento, valor_pago, status_pagamento) VALUES
-(1,  1,  'IPVA',          '2026-04-30', 1450.00, 'PAGO'),
+(1,  1,  'IPVA',          '2024-06-30', 1450.00, 'ATRASADO'),
 (2,  1,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(3,  1,  'SEGURO',        '2026-12-01', 2380.00, 'PAGO'),
-(4,  2,  'IPVA',          '2026-04-30', 1620.00, 'PAGO'),
+(3,  1,  'SEGURO',        '2024-01-15', 2380.00, 'ATRASADO'),
+(4,  2,  'IPVA',          '2024-03-20', 1620.00, 'ATRASADO'),
 (5,  2,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (6,  2,  'SEGURO',        '2027-02-10', 2510.00, 'PAGO'),
 (7,  3,  'IPVA',          '2026-04-30', 980.00,  'PAGO'),
-(8,  3,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PENDENTE'),
-(9,  4,  'IPVA',          '2026-04-30', 1740.00, 'PAGO'),
+(8,  3,  'LICENCIAMENTO', '2024-08-01', 165.00,  'ATRASADO'),
+(9,  4,  'IPVA',          '2024-02-10', 1740.00, 'ATRASADO'),
 (10, 4,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(11, 5,  'IPVA',          '2026-04-30', 1180.00, 'ATRASADO'),
+(11, 5,  'IPVA',          '2026-04-30', 1180.00, 'PAGO'),
 (12, 5,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (13, 5,  'SEGURO',        '2026-07-22', 2110.00, 'PAGO'),
-(14, 6,  'IPVA',          '2026-04-30', 1290.00, 'PAGO'),
+(14, 6,  'IPVA',          '2024-05-01', 1290.00, 'ATRASADO'),
 (15, 6,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (16, 7,  'IPVA',          '2026-04-30', 720.00,  'PAGO'),
-(17, 7,  'LICENCIAMENTO', '2026-09-15', 165.00,  'ATRASADO'),
+(17, 7,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (18, 8,  'IPVA',          '2026-04-30', 1080.00, 'PAGO'),
 (19, 8,  'SEGURO',        '2026-11-08', 2240.00, 'PAGO'),
-(20, 9,  'IPVA',          '2026-04-30', 540.00,  'ATRASADO'),
+(20, 9,  'IPVA',          '2026-04-30', 540.00,  'PAGO'),
 (21, 10, 'IPVA',          '2026-04-30', 1980.00, 'PAGO'),
 (22, 10, 'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (23, 10, 'SEGURO',        '2027-04-01', 2890.00, 'PAGO'),
 (24, 10, 'DPVAT',         '2026-12-31', 50.00,   'PAGO')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_documento) DO UPDATE SET
+  id_veiculo = EXCLUDED.id_veiculo,
+  tipo_documento = EXCLUDED.tipo_documento,
+  data_vencimento = EXCLUDED.data_vencimento,
+  valor_pago = EXCLUDED.valor_pago,
+  status_pagamento = EXCLUDED.status_pagamento;
 
 
 -- =====================================================================
--- 7. MANUTENCOES
+-- 7. REGISTROS_USO
+--   Histórico operacional usado pelas telas de histórico do veículo e timeline
+--   da reserva. `id_motorista` referencia usuarios.id dos motoristas mockados.
+-- =====================================================================
+INSERT INTO registros_uso (
+  id_uso,
+  id_veiculo,
+  id_motorista,
+  id_reserva,
+  data_saida,
+  quilometragem_saida,
+  data_retorno,
+  quilometragem_retorno,
+  observacoes_veiculo
+) VALUES
+(101,  1, 5, NULL, '2026-05-02 08:10:00', 15405.0, '2026-05-02 12:35:00', 15538.4, 'Retorno sem avarias. Veículo entregue limpo.'),
+(102,  1, 6, NULL, '2026-05-08 13:20:00', 15538.4, '2026-05-08 17:55:00', 15622.0, 'Abastecimento recomendado antes da próxima saída.'),
+(103,  2, 5, NULL, '2026-05-03 07:40:00', 32242.0, '2026-05-03 11:15:00', 32318.7, 'Uso institucional concluído sem ocorrências.'),
+(104,  2, 6, NULL, '2026-05-10 09:00:00', 32318.7, '2026-05-10 15:25:00', 32472.1, 'Motorista relatou ruído leve ao frear em baixa velocidade.'),
+(105,  3, 5, NULL, '2026-05-04 10:30:00', 46900.0, '2026-05-04 16:45:00', 47058.2, 'Conferência de documentos realizada no retorno.'),
+(106,  4, 6, NULL, '2026-05-05 08:00:00', 5320.0,  '2026-05-05 10:20:00', 5364.6,  'Sem observações no retorno.'),
+(107,  5, 5, NULL, '2026-05-06 07:30:00', 48254.0, '2026-05-06 18:10:00', 48512.9, 'Viagem longa concluída. Solicitar limpeza interna.'),
+(108,  6, 6, NULL, '2026-05-07 06:50:00', 28095.0, '2026-05-07 14:40:00', 28218.3, 'Veículo liberado com tanque acima de meio.'),
+(109, 10, 5, NULL, '2026-05-09 08:25:00', 1180.0,  '2026-05-09 13:05:00', 1276.8,  'Carga entregue e veículo liberado para nova agenda.'),
+(110,  6, 5, NULL, '2026-05-12 07:15:00', 28218.3, '2026-05-12 12:30:00', 28304.5, 'Pequenos riscos já existentes conferidos no retorno.')
+ON CONFLICT (id_uso) DO UPDATE SET
+  id_veiculo = EXCLUDED.id_veiculo,
+  id_motorista = EXCLUDED.id_motorista,
+  id_reserva = EXCLUDED.id_reserva,
+  data_saida = EXCLUDED.data_saida,
+  quilometragem_saida = EXCLUDED.quilometragem_saida,
+  data_retorno = EXCLUDED.data_retorno,
+  quilometragem_retorno = EXCLUDED.quilometragem_retorno,
+  observacoes_veiculo = EXCLUDED.observacoes_veiculo;
+
+DO $$
+DECLARE
+  seq_name text;
+  max_id bigint;
+  has_rows boolean;
+BEGIN
+  seq_name := pg_get_serial_sequence('registros_uso', 'id_uso');
+  IF seq_name IS NOT NULL THEN
+    SELECT COALESCE(MAX(id_uso), 0) INTO max_id FROM registros_uso;
+    SELECT EXISTS (SELECT 1 FROM registros_uso) INTO has_rows;
+    IF has_rows THEN
+      PERFORM setval(seq_name::regclass, max_id, true);
+    ELSE
+      PERFORM setval(seq_name::regclass, 1, false);
+    END IF;
+  END IF;
+END $$;
+
+
+-- =====================================================================
+-- 8. MANUTENCOES
 -- =====================================================================
 INSERT INTO manutencoes (id_manutencao, id_veiculo, tipo_manutencao, descricao_problema, data_realizada, quilometragem_registro, custo_total, oficina_executor, status) VALUES
 (1, 7, 'CORRETIVA',  'Troca da correia dentada e tensores após ruído anormal no motor.',          '2026-04-12', 87850.00, 1840.00, 'Mecânica Central LTDA', 'EM_ANDAMENTO'),
@@ -328,16 +495,66 @@ ON CONFLICT DO NOTHING;
 -- =====================================================================
 -- 11. RESERVAS
 -- =====================================================================
-INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, status_reserva) VALUES
-(1, 3,  1, '2026-04-08 16:20:00', '2026-04-10 08:00:00', '2026-04-10 18:00:00', 'Vistoria Regional Norte',         'Garagem Central', 'CONCLUIDA'),
-(2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'CONCLUIDA'),
-(3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'CONCLUIDA'),
-(4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'CONCLUIDA'),
-(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'APROVADA'),
-(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'APROVADA'),
-(7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'SOLICITADA'),
-(8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'SOLICITADA')
+-- Bancos criados antes da entidade Reserva completa podem não ter estas colunas
+-- (ddl-auto=update nem sempre adiciona em tabelas já existentes).
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS justificativa TEXT;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS matricula_solicitante VARCHAR(30);
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lat DOUBLE PRECISION;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lng DOUBLE PRECISION;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lat DOUBLE PRECISION;
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lng DOUBLE PRECISION;
+
+UPDATE reservas
+SET justificativa = 'Viagem de serviço'
+WHERE justificativa IS NULL OR TRIM(justificativa) = '';
+
+UPDATE reservas r
+SET matricula_solicitante = u.matricula
+FROM usuarios u
+WHERE r.id_usuario = u.id
+  AND (r.matricula_solicitante IS NULL OR TRIM(r.matricula_solicitante) = '');
+
+INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, justificativa, status_reserva) VALUES
+(1, 3,  1, '2026-04-08 16:20:00', '2026-04-10 08:00:00', '2026-04-10 18:00:00', 'Vistoria Regional Norte',         'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'Viagem de serviço', 'APROVADA'),
+(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'Viagem de serviço', 'APROVADA'),
+(7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'Viagem de serviço', 'SOLICITADA'),
+(8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'Viagem de serviço', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+
+-- Coordenadas do trajeto (garagem da frota + destinos aproximados em BH)
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.8820, destino_lng = -43.9200
+WHERE id_reserva = 1 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9240, destino_lng = -43.9370
+WHERE id_reserva = 2 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9650, destino_lng = -43.9680
+WHERE id_reserva = 3 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9310, destino_lng = -43.9380
+WHERE id_reserva = 4 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9150, destino_lng = -43.9290
+WHERE id_reserva = 5 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9200, destino_lng = -43.9500
+WHERE id_reserva = 6 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.8780, destino_lng = -43.9280
+WHERE id_reserva = 7 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9050, destino_lng = -43.9420
+WHERE id_reserva = 8 AND (origem_lat IS NULL OR destino_lat IS NULL);
+
+-- Demais reservas: origem na garagem quando texto for Garagem Central
+UPDATE reservas
+SET origem_lat = -19.9167, origem_lng = -43.9345
+WHERE origem_lat IS NULL AND origem ILIKE '%Garagem Central%';
+
+UPDATE reservas
+SET justificativa = 'Viagem de serviço'
+WHERE justificativa IS NULL OR TRIM(justificativa) = '';
+
+ALTER TABLE reservas ALTER COLUMN justificativa SET NOT NULL;
 
 
 -- =====================================================================
@@ -352,7 +569,21 @@ INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_sa
 (4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
 (5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
 (6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id_uso) DO UPDATE SET
+  id_reserva = EXCLUDED.id_reserva,
+  id_veiculo = EXCLUDED.id_veiculo,
+  id_motorista = EXCLUDED.id_motorista,
+  data_saida = EXCLUDED.data_saida,
+  quilometragem_saida = EXCLUDED.quilometragem_saida,
+  data_retorno = EXCLUDED.data_retorno,
+  quilometragem_retorno = EXCLUDED.quilometragem_retorno,
+  observacoes_veiculo = EXCLUDED.observacoes_veiculo;
+
+UPDATE reservas r
+SET id_motorista = ru.id_motorista
+FROM registros_uso ru
+WHERE r.id_reserva = ru.id_reserva
+  AND r.id_motorista IS NULL;
 
 
 -- =====================================================================

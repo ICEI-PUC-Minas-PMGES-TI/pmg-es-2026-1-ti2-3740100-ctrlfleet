@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { FinalizarUsoForm } from '../../../components/fleet/FinalizarUsoForm';
 import { RegistroUsoSection } from '../../../components/fleet/RegistroUsoSection';
 import { DocumentPills } from '../../../components/gestor/DocumentPills';
 import { ActionButton } from '../../../components/common/ActionButton';
@@ -13,8 +14,9 @@ export function VehicleDetailPage() {
   const { vehicleId } = useParams();
   const [vehicleState, setVehicleState] = useState({ loading: true, error: null, item: null });
   const [editingDocs, setEditingDocs] = useState({});
+  const [historyVersion, setHistoryVersion] = useState(0);
 
-  function loadVehicle(signal) {
+  const loadVehicle = useCallback((signal) => {
     setVehicleState((current) => ({ ...current, loading: true, error: null }));
     return buscarVeiculo(vehicleId, { signal })
       .then((dto) => {
@@ -40,13 +42,13 @@ export function VehicleDetailPage() {
         if (error.name === 'AbortError') return;
         setVehicleState({ loading: false, error: error.message || 'Falha ao carregar veiculo.', item: null });
       });
-  }
+  }, [vehicleId]);
 
   useEffect(() => {
     const controller = new AbortController();
-    loadVehicle(controller.signal);
+    Promise.resolve().then(() => loadVehicle(controller.signal));
     return () => controller.abort();
-  }, [vehicleId]);
+  }, [loadVehicle]);
 
   async function handleSaveDocument(documento) {
     const form = editingDocs[documento.id];
@@ -59,6 +61,11 @@ export function VehicleDetailPage() {
       valorPago: form.valorPago === '' ? null : Number(form.valorPago),
     });
     await loadVehicle();
+  }
+
+  async function handleUsoFinalizado() {
+    await loadVehicle();
+    setHistoryVersion((current) => current + 1);
   }
 
   if (vehicleState.loading) {
@@ -99,6 +106,15 @@ export function VehicleDetailPage() {
           <p>{vehicle.year}</p>
         </div>
         <StatusBadge label={vehicle.status} />
+      </div>
+
+      <div className="detail-actions">
+        <ActionButton icon="history" to={`/gestor/frota/${vehicleId}/historico`} variant="secondary">
+          Histórico do veículo
+        </ActionButton>
+        <ActionButton icon="reservations" to="/gestor/reservas" variant="secondary">
+          Timeline de reserva
+        </ActionButton>
       </div>
 
       <div className="content-grid">
@@ -172,7 +188,9 @@ export function VehicleDetailPage() {
         </div>
       </SectionCard>
 
-      <RegistroUsoSection veiculoId={vehicleId} />
+      <FinalizarUsoForm onFinalizado={handleUsoFinalizado} veiculoId={vehicleId} />
+
+      <RegistroUsoSection key={historyVersion} veiculoId={vehicleId} />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
+import com.ctrlfleet.api.domain.enums.TipoVeiculo;
 
 @Entity
 @Table(name = "veiculos")
@@ -36,6 +37,14 @@ public class Veiculo {
     @Column(nullable = false)
     private StatusVeiculo status = StatusVeiculo.DISPONIVEL;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_veiculo", nullable = false, length = 30)
+    private TipoVeiculo tipoVeiculo = TipoVeiculo.SEDAN;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_motorista")
+    private Usuario motorista;
+
     public Veiculo() {}
 
     public Veiculo(String placa, String modelo, String marca, int ano, String secretaria) {
@@ -67,4 +76,10 @@ public class Veiculo {
 
     public StatusVeiculo getStatus() { return status; }
     public void setStatus(StatusVeiculo status) { this.status = status; }
+
+    public TipoVeiculo getTipoVeiculo() { return tipoVeiculo; }
+    public void setTipoVeiculo(TipoVeiculo tipoVeiculo) { this.tipoVeiculo = tipoVeiculo; }
+
+    public Usuario getMotorista() { return motorista; }
+    public void setMotorista(Usuario motorista) { this.motorista = motorista; }
 }

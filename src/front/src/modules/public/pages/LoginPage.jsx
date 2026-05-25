@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
+import { setCurrentSolicitante } from '../../../services/currentSolicitante';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -8,7 +9,18 @@ export function LoginPage() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    navigate(profile === 'admin' ? '/admin/dashboard' : '/gestor/dashboard');
+
+    const profileHome = {
+      admin: '/admin/dashboard',
+      gestor: '/gestor/dashboard',
+      solicitante: '/solicitante/dashboard',
+    };
+
+    if (profile === 'solicitante') {
+      setCurrentSolicitante({ id: 10, matricula: 'MAT-0010' });
+    }
+
+    navigate(profileHome[profile]);
   }
 
   return (
@@ -40,6 +52,13 @@ export function LoginPage() {
               type="button"
             >
               Admin
+            </button>
+            <button
+              className={profile === 'solicitante' ? 'is-active' : ''}
+              onClick={() => setProfile('solicitante')}
+              type="button"
+            >
+              Solicitante
             </button>
           </div>
 
