@@ -83,21 +83,36 @@ public class ReservaService {
         return ReservaResponseDTO.fromEntity(salva);
     }
 
-    @Transactional
+    @Transactional //Adicionei um teste para ver se o texto do motivo veio nulo ou vazio (isBlank()). Se veio vazio, o sistema joga um erro na tela e não deixa reprovar sem justificativa.
     public ReservaResponseDTO aprovar(Long reservaId, DecisaoReservaRequestDTO dto) {
         Reserva reserva = buscarSolicitada(reservaId);
+        
+        boolean conflito = reservaRepository.existeReservaConcorrente(
+                reserva.getVeiculo(), 
+                reserva.getDataHoraInicioPrevista(), 
+                reserva.getDataHoraFimEstimada()
+        );
+        if (conflito) {
+            throw new IllegalArgumentException("Não é possível aprovar: o veículo já possui uma reserva ativa neste horário.");
+        }
+
         reserva.setStatusReserva(StatusReserva.APROVADA);
         registrarDecisao("RESERVA_APROVADA", reserva, dto, "Aprovada", "success");
         return ReservaResponseDTO.fromEntity(reserva);
     }
 
-    @Transactional
+    @Transactional //Adicionei um teste para ver se o texto do motivo veio nulo ou vazio (isBlank()). Se veio vazio, o sistema joga um erro na tela e não deixa reprovar sem justificativa.
     public ReservaResponseDTO reprovar(Long reservaId, DecisaoReservaRequestDTO dto) {
         Reserva reserva = buscarSolicitada(reservaId);
+        
+        if (dto == null || dto.getMotivo() == null || dto.getMotivo().isBlank()) {
+            throw new IllegalArgumentException("O motivo da reprovação é obrigatório.");
+        }
+
         reserva.setStatusReserva(StatusReserva.REPROVADA);
         registrarDecisao("RESERVA_REPROVADA", reserva, dto, "Reprovada", "warning");
         return ReservaResponseDTO.fromEntity(reserva);
-    }
+    }   
 
     @Transactional
     public ReservaResponseDTO cancelar(Long reservaId, DecisaoReservaRequestDTO dto) {
