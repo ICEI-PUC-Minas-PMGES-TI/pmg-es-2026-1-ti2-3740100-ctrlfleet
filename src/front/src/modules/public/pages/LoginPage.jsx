@@ -13,7 +13,7 @@ export function LoginPage() {
     const profileHome = {
       admin: '/admin/dashboard',
       gestor: '/gestor/dashboard',
-      solicitante: '/solicitante/reservas',
+      solicitante: '/solicitante/dashboard',
     };
 
     if (profile === 'solicitante') {
