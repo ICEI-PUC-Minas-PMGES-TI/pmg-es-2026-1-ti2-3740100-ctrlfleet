@@ -19,6 +19,7 @@ import { MotoristaDashboardPage } from './modules/motorista/pages/MotoristaDashb
 import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHistoricoPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
+import { RequesterDashboardPage } from './modules/solicitante/pages/RequesterDashboardPage';
 import { RequesterReservationCreatePage } from './modules/solicitante/pages/RequesterReservationCreatePage';
 import { RequesterReservationsPage } from './modules/solicitante/pages/RequesterReservationsPage';
 import { getMotoristaHomePath } from './services/currentMotorista';
@@ -99,7 +100,8 @@ function App() {
           </Route>
 
           <Route path="solicitante" element={<ManagerLayout />}>
-            <Route index element={<Navigate replace to="reservas" />} />
+            <Route index element={<Navigate replace to="dashboard" />} />
+            <Route path="dashboard" element={<RequesterDashboardPage />} />
             <Route path="reservas" element={<RequesterReservationsPage />} />
             <Route path="reservas/nova" element={<RequesterReservationCreatePage />} />
           </Route>

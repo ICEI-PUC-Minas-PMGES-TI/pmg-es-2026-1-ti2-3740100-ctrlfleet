@@ -8,6 +8,7 @@ import { RequesterReservationCard } from '../../../components/solicitante/Reques
 import { getCurrentSolicitanteId } from '../../../services/currentSolicitante';
 import { cancelarReserva, excluirReservaDoHistorico, listarReservas } from '../../../services/reservaApi';
 import { coordsFromReservation } from '../../../utils/resolveReservationCoords';
+import { mapRequesterReservation } from '../../../services/requesterReservationUtils';
 
 const STATUS_TABS = [
   { key: 'TODAS', label: 'Todas' },
@@ -17,52 +18,6 @@ const STATUS_TABS = [
   { key: 'CONCLUIDA', label: 'Concluídas' },
   { key: 'CANCELADA', label: 'Canceladas' },
 ];
-
-const STATUS_LABELS = {
-  SOLICITADA: 'Solicitada',
-  APROVADA: 'Aprovada',
-  EM_USO: 'Em uso',
-  CONCLUIDA: 'Concluída',
-  REPROVADA: 'Reprovada',
-  CANCELADA: 'Cancelada',
-};
-
-function formatDateTime(value) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-}
-
-function mapReservation(reservation) {
-  const statusKey = reservation.statusReserva ?? 'SOLICITADA';
-  const { origemCoords, destinoCoords } = coordsFromReservation(reservation);
-
-  return {
-    rawId: reservation.idReserva,
-    dataHoraFimEstimada: formatDateTime(reservation.dataHoraFimEstimada),
-    dataHoraInicioPrevista: formatDateTime(reservation.dataHoraInicioPrevista),
-    dataHoraSolicitacao: formatDateTime(reservation.dataHoraSolicitacao),
-    destino: reservation.destino,
-    destinoLat: reservation.destinoLat,
-    destinoLng: reservation.destinoLng,
-    destinoCoords,
-    idReserva: reservation.idReserva,
-    origem: reservation.origem,
-    origemLat: reservation.origemLat,
-    origemLng: reservation.origemLng,
-    origemCoords,
-    statusKey,
-    statusLabel: STATUS_LABELS[statusKey] ?? statusKey,
-    veiculo: `${reservation.placaVeiculo} — ${reservation.modeloVeiculo}`,
-  };
-}
 
 export function RequesterReservationsPage() {
   const location = useLocation();
@@ -80,7 +35,7 @@ export function RequesterReservationsPage() {
           setReservationsData({
             loading: false,
             error: null,
-            items: (items || []).map(mapReservation),
+            items: (items || []).map(mapRequesterReservation),
           });
         })
         .catch((error) => {

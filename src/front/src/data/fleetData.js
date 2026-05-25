@@ -8,6 +8,7 @@ export const fleetNavigationItems = [
 ];
 
 export const requesterNavigationItems = [
+  { icon: 'dashboard', label: 'Dashboard', to: '/solicitante/dashboard' },
   { icon: 'reservations', label: 'Minhas reservas', to: '/solicitante/reservas' },
 ];
 

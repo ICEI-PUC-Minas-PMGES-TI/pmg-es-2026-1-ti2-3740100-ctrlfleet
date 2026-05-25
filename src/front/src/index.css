@@ -5704,9 +5704,192 @@ a {
   }
 }
 
-/* —— Solicitante: reservas e mapa de trajeto —— */
+/* —— Solicitante: dashboard, reservas e mapa —— */
 .requester-page .stats-grid.requester-stats {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.requester-dashboard-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(13, 122, 95, 0.08));
+  box-shadow: var(--shadow);
+}
+
+.requester-dashboard-hero__copy h2 {
+  margin: 0.2rem 0 0.45rem;
+  font-size: 1.55rem;
+}
+
+.requester-dashboard-hero__copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  max-width: 42rem;
+}
+
+.requester-dashboard-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+}
+
+.requester-dashboard-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1d4ed8;
+  flex-shrink: 0;
+}
+
+.requester-dashboard-main,
+.requester-dashboard-side {
+  display: grid;
+  gap: 18px;
+}
+
+.requester-trip-list,
+.requester-activity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.requester-trip-item,
+.requester-activity-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.requester-trip-item__kicker,
+.requester-activity-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.requester-trip-item h3,
+.requester-activity-item strong {
+  margin: 0.15rem 0;
+  font-size: 1rem;
+}
+
+.requester-trip-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.requester-trip-item__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.requester-trip-item__meta span {
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.requester-trip-item__meta small {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.requester-activity-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.requester-status-breakdown {
+  display: grid;
+  gap: 12px;
+}
+
+.requester-status-breakdown__row {
+  display: grid;
+  gap: 6px;
+}
+
+.requester-status-breakdown__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+}
+
+.requester-status-breakdown__label strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.requester-status-breakdown__track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(231, 230, 235, 0.9);
+  overflow: hidden;
+}
+
+.requester-status-breakdown__bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  min-width: 4px;
+}
+
+.requester-status-breakdown__bar--pending {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.requester-status-breakdown__bar--approved {
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.requester-status-breakdown__bar--active {
+  background: linear-gradient(90deg, #0d7a5f, #34d399);
+}
+
+.requester-status-breakdown__bar--done {
+  background: linear-gradient(90deg, #64748b, #94a3b8);
+}
+
+.requester-status-breakdown__bar--rejected {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.requester-status-breakdown__bar--muted {
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+}
+
+.requester-empty--compact {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.requester-empty--compact p {
+  margin: 0.35rem 0 0.65rem;
+  color: var(--muted);
 }
 
 .requester-create-layout {
@@ -6634,6 +6817,22 @@ a {
 }
 
 @media (max-width: 720px) {
+  .requester-dashboard-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .requester-trip-item,
+  .requester-activity-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .requester-trip-item__meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+
   .requester-form-grid,
   .requester-reservation-card__meta {
     grid-template-columns: 1fr;
