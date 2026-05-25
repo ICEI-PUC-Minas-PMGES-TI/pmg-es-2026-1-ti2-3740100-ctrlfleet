@@ -1,16 +1,7 @@
 import { resolveRegistrosUsoForReserva } from '../utils/mockRegistroUso';
 import { mapRegistroUsoFromApi, mapRegistrosUsoFromApi } from '../utils/registroUsoMappers';
 
-import { buildApiUrl } from './apiBase';
-
-function parseJsonSafely(text) {
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { mensagem: text };
-  }
-}
+import { apiFetch, parseApiResponse } from './apiBase';
 
 /**
  * Lista todos os registros de uso de um veículo, ordenados por data mais recente.
@@ -18,18 +9,8 @@ function parseJsonSafely(text) {
  * @returns {Promise<Array>}
  */
 export async function listarRegistrosPorVeiculo(veiculoId) {
-  const res = await fetch(buildApiUrl(`/registros-uso/veiculo/${veiculoId}`));
-
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Não foi possível carregar registros de uso (${res.status})`;
-    throw new Error(msg);
-  }
-
+  const res = await apiFetch(`/registros-uso/veiculo/${veiculoId}`);
+  const data = await parseApiResponse(res);
   return mapRegistrosUsoFromApi(data || []);
 }
 
@@ -41,21 +22,16 @@ export async function listarRegistrosPorVeiculo(veiculoId) {
  * @returns {Promise<Array>}
  */
 export async function listarRegistrosPorReserva(reservaId, reserva = null) {
-  const res = await fetch(buildApiUrl(`/registros-uso/reserva/${reservaId}`));
-
-  const data = parseJsonSafely(await res.text());
+  const res = await apiFetch(`/registros-uso/reserva/${reservaId}`);
 
   if (!res.ok) {
     if (reserva?.statusReserva === 'CONCLUIDA') {
       return resolveRegistrosUsoForReserva(reserva, []);
     }
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Não foi possível carregar o histórico da reserva (${res.status})`;
-    throw new Error(msg);
+    await parseApiResponse(res);
   }
 
+  const data = await parseApiResponse(res);
   const registros = mapRegistrosUsoFromApi(Array.isArray(data) ? data : []);
   return resolveRegistrosUsoForReserva(reserva, registros);
 }
@@ -66,21 +42,12 @@ export async function listarRegistrosPorReserva(reservaId, reserva = null) {
  * @returns {Promise<object>}
  */
 export async function finalizarCorrida(payload) {
-  const res = await fetch(buildApiUrl('/registros-uso/finalizar'), {
+  const res = await apiFetch('/registros-uso/finalizar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Não foi possível finalizar corrida (${res.status})`;
-    throw new Error(msg);
-  }
-
+  const data = await parseApiResponse(res);
   return mapRegistroUsoFromApi(data);
 }

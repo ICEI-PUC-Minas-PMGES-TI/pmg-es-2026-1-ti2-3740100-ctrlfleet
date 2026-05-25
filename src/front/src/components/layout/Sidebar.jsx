@@ -3,18 +3,28 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Icon } from '../common/Icon';
 import { adminNavigationItems } from '../../data/adminData';
 import { driverNavigationItems, fleetNavigationItems, requesterNavigationItems } from '../../data/fleetData';
+import {
+  clearAuthSession,
+  getAreaLabel,
+  getAuthSession,
+  getMotoristaIdFromSession,
+  getUserInitials,
+} from '../../services/authSession';
 import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const session = getAuthSession();
   const isAdminArea = location.pathname.startsWith('/admin');
   const isDriverArea = location.pathname.startsWith('/motorista');
   const isRequesterArea = location.pathname.startsWith('/solicitante');
-  const motoristaId = location.pathname.match(/^\/motorista\/(\d+)/)?.[1] || '5';
+  const motoristaId = String(
+    getMotoristaIdFromSession(session) ?? location.pathname.match(/^\/motorista\/(\d+)/)?.[1] ?? '',
+  );
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
 
   const navigationItems = useMemo(() => {
-    if (isDriverArea) {
+    if (isDriverArea && motoristaId) {
       return driverNavigationItems.map((item) => ({
         ...item,
         to: item.to.replace(':motoristaId', motoristaId),
@@ -33,20 +43,11 @@ export function Sidebar({ isOpen, onClose }) {
     });
   }, [isAdminArea, isDriverArea, isRequesterArea, motoristaId, pendingUsersCount]);
 
-  const navigationLabel = isAdminArea
-    ? 'Administração'
-    : isDriverArea
-      ? 'Motorista'
-      : isRequesterArea
-        ? 'Solicitante'
-        : 'Gestor de Frotas';
-  const accessLabel = isAdminArea
-    ? 'Área administrativa'
-    : isDriverArea
-      ? 'Área do motorista'
-      : isRequesterArea
-        ? 'Área do solicitante'
-        : 'Área do gestor';
+  const areaKey = isAdminArea ? 'admin' : isDriverArea ? 'motorista' : isRequesterArea ? 'solicitante' : 'gestor';
+  const navigationLabel = getAreaLabel(areaKey);
+  const displayName = session?.nome ?? 'Usuário';
+  const displayRole = session?.perfilAcesso ?? navigationLabel;
+  const initials = getUserInitials(session?.nome);
 
   useEffect(() => {
     if (!isAdminArea) {
@@ -113,18 +114,14 @@ export function Sidebar({ isOpen, onClose }) {
       <div className="sidebar__footer">
         <div className="sidebar__profile">
           <span className="sidebar__avatar">
-            <span className="avatar-initials">
-              {isAdminArea ? 'AS' : isRequesterArea ? 'MS' : isDriverArea ? 'CF' : 'AC'}
-            </span>
+            <span className="avatar-initials">{initials}</span>
           </span>
           <div>
-            <strong>
-              {isAdminArea ? 'Ana Souza' : isRequesterArea ? 'Marina Silva' : isDriverArea ? 'CtrlFleet' : 'Ana Costa'}
-            </strong>
-            <span>{isDriverArea ? accessLabel : isAdminArea ? 'Admin Setorial' : navigationLabel}</span>
+            <strong>{displayName}</strong>
+            <span>{displayRole}</span>
           </div>
         </div>
-        <Link className="sidebar__logout" to="/login">
+        <Link className="sidebar__logout" to="/login" onClick={clearAuthSession}>
           <Icon name="logout" />
           <span>Sair</span>
         </Link>

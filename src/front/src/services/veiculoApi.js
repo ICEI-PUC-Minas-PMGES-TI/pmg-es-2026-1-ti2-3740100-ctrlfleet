@@ -1,13 +1,4 @@
-import { buildApiUrl } from './apiBase';
-
-function parseJsonSafely(text) {
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { mensagem: text };
-  }
-}
+import { apiFetch, parseApiResponse } from './apiBase';
 
 /**
  * Busca todos os veículos cadastrados, ordenados por id ascendente (definido
@@ -24,27 +15,18 @@ function parseJsonSafely(text) {
  * }>>}
  */
 export async function listarVeiculos({ signal } = {}) {
-  const res = await fetch(buildApiUrl('/veiculos'), {
+  const res = await apiFetch('/veiculos', {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
   });
 
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Não foi possível carregar a lista de veículos (${res.status})`;
-    throw new Error(msg);
-  }
-
+  const data = await parseApiResponse(res);
   return Array.isArray(data) ? data : [];
 }
 
 async function requestJson(path, options) {
-  const res = await fetch(buildApiUrl(path), {
+  const res = await apiFetch(path, {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -53,17 +35,7 @@ async function requestJson(path, options) {
     ...options,
   });
 
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `OperaÃ§Ã£o nÃ£o concluÃ­da (${res.status})`;
-    throw new Error(msg);
-  }
-
-  return data;
+  return parseApiResponse(res);
 }
 
 export function criarVeiculo(payload) {

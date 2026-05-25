@@ -5,6 +5,7 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
+import { getAuthSession } from '../../../services/authSession';
 import { getCurrentSolicitanteId, getCurrentSolicitanteMatricula } from '../../../services/currentSolicitante';
 import { listarReservas } from '../../../services/reservaApi';
 import {
@@ -25,10 +26,15 @@ function isUpcoming(reservation) {
 
 export function RequesterDashboardPage() {
   const location = useLocation();
+  const session = getAuthSession();
   const solicitanteId = getCurrentSolicitanteId();
   const matriculaFallback = getCurrentSolicitanteMatricula();
 
-  const [profile, setProfile] = useState({ loading: true, name: null, matricula: matriculaFallback });
+  const [profile, setProfile] = useState({
+    loading: true,
+    name: session?.nome ?? null,
+    matricula: session?.matricula ?? matriculaFallback,
+  });
   const [reservationsData, setReservationsData] = useState({ loading: true, error: null, items: [] });
 
   const carregarReservas = useCallback(

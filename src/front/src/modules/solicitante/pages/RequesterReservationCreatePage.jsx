@@ -8,6 +8,7 @@ import { RouteAddressSearch } from '../../../components/solicitante/RouteAddress
 import { RouteMapPicker } from '../../../components/solicitante/RouteMapPicker';
 import { VehicleTypePicker } from '../../../components/solicitante/VehicleTypePicker';
 import { listarMotoristasAtivos, listarVeiculosDoMotorista, mapMotoristaToView } from '../../../services/motoristaFrotaApi';
+import { getAuthSession } from '../../../services/authSession';
 import {
   getCurrentSolicitanteId,
   getCurrentSolicitanteMatricula,
@@ -170,11 +171,15 @@ export function RequesterReservationCreatePage() {
 
   const currentSolicitante = useMemo(() => {
     const currentId = getCurrentSolicitanteId();
+    if (!currentId) return null;
+
+    const session = getAuthSession();
     return (
-      solicitantes.find((user) => Number(user.id) === currentId) ??
-      solicitantes.find((user) => user.matricula === getCurrentSolicitanteMatricula()) ??
-      solicitantes[0] ??
-      null
+      solicitantes.find((user) => Number(user.id) === currentId) ?? {
+        id: currentId,
+        matricula: getCurrentSolicitanteMatricula() ?? session?.matricula ?? '',
+        nome: session?.nome ?? 'Solicitante',
+      }
     );
   }, [solicitantes]);
 

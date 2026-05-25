@@ -27,8 +27,7 @@ WHERE criado_em > ((now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '5 minute
 -- 1. USUARIOS
 --   Entidade Usuario.java: coluna `role` = enum PapelUsuario (STRING).
 --   Dados de CNH ficam na tabela motorista (composição 1:1).
---   A senha "$2a$10$N9qo8uLOickgx2..." é o hash BCrypt de "123456"
---   (somente para mocks/dev — nunca usar em produção).
+--   A senha abaixo é o hash BCrypt de "123456" (somente mocks/dev).
 -- =====================================================================
 -- Em bancos antigos a coluna `departamento` ainda pode existir (ddl-auto=update
 -- não dropa colunas removidas do entity). Como o conceito foi removido, dropamos
@@ -36,22 +35,27 @@ WHERE criado_em > ((now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '5 minute
 -- bancos novos onde a coluna nunca foi criada.
 ALTER TABLE usuarios DROP COLUMN IF EXISTS departamento;
 
+-- Corrige hashes legados que não correspondiam à senha mock "123456".
+UPDATE usuarios
+SET senha = '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS'
+WHERE senha = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+
 INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, perfil_acesso, role, data_desligamento, status) VALUES
-(1,  'Ana Costa',         'ana.costa@ctrlfleet.gov.br',         '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0001', 'Coordenadora Administrativa', '2018-03-12', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
-(2,  'João Duarte',       'joao.duarte@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0002', 'Gestor de Frota',             '2019-06-20', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
-(3,  'Marina Silva',      'marina.silva@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0003', 'Assistente Administrativa',   '2024-02-01', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'PENDENTE'),
-(4,  'Carlos Rocha',      'carlos.rocha@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0004', 'Motorista Pleno',             '2020-09-15', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'BLOQUEADO'),
-(5,  'Patrícia Melo',     'patricia.melo@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0005', 'Motorista Sênior',            '2017-11-04', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
-(6,  'Leandro Sousa',     'leandro.sousa@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0006', 'Motorista Pleno',             '2021-01-22', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
-(7,  'Beatriz Lima',      'beatriz.lima@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0007', 'Gestora de Frota',            '2016-04-18', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  '2025-12-30', 'INATIVO'),
-(8,  'Rafael Menezes',    'rafael.menezes@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0008', 'Motorista Júnior',            '2025-08-05', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'PENDENTE'),
-(9,  'Lúcia Albuquerque', 'lucia.albuquerque@ctrlfleet.gov.br', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0009', 'Gestora de Frota',            '2022-07-19', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
-(10, 'Fernando Tavares',  'fernando.tavares@ctrlfleet.gov.br',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0010', 'Servidor Público',            '2023-03-08', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(11, 'Juliana Martins',   'juliana.martins@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0011', 'Servidora Pública',           '2019-10-14', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(12, 'Roberto Alves',     'roberto.alves@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0012', 'Auditor de Sistemas',         '2015-02-26', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
-(13, 'Camila Reis',       'camila.reis@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0013', 'Servidora Pública',           '2021-05-17', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(14, 'Eduardo Pereira',   'eduardo.pereira@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0014', 'Servidor Público',            '2020-08-23', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
-(15, 'Tatiane Cardoso',   'tatiane.cardoso@ctrlfleet.gov.br',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0015', 'Servidora Pública',           '2024-11-04', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO')
+(1,  'Ana Costa',         'ana.costa@ctrlfleet.gov.br',         '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0001', 'Coordenadora Administrativa', '2018-03-12', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
+(2,  'João Duarte',       'joao.duarte@ctrlfleet.gov.br',       '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0002', 'Gestor de Frota',             '2019-06-20', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
+(3,  'Marina Silva',      'marina.silva@ctrlfleet.gov.br',      '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0003', 'Assistente Administrativa',   '2024-02-01', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'PENDENTE'),
+(4,  'Carlos Rocha',      'carlos.rocha@ctrlfleet.gov.br',      '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0004', 'Motorista Pleno',             '2020-09-15', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'BLOQUEADO'),
+(5,  'Patrícia Melo',     'patricia.melo@ctrlfleet.gov.br',     '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0005', 'Motorista Sênior',            '2017-11-04', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
+(6,  'Leandro Sousa',     'leandro.sousa@ctrlfleet.gov.br',     '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0006', 'Motorista Pleno',             '2021-01-22', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'ATIVO'),
+(7,  'Beatriz Lima',      'beatriz.lima@ctrlfleet.gov.br',      '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0007', 'Gestora de Frota',            '2016-04-18', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  '2025-12-30', 'INATIVO'),
+(8,  'Rafael Menezes',    'rafael.menezes@ctrlfleet.gov.br',    '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0008', 'Motorista Júnior',            '2025-08-05', 'motorista',       'Motorista',       'ROLE_MOTORISTA',     NULL,         'PENDENTE'),
+(9,  'Lúcia Albuquerque', 'lucia.albuquerque@ctrlfleet.gov.br', '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0009', 'Gestora de Frota',            '2022-07-19', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
+(10, 'Fernando Tavares',  'fernando.tavares@ctrlfleet.gov.br',  '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0010', 'Servidor Público',            '2023-03-08', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(11, 'Juliana Martins',   'juliana.martins@ctrlfleet.gov.br',   '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0011', 'Servidora Pública',           '2019-10-14', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(12, 'Roberto Alves',     'roberto.alves@ctrlfleet.gov.br',     '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0012', 'Auditor de Sistemas',         '2015-02-26', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
+(13, 'Camila Reis',       'camila.reis@ctrlfleet.gov.br',       '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0013', 'Servidora Pública',           '2021-05-17', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(14, 'Eduardo Pereira',   'eduardo.pereira@ctrlfleet.gov.br',   '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0014', 'Servidor Público',            '2020-08-23', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO'),
+(15, 'Tatiane Cardoso',   'tatiane.cardoso@ctrlfleet.gov.br',   '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0015', 'Servidora Pública',           '2024-11-04', 'usuario',         'Solicitante',     'ROLE_SOLICITANTE',   NULL,         'ATIVO')
 ON CONFLICT DO NOTHING;
 
 -- Avança a sequence do IDENTITY para evitar colisão de PK ao criar novos usuários via POST.
@@ -105,13 +109,13 @@ ON CONFLICT (usuario_id) DO NOTHING;
 
 -- Motoristas adicionais para a frota (10 motoristas ativos no painel do solicitante)
 INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, perfil_acesso, role, data_desligamento, status) VALUES
-(16, 'Marcos Oliveira',     'marcos.oliveira@ctrlfleet.gov.br',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0016', 'Motorista Pleno',   '2022-04-11', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
-(17, 'Renata Freitas',      'renata.freitas@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0017', 'Motorista Pleno',   '2021-08-30', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
-(18, 'Diego Nascimento',    'diego.nascimento@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0018', 'Motorista Sênior',  '2019-02-14', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
-(19, 'Camila Rodrigues',    'camila.rodrigues@ctrlfleet.gov.br',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0019', 'Motorista Pleno',   '2023-01-09', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
-(20, 'Thiago Barbosa',      'thiago.barbosa@ctrlfleet.gov.br',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0020', 'Motorista Júnior',  '2024-06-17', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
-(21, 'Aline Correia',       'aline.correia@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0021', 'Motorista Pleno',   '2020-11-25', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
-(22, 'Gustavo Pires',       'gustavo.pires@ctrlfleet.gov.br',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MAT-0022', 'Motorista Sênior',  '2018-07-03', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO')
+(16, 'Marcos Oliveira',     'marcos.oliveira@ctrlfleet.gov.br',     '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0016', 'Motorista Pleno',   '2022-04-11', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(17, 'Renata Freitas',      'renata.freitas@ctrlfleet.gov.br',      '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0017', 'Motorista Pleno',   '2021-08-30', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(18, 'Diego Nascimento',    'diego.nascimento@ctrlfleet.gov.br',    '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0018', 'Motorista Sênior',  '2019-02-14', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(19, 'Camila Rodrigues',    'camila.rodrigues@ctrlfleet.gov.br',    '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0019', 'Motorista Pleno',   '2023-01-09', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(20, 'Thiago Barbosa',      'thiago.barbosa@ctrlfleet.gov.br',      '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0020', 'Motorista Júnior',  '2024-06-17', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(21, 'Aline Correia',       'aline.correia@ctrlfleet.gov.br',       '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0021', 'Motorista Pleno',   '2020-11-25', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO'),
+(22, 'Gustavo Pires',       'gustavo.pires@ctrlfleet.gov.br',       '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0022', 'Motorista Sênior',  '2018-07-03', 'motorista', 'Motorista', 'ROLE_MOTORISTA', NULL, 'ATIVO')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO motorista (usuario_id, numero_cnh, validade_cnh) VALUES
