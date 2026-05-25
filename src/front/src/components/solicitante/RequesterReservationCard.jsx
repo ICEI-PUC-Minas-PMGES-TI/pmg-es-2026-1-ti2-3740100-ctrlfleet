@@ -5,8 +5,9 @@ import { Icon } from '../common/Icon';
 import { StatusBadge } from '../common/StatusBadge';
 import { RouteMapPreview } from './RouteMapPreview';
 
-export function RequesterReservationCard({ onCancel, cancelingId, reservation }) {
+export function RequesterReservationCard({ onCancel, onDelete, cancelingId, deletingId, reservation }) {
   const canCancel = reservation.statusKey === 'SOLICITADA';
+  const canDelete = reservation.statusKey === 'CANCELADA';
   const hasTextRoute = Boolean(reservation.origem?.trim() && reservation.destino?.trim());
 
   const [coords, setCoords] = useState(() => {
@@ -175,16 +176,28 @@ export function RequesterReservationCard({ onCancel, cancelingId, reservation })
           </div>
         </dl>
 
-        {canCancel ? (
+        {canCancel || canDelete ? (
           <div className="requester-reservation-card__actions">
-            <button
-              className="requester-reservation-card__cancel"
-              disabled={cancelingId === reservation.rawId}
-              onClick={() => onCancel?.(reservation.rawId)}
-              type="button"
-            >
-              {cancelingId === reservation.rawId ? 'Cancelando...' : 'Cancelar solicitação'}
-            </button>
+            {canCancel ? (
+              <button
+                className="requester-reservation-card__cancel"
+                disabled={cancelingId === reservation.rawId || deletingId === reservation.rawId}
+                onClick={() => onCancel?.(reservation.rawId)}
+                type="button"
+              >
+                {cancelingId === reservation.rawId ? 'Cancelando...' : 'Cancelar solicitação'}
+              </button>
+            ) : null}
+            {canDelete ? (
+              <button
+                className="requester-reservation-card__delete"
+                disabled={deletingId === reservation.rawId || cancelingId === reservation.rawId}
+                onClick={() => onDelete?.(reservation.rawId)}
+                type="button"
+              >
+                {deletingId === reservation.rawId ? 'Removendo...' : 'Excluir do histórico'}
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>

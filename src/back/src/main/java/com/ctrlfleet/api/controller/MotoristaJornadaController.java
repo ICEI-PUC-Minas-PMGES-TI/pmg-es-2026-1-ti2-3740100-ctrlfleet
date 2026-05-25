@@ -3,8 +3,11 @@ package com.ctrlfleet.api.controller;
 import com.ctrlfleet.api.dto.motorista.ChecklistItemResponseDTO;
 import com.ctrlfleet.api.dto.motorista.FinalizarTrajetoRequestDTO;
 import com.ctrlfleet.api.dto.motorista.IniciarTrajetoRequestDTO;
+import com.ctrlfleet.api.dto.motorista.MotoristaResumoDTO;
 import com.ctrlfleet.api.dto.motorista.ReservaMotoristaResponseDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
+import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
+import com.ctrlfleet.api.service.MotoristaFrotaService;
 import com.ctrlfleet.api.service.MotoristaJornadaService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,9 +26,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class MotoristaJornadaController {
 
     private final MotoristaJornadaService motoristaJornadaService;
+    private final MotoristaFrotaService motoristaFrotaService;
 
-    public MotoristaJornadaController(MotoristaJornadaService motoristaJornadaService) {
+    public MotoristaJornadaController(
+            MotoristaJornadaService motoristaJornadaService, MotoristaFrotaService motoristaFrotaService) {
         this.motoristaJornadaService = motoristaJornadaService;
+        this.motoristaFrotaService = motoristaFrotaService;
+    }
+
+    @GetMapping("/ativos")
+    public ResponseEntity<List<MotoristaResumoDTO>> listarMotoristasAtivos() {
+        return ResponseEntity.ok(motoristaFrotaService.listarAtivos());
+    }
+
+    @GetMapping("/{motoristaId}/veiculos")
+    public ResponseEntity<List<VeiculoResponseDTO>> listarVeiculosDoMotorista(
+            @PathVariable Long motoristaId,
+            @RequestParam(defaultValue = "true") boolean apenasDisponiveis) {
+        return ResponseEntity.ok(motoristaFrotaService.listarVeiculosDoMotorista(motoristaId, apenasDisponiveis));
     }
 
     @GetMapping("/{motoristaId}/reservas/aprovadas")

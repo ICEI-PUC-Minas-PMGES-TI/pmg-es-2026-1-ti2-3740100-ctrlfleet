@@ -6,7 +6,7 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { StatCard } from '../../../components/common/StatCard';
 import { RequesterReservationCard } from '../../../components/solicitante/RequesterReservationCard';
 import { getCurrentSolicitanteId } from '../../../services/currentSolicitante';
-import { cancelarReserva, listarReservas } from '../../../services/reservaApi';
+import { cancelarReserva, excluirReservaDoHistorico, listarReservas } from '../../../services/reservaApi';
 import { coordsFromReservation } from '../../../utils/resolveReservationCoords';
 
 const STATUS_TABS = [
@@ -15,6 +15,7 @@ const STATUS_TABS = [
   { key: 'APROVADA', label: 'Aprovadas' },
   { key: 'EM_USO', label: 'Em uso' },
   { key: 'CONCLUIDA', label: 'Concluídas' },
+  { key: 'CANCELADA', label: 'Canceladas' },
 ];
 
 const STATUS_LABELS = {
@@ -69,6 +70,7 @@ export function RequesterReservationsPage() {
   const [statusFilter, setStatusFilter] = useState('TODAS');
   const [reservationsData, setReservationsData] = useState({ loading: true, error: null, items: [] });
   const [cancelingId, setCancelingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const carregarReservas = useCallback(
     (signal) => {
@@ -150,6 +152,22 @@ export function RequesterReservationsPage() {
     }
   }
 
+  async function handleDelete(reservaId) {
+    if (!window.confirm('Remover esta reserva cancelada do seu histórico? Essa ação não pode ser desfeita.')) {
+      return;
+    }
+
+    setDeletingId(reservaId);
+    try {
+      await excluirReservaDoHistorico(reservaId, { idUsuario: solicitanteId });
+      await carregarReservas();
+    } catch (error) {
+      window.alert(error.message || 'Não foi possível remover a reserva do histórico.');
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="page-stack requester-page">
       <PageHeader
@@ -215,7 +233,9 @@ export function RequesterReservationsPage() {
             <RequesterReservationCard
               key={reservation.idReserva}
               cancelingId={cancelingId}
+              deletingId={deletingId}
               onCancel={handleCancel}
+              onDelete={handleDelete}
               reservation={reservation}
             />
           ))}

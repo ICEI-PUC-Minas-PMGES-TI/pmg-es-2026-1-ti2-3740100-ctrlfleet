@@ -1,15 +1,4 @@
-function getApiBaseUrl() {
-  const fromEnv = import.meta.env.VITE_API_BASE_URL;
-  if (typeof fromEnv === 'string' && fromEnv.trim() !== '') return fromEnv.replace(/\/$/, '');
-  if (import.meta.env.DEV) return 'http://127.0.0.1:8080';
-  return '';
-}
-
-function requestUrl(path) {
-  const p = path.startsWith('/') ? path : `/${path}`;
-  const base = getApiBaseUrl();
-  return base ? `${base}${p}` : `/api${p}`;
-}
+import { buildApiUrl } from './apiBase';
 
 function parseJsonSafely(text) {
   if (!text) return null;
@@ -21,7 +10,7 @@ function parseJsonSafely(text) {
 }
 
 async function request(path, options = {}) {
-  const res = await fetch(requestUrl(path), options);
+  const res = await fetch(buildApiUrl(path), options);
   const data = parseJsonSafely(await res.text());
   if (!res.ok) {
     const msg =
@@ -47,6 +36,13 @@ export async function cancelarReserva(reservaId, payload = {}) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
+
+export async function excluirReservaDoHistorico(reservaId, options = {}) {
+  const params = new URLSearchParams();
+  if (options.idUsuario != null) params.set('idUsuario', String(options.idUsuario));
+  const query = params.toString() ? `?${params}` : '';
+  return request(`/reservas/${reservaId}${query}`, { method: 'DELETE' });
 }
 
 export async function criarReserva(payload) {
