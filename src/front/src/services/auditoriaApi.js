@@ -19,8 +19,14 @@ function formatTimestamp(value) {
   return time ? `${date}, ${time}` : date;
 }
 
-export async function listarAuditoria({ signal } = {}) {
-  const res = await fetch(buildApiUrl('/auditoria'), {
+export async function listarAuditoria({ acao, severidade, ator, signal } = {}) {
+  const params = new URLSearchParams();
+  if (acao)      params.set('acao', acao);
+  if (severidade) params.set('severidade', severidade);
+  if (ator)      params.set('ator', ator);
+  const query = params.toString() ? `?${params.toString()}` : '';
+
+  const res = await fetch(buildApiUrl('/auditoria') + query, {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,

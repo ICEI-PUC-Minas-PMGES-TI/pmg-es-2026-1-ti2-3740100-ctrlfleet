@@ -263,6 +263,16 @@ a {
   display: none;
 }
 
+
+.mobile-topbar:has(a[aria-label*="notificações"]) {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 56px;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+}
+
 .public-page,
 .login-page {
   min-height: 100vh;

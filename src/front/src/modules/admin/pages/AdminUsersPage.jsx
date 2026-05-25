@@ -18,6 +18,8 @@ import {
   reenviarConviteUsuario,
 } from '../../../services/usuarioApi';
 import { mapBackendUserToView, pad2 } from '../../../services/usuarioMappers';
+import { toast } from '../../../components/common/Toast';
+
 
 const ACTION_CONFIG = {
   approve: {
@@ -99,7 +101,7 @@ export function AdminUsersPage() {
   const [selectedRole, setSelectedRole] = useState('Perfil (Todos)');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
   const [actionModal, setActionModal] = useState({ key: null, user: null });
-  const [feedback, setFeedback] = useState(null);
+
 
   const [usersData, setUsersData] = useState({
     loading: true,
@@ -155,12 +157,12 @@ export function AdminUsersPage() {
         items: current.items.map((item) => (item.id === user.id ? updatedView : item)),
       }));
       window.dispatchEvent(new Event('ctrlfleet:usuarios-updated'));
-      setFeedback({ tone: config.tone === 'danger' ? 'danger' : 'success', message: config.message });
+       toast(config.message, config.tone === 'danger' ? 'warning' : 'success');
       closeActionModal();
-      setTimeout(() => setFeedback(null), 3500);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao concluir ação.';
-      setActionError(message);
+      toast(message, 'error');
+      closeActionModal();
     }
   }
 
@@ -227,11 +229,7 @@ export function AdminUsersPage() {
         title="Usuários"
       />
 
-      {feedback ? (
-        <div className={`admin-dashboard__flash admin-dashboard__flash--${feedback.tone}`}>
-          {feedback.message}
-        </div>
-      ) : null}
+      
 
       <section className="stats-grid">
         {summaryCards.map((stat) => (

@@ -23,7 +23,7 @@ import { RequesterDashboardPage } from './modules/solicitante/pages/RequesterDas
 import { RequesterReservationCreatePage } from './modules/solicitante/pages/RequesterReservationCreatePage';
 import { RequesterReservationsPage } from './modules/solicitante/pages/RequesterReservationsPage';
 import { getMotoristaHomePath } from './services/currentMotorista';
-
+import { ToastContainer } from './components/common/Toast';
 
 function App() {
   return (
@@ -108,6 +108,7 @@ function App() {
 
           <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
+        <ToastContainer />
       </VehicleFormProvider>
     </BrowserRouter>
   );

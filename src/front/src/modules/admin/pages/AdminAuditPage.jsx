@@ -19,10 +19,11 @@ export function AdminAuditPage() {
     error: null,
     items: [],
   });
+  const [filtros, setFiltros] = useState({ acao: '', severidade: '', ator: '' });
 
-  function loadAudit(signal) {
+  function loadAudit(signal, filtrosAtivos = filtros) {
     setAuditData((current) => ({ ...current, loading: true, error: null }));
-    return listarAuditoria({ signal })
+    return listarAuditoria({ ...filtrosAtivos, signal })
       .then((items) => setAuditData({ loading: false, error: null, items }))
       .catch((error) => {
         if (error.name === 'AbortError') return;
@@ -87,6 +88,49 @@ export function AdminAuditPage() {
       </section>
 
       <SectionCard subtitle="Histórico recente de ações administrativas." title="Eventos">
+        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <input
+            placeholder="Filtrar por ação..."
+            style={{ flex: 1, minWidth: '150px', padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            value={filtros.acao}
+            onChange={(e) => setFiltros((f) => ({ ...f, acao: e.target.value }))}
+          />
+          <input
+            placeholder="Filtrar por ator..."
+            style={{ flex: 1, minWidth: '150px', padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            value={filtros.ator}
+            onChange={(e) => setFiltros((f) => ({ ...f, ator: e.target.value }))}
+          />
+          <select
+            style={{ padding: '0.4rem 0.75rem', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            value={filtros.severidade}
+            onChange={(e) => setFiltros((f) => ({ ...f, severidade: e.target.value }))}
+          >
+            <option value="">Todas severidades</option>
+            <option value="info">Info</option>
+            <option value="warning">Warning</option>
+            <option value="critical">Critical</option>
+          </select>
+          <button
+            style={{ padding: '0.4rem 1rem', borderRadius: '6px', background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer' }}
+            onClick={() => loadAudit(undefined, filtros)}
+            type="button"
+          >
+            Filtrar
+          </button>
+          <button
+            style={{ padding: '0.4rem 1rem', borderRadius: '6px', background: '#6b7280', color: '#fff', border: 'none', cursor: 'pointer' }}
+            onClick={() => {
+              const limpos = { acao: '', severidade: '', ator: '' };
+              setFiltros(limpos);
+              loadAudit(undefined, limpos);
+            }}
+            type="button"
+          >
+            Limpar
+          </button>
+        </div>
+
         {auditData.loading ? (
           <div className="admin-dashboard__loading">
             <span className="admin-dashboard__spinner" aria-hidden="true" />
