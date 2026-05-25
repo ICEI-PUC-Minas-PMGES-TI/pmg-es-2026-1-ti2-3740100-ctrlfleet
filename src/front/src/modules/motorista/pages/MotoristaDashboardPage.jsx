@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
 import { Modal } from '../../../components/common/Modal';
@@ -7,7 +7,7 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { getCurrentMotoristaId, setCurrentMotoristaId } from '../../../services/currentMotorista';
+import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import {
   finalizarTrajeto,
   listarReservasAprovadasMotorista,
@@ -65,8 +65,7 @@ function pad2(value) {
 
 export function MotoristaDashboardPage() {
   const location = useLocation();
-  const params = useParams();
-  const motoristaId = Number(params.motoristaId || getCurrentMotoristaId());
+  const motoristaId = getCurrentMotoristaId();
   const [reservasData, setReservasData] = useState({
     loading: true,
     error: null,
@@ -74,9 +73,6 @@ export function MotoristaDashboardPage() {
     emUso: [],
   });
 
-  useEffect(() => {
-    setCurrentMotoristaId(motoristaId);
-  }, [motoristaId]);
   const [finishModal, setFinishModal] = useState({
     error: '',
     observacoes: '',

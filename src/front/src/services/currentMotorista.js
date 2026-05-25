@@ -1,11 +1,15 @@
-const FALLBACK_MOTORISTA_ID = 5;
+import { getAuthSession, getMotoristaHomePathFromSession, getMotoristaIdFromSession } from './authSession';
+
 const STORAGE_KEY = 'ctrlfleet:motoristaId';
 
 export function getCurrentMotoristaId() {
-  if (typeof window === 'undefined') return FALLBACK_MOTORISTA_ID;
+  const fromSession = getMotoristaIdFromSession();
+  if (fromSession) return fromSession;
+
+  if (typeof window === 'undefined') return null;
 
   const storedId = Number(window.localStorage.getItem(STORAGE_KEY));
-  return Number.isFinite(storedId) && storedId > 0 ? storedId : FALLBACK_MOTORISTA_ID;
+  return Number.isFinite(storedId) && storedId > 0 ? storedId : null;
 }
 
 export function setCurrentMotoristaId(motoristaId) {
@@ -18,5 +22,5 @@ export function setCurrentMotoristaId(motoristaId) {
 }
 
 export function getMotoristaHomePath() {
-  return `/motorista/${getCurrentMotoristaId()}`;
+  return getMotoristaHomePathFromSession();
 }

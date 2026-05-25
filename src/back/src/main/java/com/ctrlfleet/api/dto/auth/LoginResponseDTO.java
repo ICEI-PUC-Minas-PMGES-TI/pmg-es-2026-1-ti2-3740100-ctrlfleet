@@ -8,6 +8,7 @@ public class LoginResponseDTO {
     private String email;
     private String role;
     private String perfilAcesso;
+    private String matricula;
     private Long motoristaId;
 
     public LoginResponseDTO() {}
@@ -19,6 +20,7 @@ public class LoginResponseDTO {
             String email,
             String role,
             String perfilAcesso,
+            String matricula,
             Long motoristaId) {
         this.token = token;
         this.id = id;
@@ -26,6 +28,7 @@ public class LoginResponseDTO {
         this.email = email;
         this.role = role;
         this.perfilAcesso = perfilAcesso;
+        this.matricula = matricula;
         this.motoristaId = motoristaId;
     }
 
@@ -35,5 +38,6 @@ public class LoginResponseDTO {
     public String getEmail() { return email; }
     public String getRole() { return role; }
     public String getPerfilAcesso() { return perfilAcesso; }
+    public String getMatricula() { return matricula; }
     public Long getMotoristaId() { return motoristaId; }
 }

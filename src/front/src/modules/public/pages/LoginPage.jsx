@@ -1,26 +1,44 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
-import { setCurrentSolicitante } from '../../../services/currentSolicitante';
+import { login } from '../../../services/authApi';
+import { getAuthSession, getHomePathForSession } from '../../../services/authSession';
+
+const TEST_ACCOUNTS = [
+  { perfil: 'Administrador', email: 'ana.costa@ctrlfleet.gov.br' },
+  { perfil: 'Gestor de Frota', email: 'joao.duarte@ctrlfleet.gov.br' },
+  { perfil: 'Motorista', email: 'patricia.melo@ctrlfleet.gov.br' },
+  { perfil: 'Solicitante', email: 'fernando.tavares@ctrlfleet.gov.br' },
+];
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState('gestor');
+  const location = useLocation();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [error, setError] = useState(location.state?.message ?? '');
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    const profileHome = {
-      admin: '/admin/dashboard',
-      gestor: '/gestor/dashboard',
-      solicitante: '/solicitante/dashboard',
-    };
-
-    if (profile === 'solicitante') {
-      setCurrentSolicitante({ id: 10, matricula: 'MAT-0010' });
+  useEffect(() => {
+    const session = getAuthSession();
+    if (session?.token) {
+      navigate(getHomePathForSession(session), { replace: true });
     }
+  }, [navigate]);
 
-    navigate(profileHome[profile]);
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const { homePath } = await login({ email, senha });
+      navigate(homePath);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível entrar.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -34,43 +52,41 @@ export function LoginPage() {
         <div className="login-panel__copy">
           <span className="public-eyebrow">Acesso ao sistema</span>
           <h1>Entre para gerenciar a frota</h1>
-          <p>Use seu perfil institucional para acessar painéis, reservas, usuários e manutenção.</p>
+          <p>Use seu e-mail institucional e senha para acessar o painel correspondente ao seu perfil.</p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          <div className="login-profile-switch" role="group" aria-label="Perfil de acesso">
-            <button
-              className={profile === 'gestor' ? 'is-active' : ''}
-              onClick={() => setProfile('gestor')}
-              type="button"
-            >
-              Gestor
-            </button>
-            <button
-              className={profile === 'admin' ? 'is-active' : ''}
-              onClick={() => setProfile('admin')}
-              type="button"
-            >
-              Admin
-            </button>
-            <button
-              className={profile === 'solicitante' ? 'is-active' : ''}
-              onClick={() => setProfile('solicitante')}
-              type="button"
-            >
-              Solicitante
-            </button>
-          </div>
-
           <label className="login-field">
             <span>Email institucional</span>
-            <input autoComplete="email" name="email" placeholder="nome@prefeitura.gov.br" type="email" />
+            <input
+              autoComplete="email"
+              name="email"
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="nome@prefeitura.gov.br"
+              required
+              type="email"
+              value={email}
+            />
           </label>
 
           <label className="login-field">
             <span>Senha</span>
-            <input autoComplete="current-password" name="password" placeholder="Digite sua senha" type="password" />
+            <input
+              autoComplete="current-password"
+              name="password"
+              onChange={(event) => setSenha(event.target.value)}
+              placeholder="Digite sua senha"
+              required
+              type="password"
+              value={senha}
+            />
           </label>
+
+          {error ? (
+            <p className="login-form__error" role="alert">
+              {error}
+            </p>
+          ) : null}
 
           <div className="login-form__meta">
             <label>
@@ -80,10 +96,32 @@ export function LoginPage() {
             <a href="mailto:suporte@ctrlfleet.local">Esqueci minha senha</a>
           </div>
 
-          <ActionButton className="login-form__submit" icon="logout" type="submit">
-            Entrar
+          <ActionButton className="login-form__submit" disabled={loading} icon="logout" type="submit">
+            {loading ? 'Entrando…' : 'Entrar'}
           </ActionButton>
         </form>
+
+        <aside className="login-test-accounts" aria-label="Contas de teste">
+          <p>
+            <strong>Contas de teste</strong> (senha: <code>123456</code>)
+          </p>
+          <ul>
+            {TEST_ACCOUNTS.map((account) => (
+              <li key={account.email}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail(account.email);
+                    setSenha('123456');
+                    setError('');
+                  }}
+                >
+                  {account.perfil}: {account.email}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
       </section>
     </main>
   );

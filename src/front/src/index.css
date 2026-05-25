@@ -603,6 +603,85 @@ a {
   width: 100%;
 }
 
+.login-form__error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  font-size: 0.92rem;
+}
+
+.login-test-accounts {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.login-test-accounts p {
+  margin: 0 0 10px;
+}
+
+.login-test-accounts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.login-test-accounts button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.login-test-accounts button:hover {
+  background: #eef2ff;
+}
+
+.access-denied-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.access-denied-panel {
+  width: min(100%, 520px);
+  padding: 32px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+
+.access-denied-panel h1 {
+  margin: 8px 0 12px;
+}
+
+.access-denied-panel p {
+  margin: 0 0 20px;
+  color: #475569;
+}
+
+.access-denied-panel__actions {
+  display: grid;
+  gap: 12px;
+}
+
+.access-denied-panel__link {
+  text-align: center;
+  color: #4338ca;
+}
+
 .app-main {
   padding: 40px;
 }

@@ -1,27 +1,8 @@
-import { buildApiUrl } from './apiBase';
-
-function parseJsonSafely(text) {
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { mensagem: text };
-  }
-}
+import { apiFetch, parseApiResponse } from './apiBase';
 
 async function request(path, options = {}) {
-  const res = await fetch(buildApiUrl(path), options);
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Falha na requisição (${res.status})`;
-    throw new Error(msg);
-  }
-
-  return data;
+  const res = await apiFetch(path, options);
+  return parseApiResponse(res);
 }
 
 export async function listarReservasAprovadasMotorista(motoristaId, options = {}) {

@@ -8,6 +8,7 @@ import com.ctrlfleet.api.security.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -26,6 +27,7 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
+    @Transactional(readOnly = true)
     public LoginResponseDTO login(LoginRequestDTO dto) {
         String emailNorm = dto.getEmail().trim().toLowerCase();
 
@@ -38,17 +40,15 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email ou senha inválidos");
         }
 
-        switch (usuario.getStatus()) {
-            case "BLOQUEADO" -> throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Conta bloqueada. Entre em contato com o administrador.");
-            case "INATIVO" -> throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Conta inativa. Entre em contato com o administrador.");
-            case "PENDENTE" -> throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Conta aguardando aprovação do administrador.");
-            default -> { /* ATIVO — prossegue */ }
+        String status = usuario.getStatus();
+        if (status == null || !"ATIVO".equalsIgnoreCase(status)) {
+            String mensagem = switch (status != null ? status.toUpperCase() : "") {
+                case "BLOQUEADO" -> "Conta bloqueada. Entre em contato com o administrador.";
+                case "INATIVO" -> "Conta inativa. Entre em contato com o administrador.";
+                case "PENDENTE" -> "Conta aguardando aprovação do administrador.";
+                default -> "Conta indisponível para login.";
+            };
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, mensagem);
         }
 
         String role = usuario.getPapel() != null ? usuario.getPapel().name() : "ROLE_SOLICITANTE";
@@ -71,6 +71,7 @@ public class AuthService {
                 usuario.getEmail(),
                 role,
                 usuario.getPerfilAcesso(),
+                usuario.getMatricula(),
                 motoristaId);
     }
 }

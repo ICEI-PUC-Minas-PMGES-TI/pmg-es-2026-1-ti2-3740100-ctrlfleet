@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { getCurrentMotoristaId, setCurrentMotoristaId } from '../../../services/currentMotorista';
+import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { listarHistoricoMotorista } from '../../../services/motoristaApi';
 
 function formatDateTime(value) {
@@ -32,13 +31,8 @@ function formatRoute(registro) {
 }
 
 export function MotoristaHistoricoPage() {
-  const params = useParams();
-  const motoristaId = Number(params.motoristaId || getCurrentMotoristaId());
+  const motoristaId = getCurrentMotoristaId();
   const [state, setState] = useState({ loading: true, error: null, items: [] });
-
-  useEffect(() => {
-    setCurrentMotoristaId(motoristaId);
-  }, [motoristaId]);
 
   useEffect(() => {
     const controller = new AbortController();

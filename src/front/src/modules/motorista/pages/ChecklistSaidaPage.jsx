@@ -5,7 +5,7 @@ import { Icon } from '../../../components/common/Icon';
 import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
-import { getCurrentMotoristaId, setCurrentMotoristaId } from '../../../services/currentMotorista';
+import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { iniciarTrajeto, listarChecklistSaida } from '../../../services/motoristaApi';
 
 function formatKm(value) {
@@ -28,7 +28,7 @@ export function ChecklistSaidaPage() {
   const { motoristaId: motoristaIdParam, reservaId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const motoristaId = Number(motoristaIdParam || location.state?.motoristaId || getCurrentMotoristaId());
+  const motoristaId = getCurrentMotoristaId();
   const reserva = location.state?.reserva;
 
   const [quilometragemSaida, setQuilometragemSaida] = useState('');
@@ -41,10 +41,6 @@ export function ChecklistSaidaPage() {
   });
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
   const [confirmStartOpen, setConfirmStartOpen] = useState(false);
-
-  useEffect(() => {
-    setCurrentMotoristaId(motoristaId);
-  }, [motoristaId]);
 
   useEffect(() => {
     if (reserva?.checklistSaida?.length) {

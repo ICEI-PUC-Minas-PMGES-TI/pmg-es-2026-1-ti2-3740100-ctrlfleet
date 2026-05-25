@@ -1,15 +1,6 @@
 import { formatBrDate } from './usuarioMappers';
 
-import { buildApiUrl } from './apiBase';
-
-function parseJsonSafely(text) {
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { mensagem: text };
-  }
-}
+import { apiFetch, parseApiResponse } from './apiBase';
 
 function formatTimestamp(value) {
   if (!value) return '-';
@@ -20,21 +11,13 @@ function formatTimestamp(value) {
 }
 
 export async function listarAuditoria({ signal } = {}) {
-  const res = await fetch(buildApiUrl('/auditoria'), {
+  const res = await apiFetch('/auditoria', {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
   });
 
-  const data = parseJsonSafely(await res.text());
-
-  if (!res.ok) {
-    const msg =
-      (data && typeof data.mensagem === 'string' && data.mensagem) ||
-      (data && typeof data.message === 'string' && data.message) ||
-      `Não foi possível carregar a auditoria (${res.status})`;
-    throw new Error(msg);
-  }
+  const data = await parseApiResponse(res);
 
   return Array.isArray(data)
     ? data.map((event) => ({

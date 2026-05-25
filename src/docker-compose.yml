@@ -49,7 +49,7 @@ services:
       - ./back:/app
       - maven_repo:/root/.m2
     working_dir: /app
-    command: mvn -DskipTests spring-boot:run
+    command: mvn -DskipTests compile spring-boot:run
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/health"]
       interval: 5s

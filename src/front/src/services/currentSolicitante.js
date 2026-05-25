@@ -1,20 +1,30 @@
-const FALLBACK_SOLICITANTE_ID = 10;
-const FALLBACK_MATRICULA = 'MAT-0010';
+import { getAuthSession } from './authSession';
+
 const ID_STORAGE_KEY = 'ctrlfleet:solicitanteId';
 const MATRICULA_STORAGE_KEY = 'ctrlfleet:solicitanteMatricula';
 
 export function getCurrentSolicitanteId() {
-  if (typeof window === 'undefined') return FALLBACK_SOLICITANTE_ID;
+  const session = getAuthSession();
+  if (session?.role === 'ROLE_SOLICITANTE' && session.id) {
+    return Number(session.id);
+  }
+
+  if (typeof window === 'undefined') return null;
 
   const storedId = Number(window.localStorage.getItem(ID_STORAGE_KEY));
-  return Number.isFinite(storedId) && storedId > 0 ? storedId : FALLBACK_SOLICITANTE_ID;
+  return Number.isFinite(storedId) && storedId > 0 ? storedId : null;
 }
 
 export function getCurrentSolicitanteMatricula() {
-  if (typeof window === 'undefined') return FALLBACK_MATRICULA;
+  const session = getAuthSession();
+  if (session?.role === 'ROLE_SOLICITANTE' && session.matricula) {
+    return session.matricula;
+  }
+
+  if (typeof window === 'undefined') return null;
 
   const stored = window.localStorage.getItem(MATRICULA_STORAGE_KEY);
-  return stored && stored.trim() !== '' ? stored.trim() : FALLBACK_MATRICULA;
+  return stored && stored.trim() !== '' ? stored.trim() : null;
 }
 
 export function setCurrentSolicitanteId(solicitanteId) {
