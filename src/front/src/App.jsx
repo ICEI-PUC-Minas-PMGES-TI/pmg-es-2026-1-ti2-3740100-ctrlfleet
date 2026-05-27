@@ -15,9 +15,12 @@ import { ReservationTimelinePage } from './modules/gestor/pages/ReservationTimel
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
 import { VehicleHistoryPage } from './modules/gestor/pages/VehicleHistoryPage';
+import { ChecklistRetornoPage } from './modules/motorista/pages/ChecklistRetornoPage';
 import { ChecklistSaidaPage } from './modules/motorista/pages/ChecklistSaidaPage';
 import { MotoristaDashboardPage } from './modules/motorista/pages/MotoristaDashboardPage';
 import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHistoricoPage';
+import { MotoristaIniciarCorridaPage } from './modules/motorista/pages/MotoristaIniciarCorridaPage';
+import { MotoristaReservaDetalhePage } from './modules/motorista/pages/MotoristaReservaDetalhePage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
 import { RequesterDashboardPage } from './modules/solicitante/pages/RequesterDashboardPage';
@@ -99,8 +102,12 @@ function App() {
               <Route index element={<Navigate replace to={getMotoristaHomePathFromSession()} />} />
               <Route path=":motoristaId" element={<MotoristaDashboardPage />} />
               <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
+              <Route path=":motoristaId/reservas/:reservaId" element={<MotoristaReservaDetalhePage />} />
               <Route path=":motoristaId/reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/iniciar-corrida" element={<MotoristaIniciarCorridaPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
               <Route path="reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+              <Route path="reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
             </Route>
           </Route>
 

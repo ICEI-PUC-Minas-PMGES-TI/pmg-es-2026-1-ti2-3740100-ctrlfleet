@@ -69,10 +69,12 @@ public class SecurityConfiguration {
                     .hasAnyRole("SOLICITANTE", "ADMINISTRADOR")
 
                 .requestMatchers(HttpMethod.GET, "/motoristas/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA", "MOTORISTA")
+                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA", "MOTORISTA", "SOLICITANTE")
                 .requestMatchers("/motoristas/*/reservas/*/iniciar-trajeto")
                     .hasAnyRole("MOTORISTA", "ADMINISTRADOR")
                 .requestMatchers("/motoristas/*/reservas/*/finalizar-trajeto")
+                    .hasAnyRole("MOTORISTA", "ADMINISTRADOR")
+                .requestMatchers("/motoristas/reservas/*/registrar-checklist-saida")
                     .hasAnyRole("MOTORISTA", "ADMINISTRADOR")
                 .requestMatchers("/motoristas/reservas/*/iniciar-trajeto")
                     .hasAnyRole("MOTORISTA", "ADMINISTRADOR")

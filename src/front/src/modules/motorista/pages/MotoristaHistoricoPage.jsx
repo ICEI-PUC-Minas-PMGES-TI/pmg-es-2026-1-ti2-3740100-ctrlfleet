@@ -73,7 +73,7 @@ export function MotoristaHistoricoPage() {
   }, [state.items]);
 
   return (
-    <div className="page-stack motorista-page">
+    <div className="page-stack">
       <PageHeader
         eyebrow="Histórico do motorista"
         subtitle="Registros de uso, quilometragem informada e situação de cada trajeto."

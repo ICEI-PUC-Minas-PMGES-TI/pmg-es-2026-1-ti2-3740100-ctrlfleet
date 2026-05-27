@@ -2,7 +2,8 @@ package com.ctrlfleet.api.controller;
 
 import com.ctrlfleet.api.dto.motorista.ChecklistItemResponseDTO;
 import com.ctrlfleet.api.dto.motorista.FinalizarTrajetoRequestDTO;
-import com.ctrlfleet.api.dto.motorista.IniciarTrajetoRequestDTO;
+import com.ctrlfleet.api.dto.motorista.IniciarCorridaRequestDTO;
+import com.ctrlfleet.api.dto.motorista.RegistrarChecklistSaidaRequestDTO;
 import com.ctrlfleet.api.dto.motorista.MotoristaResumoDTO;
 import com.ctrlfleet.api.dto.motorista.ReservaMotoristaResponseDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
@@ -63,17 +64,34 @@ public class MotoristaJornadaController {
         return ResponseEntity.ok(motoristaJornadaService.listarHistorico(motoristaId));
     }
 
+    @GetMapping("/{motoristaId}/reservas/concluidas")
+    public ResponseEntity<List<ReservaMotoristaResponseDTO>> listarReservasConcluidas(
+            @PathVariable Long motoristaId) {
+        return ResponseEntity.ok(motoristaJornadaService.listarReservasConcluidas(motoristaId));
+    }
+
     @GetMapping("/checklists/saida")
     public ResponseEntity<List<ChecklistItemResponseDTO>> listarChecklistSaida() {
         return ResponseEntity.ok(motoristaJornadaService.listarChecklistSaida());
     }
 
-    @PostMapping("/reservas/{reservaId}/iniciar-trajeto")
-    public ResponseEntity<RegistroUsoResponseDTO> iniciarTrajeto(
-            @PathVariable Long reservaId, @RequestBody @Valid IniciarTrajetoRequestDTO dto) {
+    @GetMapping("/checklists/retorno")
+    public ResponseEntity<List<ChecklistItemResponseDTO>> listarChecklistRetorno() {
+        return ResponseEntity.ok(motoristaJornadaService.listarChecklistRetorno());
+    }
+
+    @PostMapping("/reservas/{reservaId}/registrar-checklist-saida")
+    public ResponseEntity<RegistroUsoResponseDTO> registrarChecklistSaida(
+            @PathVariable Long reservaId, @RequestBody @Valid RegistrarChecklistSaidaRequestDTO dto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(motoristaJornadaService.iniciarTrajeto(reservaId, dto));
+                .body(motoristaJornadaService.registrarChecklistSaida(reservaId, dto));
+    }
+
+    @PostMapping("/reservas/{reservaId}/iniciar-trajeto")
+    public ResponseEntity<RegistroUsoResponseDTO> iniciarTrajeto(
+            @PathVariable Long reservaId, @RequestBody @Valid IniciarCorridaRequestDTO dto) {
+        return ResponseEntity.ok(motoristaJornadaService.iniciarTrajeto(reservaId, dto));
     }
 
     @PostMapping("/reservas/{reservaId}/finalizar-trajeto")

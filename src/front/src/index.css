@@ -743,6 +743,266 @@ a {
   grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
 }
 
+.content-grid__main,
+.content-grid__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.driver-reserva-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(320px, 0.95fr);
+  gap: 18px;
+}
+
+.driver-reserva-detail-main,
+.driver-reserva-detail-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.driver-detail-hero {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.driver-detail-hero__copy h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.driver-detail-hero__copy p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.driver-detail-hero__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.driver-detail-hero__plate {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.06);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: 0.82rem;
+}
+
+.driver-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+}
+
+.driver-detail-meta > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.78);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  min-width: 0;
+}
+
+.driver-detail-meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.driver-detail-meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.driver-detail-justificativa {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.16);
+}
+
+.driver-detail-justificativa strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.driver-detail-justificativa p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.driver-detail-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.driver-route-map {
+  height: 320px;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  overflow: hidden;
+}
+
+.driver-route-map--compact {
+  height: 230px;
+}
+
+.driver-vehicle-photo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.driver-vehicle-photo {
+  width: 100%;
+  max-width: 260px;
+  height: 142px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: #fff;
+}
+
+.driver-vehicle-photo-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.driver-detail-hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(254, 243, 199, 0.45);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  color: #92400e;
+}
+
+.driver-detail-hint svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.driver-detail-hint p {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.driver-detail-side-meta {
+  margin: 14px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.driver-detail-side-meta > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-detail-side-meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.driver-detail-side-meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.driver-ab-points {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.driver-ab-points > div {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(249, 250, 252, 0.8);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-ab-points span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.driver-ab-points p {
+  margin: 2px 0 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.action-button--disabled {
+  pointer-events: none;
+  opacity: 0.55;
+  filter: grayscale(0.1);
+}
+
 .content-grid--form {
   align-items: start;
 }
@@ -1064,6 +1324,40 @@ a {
   background: var(--danger-soft);
   color: var(--danger);
   border-color: rgba(209, 79, 74, 0.2);
+}
+
+.flash-banner--inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.flash-banner--inline svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.stat-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  border-radius: 22px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card-link:hover .stat-card {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.admin-empty__hint {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 380px;
+  line-height: 1.45;
 }
 
 .fleet-filters {
@@ -2045,6 +2339,271 @@ a {
   opacity: 0.55;
   cursor: default;
   pointer-events: none;
+}
+
+.reservation-card__window-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(207, 78, 54, 0.08);
+  color: #8a3b2c;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.reservation-card__window-hint svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.reservation-card__window-hint--ok {
+  background: rgba(34, 139, 84, 0.1);
+  color: #1a6b42;
+}
+
+.reservation-route-map-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.reservation-route-map-panel__map,
+.reservation-route-map-panel__map.route-map-preview {
+  width: 100%;
+  min-height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.reservation-route-map-panel__map--compact,
+.reservation-route-map-panel__map--compact.route-map-preview {
+  min-height: 220px;
+}
+
+.reservation-route-map-panel__placeholder {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px dashed rgba(47, 76, 107, 0.25);
+  background: rgba(248, 250, 252, 0.9);
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.reservation-route-map-panel__points {
+  display: grid;
+  gap: 12px;
+}
+
+.reservation-route-map-panel__points > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.reservation-route-map-panel__points span {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(47, 76, 107, 0.72);
+}
+
+.reservation-route-map-panel__points strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.reservation-route-map-panel__dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.reservation-route-map-panel__dot--origin {
+  background: #2563eb;
+}
+
+.reservation-route-map-panel__dot--dest {
+  background: var(--accent);
+}
+
+.driver-reserva-detail-v2__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.driver-reserva-detail-v2__main,
+.driver-reserva-detail-v2__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.driver-reserva-detail-v2__aside {
+  position: sticky;
+  top: 88px;
+}
+
+.driver-reserva-detail-v2__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.driver-reserva-detail-v2__vehicle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.driver-reserva-detail-v2__vehicle-img {
+  width: 120px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 8px;
+}
+
+.driver-reserva-detail-v2__vehicle h2 {
+  margin: 8px 0 4px;
+  font-size: 1.35rem;
+}
+
+.driver-reserva-detail-v2__vehicle p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.driver-reserva-detail-v2__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.driver-reserva-detail-v2__meta > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-reserva-detail-v2__meta dt {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(47, 76, 107, 0.72);
+}
+
+.driver-reserva-detail-v2__meta dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.driver-reserva-detail-v2__justificativa {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 246, 232, 0.7);
+  border: 1px solid rgba(207, 78, 54, 0.15);
+}
+
+.driver-reserva-detail-v2__justificativa p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.driver-reserva-detail-v2__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(207, 78, 54, 0.08);
+  color: #8a3b2c;
+  font-size: 0.88rem;
+}
+
+.driver-reserva-detail-v2__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.driver-reserva-detail-v2__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.driver-reserva-detail-v2__timeline li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.driver-reserva-detail-v2__timeline li.is-done {
+  border-color: rgba(34, 139, 84, 0.25);
+  background: rgba(233, 245, 238, 0.6);
+}
+
+.driver-reserva-detail-v2__timeline li > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  font-weight: 800;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.driver-reserva-detail-v2__timeline li.is-done > span {
+  background: rgba(34, 139, 84, 0.15);
+  color: #1a6b42;
+}
+
+.driver-reserva-detail-v2__timeline p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 960px) {
+  .driver-reserva-detail-v2__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-reserva-detail-v2__aside {
+    position: static;
+  }
 }
 
 @media (max-width: 640px) {
@@ -3252,6 +3811,230 @@ a {
 
 .motorista-page {
   max-width: 1280px;
+}
+
+.driver-journey-list {
+  display: grid;
+  gap: 18px;
+}
+
+.driver-journey-card {
+  position: relative;
+  display: flex;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.driver-journey-card--active {
+  border-color: rgba(45, 139, 87, 0.28);
+  box-shadow: 0 20px 48px rgba(45, 139, 87, 0.1);
+}
+
+.driver-journey-card__accent {
+  width: 5px;
+  align-self: stretch;
+  background: linear-gradient(180deg, var(--accent), #166534);
+  flex: 0 0 5px;
+}
+
+.driver-journey-card__body {
+  flex: 1;
+  padding: 20px 22px 20px 18px;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.driver-journey-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.driver-journey-card__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  margin-bottom: 8px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.driver-journey-card__chip--muted {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--muted);
+}
+
+.driver-journey-card__title {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+.driver-journey-card__route {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.driver-journey-card__modelo {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.driver-journey-card__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.driver-journey-card__meta > div {
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(231, 230, 235, 0.85);
+}
+
+.driver-journey-card__meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.driver-journey-card__meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.driver-placa-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.06);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+
+.driver-journey-card__banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  background: rgba(254, 243, 199, 0.45);
+  color: #92400e;
+}
+
+.driver-journey-card__banner strong,
+.driver-journey-card__banner span {
+  display: block;
+}
+
+.driver-journey-card__banner strong {
+  font-size: 0.88rem;
+  margin-bottom: 2px;
+}
+
+.driver-journey-card__banner span {
+  font-size: 0.86rem;
+  opacity: 0.95;
+}
+
+.driver-journey-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.driver-flow-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.driver-flow-steps li {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.driver-flow-steps__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.driver-flow-steps strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+  color: var(--foreground);
+}
+
+.driver-flow-steps p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.driver-flow-hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #1e3a5f;
+}
+
+.driver-flow-hint svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.driver-flow-hint p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.driver-trip-summary--retorno {
+  border-left: 4px solid var(--accent);
+  padding-left: 4px;
 }
 
 .stats-grid--compact {
@@ -4526,11 +5309,16 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .driver-reserva-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
   .stats-grid--compact {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .driver-reservation-card__meta {
+  .driver-reservation-card__meta,
+  .driver-journey-card__meta {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -4553,6 +5341,14 @@ a {
 @media (max-width: 920px) {
   .driver-required-grid,
   .driver-trip-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-detail-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-detail-meta {
     grid-template-columns: 1fr;
   }
 
@@ -4591,7 +5387,8 @@ a {
 
 @media (max-width: 640px) {
   .stats-grid--compact,
-  .driver-reservation-card__meta {
+  .driver-reservation-card__meta,
+  .driver-journey-card__meta {
     grid-template-columns: 1fr;
   }
 

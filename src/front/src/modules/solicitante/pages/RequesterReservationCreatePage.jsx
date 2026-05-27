@@ -17,8 +17,6 @@ import {
 import { fetchDrivingRoute, reverseGeocode } from '../../../services/geocodingApi';
 import { FLEET_GARAGE, getFleetGaragePlace } from '../../../services/fleetMapLocations';
 import { criarReserva } from '../../../services/reservaApi';
-import { listarUsuarios } from '../../../services/usuarioApi';
-import { mapBackendUserToView } from '../../../services/usuarioMappers';
 import { mapBackendVehicleToView } from '../../../services/veiculoMappers';
 
 function formatPreviewDateTime(value) {
@@ -65,7 +63,6 @@ export function RequesterReservationCreatePage() {
   const [optionsData, setOptionsData] = useState({
     loading: true,
     error: null,
-    users: [],
     drivers: [],
     vehicles: [],
     vehiclesLoading: false,
@@ -79,16 +76,12 @@ export function RequesterReservationCreatePage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    Promise.all([
-      listarUsuarios({ signal: controller.signal }),
-      listarMotoristasAtivos({ signal: controller.signal }),
-    ])
-      .then(([users, drivers]) => {
+    listarMotoristasAtivos({ signal: controller.signal })
+      .then((drivers) => {
         const mappedDrivers = (drivers || []).map(mapMotoristaToView);
         setOptionsData({
           loading: false,
           error: null,
-          users: users.map(mapBackendUserToView),
           drivers: mappedDrivers,
           vehicles: [],
           vehiclesLoading: false,
@@ -105,7 +98,6 @@ export function RequesterReservationCreatePage() {
         setOptionsData({
           loading: false,
           error: error.message || 'Não foi possível carregar dados para a reserva.',
-          users: [],
           drivers: [],
           vehicles: [],
           vehiclesLoading: false,
@@ -154,14 +146,6 @@ export function RequesterReservationCreatePage() {
     return () => controller.abort();
   }, [form.idMotorista]);
 
-  const solicitantes = useMemo(
-    () =>
-      optionsData.users.filter(
-        (user) => user.status === 'Ativo' && (user.role === 'Servidor Solicitante' || user.role === 'Solicitante'),
-      ),
-    [optionsData.users],
-  );
-
   const veiculosDisponiveis = useMemo(() => optionsData.vehicles, [optionsData.vehicles]);
 
   const selectedDriver = useMemo(
@@ -174,14 +158,12 @@ export function RequesterReservationCreatePage() {
     if (!currentId) return null;
 
     const session = getAuthSession();
-    return (
-      solicitantes.find((user) => Number(user.id) === currentId) ?? {
-        id: currentId,
-        matricula: getCurrentSolicitanteMatricula() ?? session?.matricula ?? '',
-        nome: session?.nome ?? 'Solicitante',
-      }
-    );
-  }, [solicitantes]);
+    return {
+      id: currentId,
+      matricula: getCurrentSolicitanteMatricula() ?? session?.matricula ?? '',
+      nome: session?.nome ?? 'Solicitante',
+    };
+  }, []);
 
   useEffect(() => {
     if (!currentSolicitante) return;

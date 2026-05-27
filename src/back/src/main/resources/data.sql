@@ -209,7 +209,7 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (3,  'LMN9C12', 'Corsa',        'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (4,  'VXY8D01', 'March',        'Nissan',     2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'EM_USO',     'Garagem Central',               'SEDAN'),
-(6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'EM_USO',     'Garagem Central',               'HATCH'),
+(6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (7,  'JKL2G45', 'Celta',        'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central',               'HATCH'),
 (8,  'OPQ6H89', 'Fit',          'Honda',      2021, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
 (9,  'RST0I23', 'Palio',        'Fiat',       2015, 'DESATIVADO', 'Garagem Central',               'HATCH'),
@@ -523,11 +523,76 @@ INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, 
 (2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
 (3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
 (4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
-(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'Viagem de serviço', 'APROVADA'),
-(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'Viagem de serviço', 'APROVADA'),
+(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
 (7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'Viagem de serviço', 'SOLICITADA'),
 (8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'Viagem de serviço', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+
+-- ---------------------------------------------------------------------
+-- Mock teste Patrícia Melo (usuario id 5): encerra trajetos 5/6 legados
+-- ---------------------------------------------------------------------
+UPDATE registros_uso ru
+SET
+  data_retorno = CASE ru.id_uso
+    WHEN 5 THEN '2026-05-12 17:45:00'::timestamp
+    WHEN 6 THEN '2026-05-11 16:10:00'::timestamp
+  END,
+  quilometragem_retorno = CASE ru.id_uso WHEN 5 THEN 28148.0 WHEN 6 THEN 5488.0 END,
+  observacoes_veiculo = COALESCE(ru.observacoes_veiculo, 'Encerrado no seed para teste de fluxo.')
+WHERE ru.id_uso IN (5, 6)
+  AND ru.data_retorno IS NULL;
+
+UPDATE reservas r
+SET status_reserva = 'CONCLUIDA'
+WHERE r.id_reserva IN (5, 6)
+  AND r.status_reserva = 'APROVADA';
+
+UPDATE veiculos v
+SET status = 'DISPONIVEL'
+WHERE v.id = 6
+  AND NOT EXISTS (SELECT 1 FROM registros_uso ru WHERE ru.id_veiculo = v.id AND ru.data_retorno IS NULL);
+
+INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, justificativa, status_reserva)
+SELECT
+  9,
+  10,
+  1,
+  now() - interval '24 hours',
+  now() - interval '1 hour',
+  now() + interval '30 days',
+  'Treinamento operacional (mock teste Patrícia Melo)',
+  'Garagem Central',
+  'Viagem de serviço',
+  'APROVADA'
+ON CONFLICT (id_reserva) DO UPDATE SET
+  id_usuario = EXCLUDED.id_usuario,
+  id_veiculo = EXCLUDED.id_veiculo,
+  datahora_solicitacao = EXCLUDED.datahora_solicitacao,
+  datahora_inicio_prevista = EXCLUDED.datahora_inicio_prevista,
+  datahora_fim_estimada = EXCLUDED.datahora_fim_estimada,
+  destino = EXCLUDED.destino,
+  origem = EXCLUDED.origem,
+  justificativa = EXCLUDED.justificativa,
+  status_reserva = EXCLUDED.status_reserva;
+
+UPDATE reservas r
+SET matricula_solicitante = u.matricula
+FROM usuarios u
+WHERE r.id_reserva = 9
+  AND r.id_usuario = u.id
+  AND (r.matricula_solicitante IS NULL OR trim(r.matricula_solicitante) = '');
+
+-- Mantém a janela da reserva #9 sempre válida (evita "fora da janela" após passar maio/2026).
+UPDATE reservas
+SET
+  datahora_solicitacao = now() - interval '24 hours',
+  datahora_inicio_prevista = now() - interval '1 hour',
+  datahora_fim_estimada = now() + interval '30 days'
+WHERE id_reserva = 9
+  AND status_reserva = 'APROVADA';
 
 SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
 
@@ -548,6 +613,8 @@ UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = 
 WHERE id_reserva = 7 AND (origem_lat IS NULL OR destino_lat IS NULL);
 UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9050, destino_lng = -43.9420
 WHERE id_reserva = 8 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9080, destino_lng = -43.9360
+WHERE id_reserva = 9 AND (origem_lat IS NULL OR destino_lat IS NULL);
 
 -- Demais reservas: origem na garagem quando texto for Garagem Central
 UPDATE reservas
@@ -571,8 +638,8 @@ INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_sa
 (2, 2, 2, 6, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
 (3, 3, 5, 4, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
 (4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
-(5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
-(6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
+(5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, '2026-05-12 17:45:00', 28148.00, 'Mock encerrado no seed para liberar testes de nova reserva.'),
+(6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  '2026-05-11 16:10:00', 5488.00,  'Mock encerrado no seed para liberar testes de nova reserva.')
 ON CONFLICT (id_uso) DO UPDATE SET
   id_reserva = EXCLUDED.id_reserva,
   id_veiculo = EXCLUDED.id_veiculo,

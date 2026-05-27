@@ -1,437 +1,200 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ActionButton } from '../../../components/common/ActionButton';
+import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { Icon } from '../../../components/common/Icon';
-import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { StatusBadge } from '../../../components/common/StatusBadge';
+import { MotoristaReservationCardGrid } from '../../../components/motorista/MotoristaReservationCardGrid';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import {
-  finalizarTrajeto,
-  listarReservasAprovadasMotorista,
-  listarReservasEmUsoMotorista,
+  listarReservasAprovadas,
+  listarReservasConcluidas,
+  listarReservasEmUso,
 } from '../../../services/motoristaApi';
+import { formatStatusReserva, sortReservasNewestFirst } from '../../../utils/motoristaReservaUtils';
 
-const STATUS_RESERVA_LABELS = {
-  APROVADA: 'Aprovada',
-  CANCELADA: 'Cancelada',
-  CONCLUIDA: 'Concluída',
-  EM_USO: 'Em uso',
-  REPROVADA: 'Reprovada',
-  SOLICITADA: 'Solicitada',
-};
+const STATUS_TABS = ['Todas', 'Aprovadas', 'Em uso', 'Finalizadas'];
 
-function formatDateTime(value) {
-  if (!value) return '-';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
-
-function formatKm(value) {
-  if (value == null) return 'Sem registro';
-  return `${Number(value).toLocaleString('pt-BR')} km`;
-}
-
-function formatStatusReserva(status) {
-  return STATUS_RESERVA_LABELS[status] || status || '-';
-}
-
-function getReservationStartBlock(reserva) {
-  if (!reserva?.dataHoraInicioPrevista) return null;
-
-  const now = new Date();
-  const startsAt = new Date(reserva.dataHoraInicioPrevista);
-  const endsAt = reserva.dataHoraFimEstimada ? new Date(reserva.dataHoraFimEstimada) : null;
-
-  if (now < startsAt) {
-    return `Disponível a partir de ${formatDateTime(reserva.dataHoraInicioPrevista)}`;
-  }
-  if (endsAt && now > endsAt) {
-    return 'Horário previsto encerrado';
-  }
-  return null;
-}
-
-function pad2(value) {
-  return String(value).padStart(2, '0');
+function normalizeReserva(reserva) {
+  return {
+    ...reserva,
+    statusReserva: reserva.statusReserva || reserva.status,
+  };
 }
 
 export function MotoristaDashboardPage() {
   const location = useLocation();
   const motoristaId = getCurrentMotoristaId();
-  const [reservasData, setReservasData] = useState({
+
+  const [state, setState] = useState({
+    aprovadas: [],
+    emUso: [],
+    concluidas: [],
     loading: true,
     error: null,
-    items: [],
-    emUso: [],
   });
+  const [search, setSearch] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('Todas');
 
-  const [finishModal, setFinishModal] = useState({
-    error: '',
-    observacoes: '',
-    open: false,
-    quilometragemRetorno: '',
-    reserva: null,
-    submitting: false,
-  });
+  const loadReservas = useCallback(async () => {
+    if (!motoristaId) return;
 
-  const carregarReservas = useCallback((signal) => {
-    const controller = new AbortController();
-    const requestSignal = signal || controller.signal;
-    setReservasData((current) => ({ ...current, loading: true, error: null }));
+    setState((current) => ({ ...current, loading: true, error: null }));
 
-    Promise.all([
-      listarReservasAprovadasMotorista(motoristaId, { signal: requestSignal }),
-      listarReservasEmUsoMotorista(motoristaId, { signal: requestSignal }),
-    ])
-      .then(([items, emUso]) => {
-        setReservasData({ loading: false, error: null, items: items || [], emUso: emUso || [] });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setReservasData({
-          loading: false,
-          error: error.message || 'Não foi possível carregar as reservas.',
-          items: [],
-          emUso: [],
-        });
+    try {
+      const [aprovadas, emUso, concluidas] = await Promise.all([
+        listarReservasAprovadas(motoristaId),
+        listarReservasEmUso(motoristaId),
+        listarReservasConcluidas(motoristaId),
+      ]);
+
+      setState({
+        aprovadas: (aprovadas || []).map(normalizeReserva),
+        emUso: (emUso || []).map(normalizeReserva),
+        concluidas: (concluidas || []).map(normalizeReserva),
+        loading: false,
+        error: null,
       });
-
-    return controller;
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        loading: false,
+        error: error.message || 'Não foi possível carregar as reservas.',
+      }));
+    }
   }, [motoristaId]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    Promise.resolve().then(() => {
-      if (!controller.signal.aborted) carregarReservas(controller.signal);
-    });
-    return () => controller.abort();
-  }, [carregarReservas]);
+    loadReservas();
+  }, [loadReservas, location.key]);
 
-  function openFinishModal(reserva) {
-    setFinishModal({
-      error: '',
-      observacoes: '',
-      open: true,
-      quilometragemRetorno: '',
-      reserva,
-      submitting: false,
+  const allReservas = useMemo(() => {
+    const byId = new Map();
+    [...state.emUso, ...state.aprovadas, ...state.concluidas].forEach((reserva) => {
+      byId.set(reserva.idReserva, reserva);
     });
-  }
+    return sortReservasNewestFirst(Array.from(byId.values()));
+  }, [state.aprovadas, state.concluidas, state.emUso]);
 
-  function closeFinishModal() {
-    setFinishModal((current) =>
-      current.submitting
-        ? current
-        : {
-            error: '',
-            observacoes: '',
-            open: false,
-            quilometragemRetorno: '',
-            reserva: null,
-            submitting: false,
-          },
+  const filteredReservas = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
+    return allReservas.filter((reserva) => {
+      const statusLabel = formatStatusReserva(reserva.statusReserva);
+      const matchesStatus =
+        selectedStatus === 'Todas' ||
+        (selectedStatus === 'Aprovadas' && reserva.statusReserva === 'APROVADA') ||
+        (selectedStatus === 'Em uso' && reserva.statusReserva === 'EM_USO') ||
+        (selectedStatus === 'Finalizadas' && reserva.statusReserva === 'CONCLUIDA');
+
+      if (!matchesStatus) return false;
+      if (!term) return true;
+
+      const haystack = [
+        reserva.idReserva,
+        reserva.destino,
+        reserva.origem,
+        reserva.placaVeiculo,
+        reserva.modeloVeiculo,
+        reserva.nomeSolicitante,
+        statusLabel,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(term);
+    });
+  }, [allReservas, search, selectedStatus]);
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        title: 'Aprovadas',
+        value: String(state.aprovadas.length),
+        icon: 'reservations',
+        caption: 'Prontas para checklist de saída',
+      },
+      {
+        title: 'Em uso',
+        value: String(state.emUso.length),
+        icon: 'fleet',
+        caption: 'Trajetos em andamento',
+      },
+      {
+        title: 'Finalizadas',
+        value: String(state.concluidas.length),
+        icon: 'history',
+        caption: 'Corridas encerradas',
+      },
+    ],
+    [state.aprovadas.length, state.concluidas.length, state.emUso.length],
+  );
+
+  if (!motoristaId) {
+    return (
+      <div className="page-stack">
+        <PageHeader subtitle="Sessão inválida para o perfil de motorista." title="Minhas reservas" />
+      </div>
     );
   }
 
-  async function confirmFinalizarTrajeto() {
-    const reserva = finishModal.reserva;
-    if (!reserva) return;
-
-    const quilometragemRetorno = Number(finishModal.quilometragemRetorno.replace(',', '.'));
-    if (!Number.isFinite(quilometragemRetorno) || quilometragemRetorno < 0) {
-      setFinishModal((current) => ({ ...current, error: 'Informe uma quilometragem de retorno válida.' }));
-      return;
-    }
-
-    try {
-      setFinishModal((current) => ({ ...current, error: '', submitting: true }));
-      await finalizarTrajeto(reserva.idReserva, {
-        idMotorista: motoristaId,
-        observacoesVeiculo: finishModal.observacoes,
-        quilometragemRetorno,
-      });
-      setFinishModal({
-        error: '',
-        observacoes: '',
-        open: false,
-        quilometragemRetorno: '',
-        reserva: null,
-        submitting: false,
-      });
-      await carregarReservas();
-    } catch (error) {
-      setFinishModal((current) => ({
-        ...current,
-        error: error.message || 'Não foi possível finalizar o trajeto.',
-        submitting: false,
-      }));
-    }
-  }
-
-  const stats = useMemo(
-    () => [
-      {
-        caption: 'Liberadas para iniciar',
-        icon: 'reservations',
-        title: 'Aprovadas',
-        value: pad2(reservasData.items.length),
-      },
-      {
-        caption: 'Trajetos abertos',
-        icon: 'fleet',
-        title: 'Em uso',
-        value: pad2(reservasData.emUso.length),
-      },
-      {
-        caption: 'Antes da retirada',
-        icon: 'check',
-        title: 'Checklist',
-        value: 'Obrig.',
-      },
-      {
-        caption: 'Motorista selecionado',
-        icon: 'users',
-        title: 'Perfil',
-        value: `#${motoristaId}`,
-      },
-    ],
-    [motoristaId, reservasData.emUso.length, reservasData.items.length],
-  );
-
   return (
-    <div className="page-stack motorista-page">
+    <div className="page-stack">
       <PageHeader
-        eyebrow="Jornada do Motorista"
-        subtitle="Tela individual com viagens aprovadas, trajetos em uso e pendências obrigatórias."
-        title={`Motorista #${motoristaId}`}
+        actions={
+          <Link className="action-button action-button--secondary" to={`/motorista/${motoristaId}/historico`}>
+            <Icon name="history" />
+            <span>Histórico de corridas</span>
+          </Link>
+        }
+        subtitle="Reservas aprovadas e em uso — mesmo padrão visual do gestor de frota."
+        title="Minhas reservas"
       />
 
-      {location.state?.flashMessage ? <div className="flash-banner">{location.state.flashMessage}</div> : null}
-
-      <section className="stats-grid stats-grid--compact">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
+      <section aria-label="Resumo das reservas" className="stats-grid stats-grid--fleet">
+        {summaryCards.map((stat) => (
+          <StatCard key={stat.title} layout="vertical" {...stat} />
         ))}
       </section>
 
-      <SectionCard title="Pendências obrigatórias">
-        <div className="driver-required-grid">
-          <div className="driver-required-item">
-            <Icon name="check" />
-            <div>
-              <strong>Checklist de saída</strong>
-              <span>Todos os itens devem ser marcados antes de iniciar o trajeto.</span>
-            </div>
-          </div>
-          <div className="driver-required-item">
-            <Icon name="reports" />
-            <div>
-              <strong>Quilometragem</strong>
-              <span>A quilometragem de saída e de retorno é obrigatória no registro de uso.</span>
-            </div>
-          </div>
-        </div>
-      </SectionCard>
+      <SectionCard>
+        <FleetFilters
+          onSearchChange={setSearch}
+          onStatusChange={setSelectedStatus}
+          search={search}
+          searchPlaceholder="Buscar por destino, placa, solicitante ou nº..."
+          selectedStatus={selectedStatus}
+          statusTabs={STATUS_TABS}
+        />
 
-      {reservasData.emUso.length > 0 ? (
-        <SectionCard title="Trajetos em uso">
-          <div className="driver-reservation-list">
-            {reservasData.emUso.map((reserva) => (
-              <article className="driver-reservation-card" key={reserva.idReserva}>
-                <div className="driver-reservation-card__main">
-                  <div>
-                    <span className="driver-reservation-card__kicker">Reserva #{reserva.idReserva}</span>
-                    <h2>{reserva.destino}</h2>
-                    <p>
-                      {reserva.placaVeiculo} - {reserva.modeloVeiculo}
-                    </p>
-                  </div>
-                  <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
-                </div>
-                <ActionButton icon="check" onClick={() => openFinishModal(reserva)}>
-                  Finalizar trajeto
-                </ActionButton>
-              </article>
-            ))}
-          </div>
-        </SectionCard>
-      ) : null}
-
-      <SectionCard title="Reservas aprovadas">
-        {reservasData.loading ? (
+        {state.loading ? (
           <div className="admin-dashboard__loading">
             <span className="admin-dashboard__spinner" aria-hidden="true" />
             <p>Carregando reservas...</p>
           </div>
-        ) : reservasData.error ? (
+        ) : state.error ? (
           <div className="admin-dashboard__error">
             <Icon name="alert" />
             <div>
-              <strong>Falha ao carregar reservas</strong>
-              <p>{reservasData.error}</p>
+              <strong>Falha nas reservas</strong>
+              <p>{state.error}</p>
             </div>
           </div>
-        ) : reservasData.items.length === 0 ? (
-          <div className="admin-empty">
-            <Icon name="reservations" />
-            <p>Nenhuma reserva aprovada para este motorista.</p>
-          </div>
         ) : (
-          <div className="driver-reservation-list">
-            {reservasData.items.map((reserva) => (
-              (() => {
-                const startBlock = getReservationStartBlock(reserva);
-                return (
-                  <article className="driver-reservation-card" key={reserva.idReserva}>
-                    <div className="driver-reservation-card__main">
-                      <div>
-                        <span className="driver-reservation-card__kicker">Reserva #{reserva.idReserva}</span>
-                        <h2>{reserva.destino}</h2>
-                        <p>
-                          {reserva.origem} -&gt; {reserva.destino}
-                        </p>
-                      </div>
-                      <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
-                    </div>
+          <>
+            <div className="table-summary">
+              <span>
+                Mostrando {filteredReservas.length} de {allReservas.length} reservas
+              </span>
+              <span>Cards com trajeto, veículo e ações de checklist.</span>
+            </div>
 
-                    <dl className="driver-reservation-card__meta">
-                      <div>
-                        <dt>Veículo</dt>
-                        <dd>
-                          {reserva.placaVeiculo} - {reserva.modeloVeiculo}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Última KM</dt>
-                        <dd>{formatKm(reserva.ultimaQuilometragemVeiculo)}</dd>
-                      </div>
-                      <div>
-                        <dt>Início</dt>
-                        <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
-                      </div>
-                      <div>
-                        <dt>Fim previsto</dt>
-                        <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
-                      </div>
-                    </dl>
-
-                    {startBlock ? (
-                      <div className="driver-required-banner driver-required-banner--warning">
-                        <Icon name="alert" />
-                        <div>
-                          <strong>Checklist bloqueado</strong>
-                          <span>{startBlock}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <Link
-                        className="action-button action-button--primary action-button--with-icon"
-                        state={{ motoristaId, reserva }}
-                        to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-saida`}
-                      >
-                        <Icon className="action-button__icon" name="check" />
-                        <span>Fazer checklist</span>
-                      </Link>
-                    )}
-                  </article>
-                );
-              })()
-            ))}
-          </div>
+            <MotoristaReservationCardGrid motoristaId={motoristaId} reservas={filteredReservas} />
+          </>
         )}
       </SectionCard>
-
-      <Modal
-        footer={
-          <>
-            <ActionButton disabled={finishModal.submitting} onClick={closeFinishModal} variant="secondary">
-              Cancelar
-            </ActionButton>
-            <ActionButton
-              disabled={finishModal.submitting || finishModal.quilometragemRetorno.trim().length === 0}
-              icon="check"
-              onClick={confirmFinalizarTrajeto}
-            >
-              {finishModal.submitting ? 'Finalizando...' : 'Confirmar retorno'}
-            </ActionButton>
-          </>
-        }
-        onClose={closeFinishModal}
-        open={finishModal.open}
-        subtitle="Informe os dados de retorno para encerrar o registro de uso."
-        title="Finalizar trajeto"
-      >
-        {finishModal.reserva ? (
-          <div className="reservation-decision-modal">
-            <dl className="admin-modal-list">
-              <div>
-                <dt>Reserva</dt>
-                <dd>#{finishModal.reserva.idReserva}</dd>
-              </div>
-              <div>
-                <dt>Veículo</dt>
-                <dd>{finishModal.reserva.placaVeiculo}</dd>
-              </div>
-              <div>
-                <dt>Destino</dt>
-                <dd>{finishModal.reserva.destino}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>{formatStatusReserva(finishModal.reserva.statusReserva)}</dd>
-              </div>
-            </dl>
-
-            {finishModal.error ? (
-              <div className="admin-dashboard__error">
-                <Icon name="alert" />
-                <div>
-                  <strong>Retorno não registrado</strong>
-                  <p>{finishModal.error}</p>
-                </div>
-              </div>
-            ) : null}
-
-            <label className="admin-form-field admin-form-field--full">
-              <span className="admin-form-field__label">
-                Quilometragem de retorno
-                <span className="admin-form-field__req">*</span>
-              </span>
-              <input
-                className="admin-form-field__input"
-                inputMode="decimal"
-                onChange={(event) =>
-                  setFinishModal((current) => ({ ...current, quilometragemRetorno: event.target.value }))
-                }
-                placeholder="Ex.: 28450"
-                value={finishModal.quilometragemRetorno}
-              />
-            </label>
-
-            <label className="admin-form-field admin-form-field--full">
-              <span className="admin-form-field__label">Observações do veículo</span>
-              <textarea
-                className="admin-form-field__textarea"
-                maxLength={240}
-                onChange={(event) =>
-                  setFinishModal((current) => ({ ...current, observacoes: event.target.value }))
-                }
-                placeholder="Ex.: veículo entregue limpo e sem ocorrências."
-                rows={4}
-                value={finishModal.observacoes}
-              />
-            </label>
-          </div>
-        ) : null}
-      </Modal>
     </div>
   );
 }

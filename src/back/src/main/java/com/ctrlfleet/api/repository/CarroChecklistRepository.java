@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CarroChecklistRepository extends JpaRepository<CarroChecklist, Long> {
     boolean existsByRegistroUsoIdAndItemId(Long registroUsoId, Long itemId);
+
+    long countByRegistroUsoId(Long registroUsoId);
 }
