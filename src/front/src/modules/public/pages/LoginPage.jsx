@@ -1,6 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
+function subscribeMobileLogin(onStoreChange) {
+  const mq = window.matchMedia('(max-width: 768px)');
+  mq.addEventListener('change', onStoreChange);
+  return () => mq.removeEventListener('change', onStoreChange);
+}
+
+function getMobileLoginSnapshot() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
+import { FleetSceneAnimation } from '../../../components/public/FleetSceneAnimation';
 import { login } from '../../../services/authApi';
 import { getAuthSession, getHomePathForSession } from '../../../services/authSession';
 
@@ -12,6 +23,11 @@ const TEST_ACCOUNTS = [
 ];
 
 export function LoginPage() {
+  const isMobileLayout = useSyncExternalStore(
+    subscribeMobileLogin,
+    getMobileLoginSnapshot,
+    () => false,
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
@@ -41,23 +57,45 @@ export function LoginPage() {
     }
   }
 
+  function fillTestAccount(account) {
+    setEmail(account.email);
+    setSenha('123456');
+    setError('');
+  }
+
   return (
-    <main className="login-page">
-      <section className="login-panel" aria-label="Login CtrlFleet">
-        <Link className="public-brand login-panel__brand" to="/">
+    <main className={`login-v2${isMobileLayout ? ' login-v2--mobile' : ''}`}>
+      {!isMobileLayout ? (
+        <section className="login-v2__scene" aria-hidden="true">
+          <FleetSceneAnimation variant="login" />
+          <div className="login-v2__scene-copy">
+            <span className="pub-hero__badge">
+              <span className="pub-hero__badge-dot" />
+              CtrlFleet · Gestão de frotas
+            </span>
+            <h1>Operação da frota com visibilidade e controle</h1>
+            <p>
+              Acompanhe reservas, checklists de saída e retorno, quilometragem e disponibilidade dos
+              veículos em tempo real.
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="login-v2__panel" aria-label="Formulário de login">
+        <Link className="login-v2__brand" to="/">
           <img alt="CtrlFleet" src="/ctrlfleet-logo-icon.png" />
           <span>CtrlFleet</span>
         </Link>
 
-        <div className="login-panel__copy">
-          <span className="public-eyebrow">Acesso ao sistema</span>
-          <h1>Entre para gerenciar a frota</h1>
-          <p>Use seu e-mail institucional e senha para acessar o painel correspondente ao seu perfil.</p>
-        </div>
+        <header className="login-v2__head">
+          <h2>Bem-vindo de volta</h2>
+          <p>Entre com seu e-mail institucional para acessar o painel do seu perfil.</p>
+        </header>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <label className="login-field">
-            <span>Email institucional</span>
+        <form className="login-v2__form" onSubmit={handleSubmit}>
+          <label className="login-v2__field">
+            <span>E-mail institucional</span>
             <input
               autoComplete="email"
               name="email"
@@ -69,13 +107,13 @@ export function LoginPage() {
             />
           </label>
 
-          <label className="login-field">
+          <label className="login-v2__field">
             <span>Senha</span>
             <input
               autoComplete="current-password"
               name="password"
               onChange={(event) => setSenha(event.target.value)}
-              placeholder="Digite sua senha"
+              placeholder="••••••••"
               required
               type="password"
               value={senha}
@@ -83,45 +121,44 @@ export function LoginPage() {
           </label>
 
           {error ? (
-            <p className="login-form__error" role="alert">
+            <p className="login-v2__error" role="alert">
               {error}
             </p>
           ) : null}
 
-          <div className="login-form__meta">
+          <div className="login-v2__meta">
             <label>
               <input type="checkbox" />
-              <span>Lembrar acesso</span>
+              <span>Manter conectado</span>
             </label>
             <a href="mailto:suporte@ctrlfleet.local">Esqueci minha senha</a>
           </div>
 
-          <ActionButton className="login-form__submit" disabled={loading} icon="logout" type="submit">
-            {loading ? 'Entrando…' : 'Entrar'}
+          <ActionButton className="login-v2__submit" disabled={loading} icon="logout" type="submit">
+            {loading ? 'Autenticando…' : 'Entrar no sistema'}
           </ActionButton>
         </form>
 
-        <aside className="login-test-accounts" aria-label="Contas de teste">
-          <p>
-            <strong>Contas de teste</strong> (senha: <code>123456</code>)
-          </p>
-          <ul>
+        <aside className="login-v2__test" aria-label="Contas de demonstração">
+          <p>Acesso rápido · senha: 123456</p>
+          <div className="login-v2__test-grid">
             {TEST_ACCOUNTS.map((account) => (
-              <li key={account.email}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail(account.email);
-                    setSenha('123456');
-                    setError('');
-                  }}
-                >
-                  {account.perfil}: {account.email}
-                </button>
-              </li>
+              <button
+                className="login-v2__test-btn"
+                key={account.email}
+                onClick={() => fillTestAccount(account)}
+                type="button"
+              >
+                <strong>{account.perfil}</strong>
+                <span>{account.email}</span>
+              </button>
             ))}
-          </ul>
+          </div>
         </aside>
+
+        <p className="login-v2__back">
+          <Link to="/">← Voltar à página inicial</Link>
+        </p>
       </section>
     </main>
   );
