@@ -33,9 +33,13 @@ export function MotoristaIniciarCorridaPage() {
     try {
       await iniciarTrajeto(reservaId, { idMotorista: motoristaId });
       setConfirmOpen(false);
-      navigate(`/motorista/${motoristaId}`, {
+      const updatedReserva = { ...reserva, statusReserva: 'EM_USO', checklistSaidaConcluido: true };
+      navigate(`/motorista/${motoristaId}/reservas/${reservaId}/corrida`, {
         replace: true,
-        state: { flashMessage: 'Corrida iniciada com sucesso.' },
+        state: {
+          reserva: updatedReserva,
+          tripStartedAt: Date.now(),
+        },
       });
     } catch (error) {
       setSubmitState({

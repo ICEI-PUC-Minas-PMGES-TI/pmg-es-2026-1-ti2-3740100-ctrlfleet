@@ -47,6 +47,10 @@ public class RegistroUso {
     @Column(name = "checklist_saida_registrado", nullable = false)
     private boolean checklistSaidaRegistrado = false;
 
+    /** Confirmação final do checklist de retorno (após preencher todos os tipos). */
+    @Column(name = "checklist_retorno_registrado", nullable = false)
+    private boolean checklistRetornoRegistrado = false;
+
     protected RegistroUso() {
     }
 
@@ -144,5 +148,13 @@ public class RegistroUso {
 
     public void setChecklistSaidaRegistrado(boolean checklistSaidaRegistrado) {
         this.checklistSaidaRegistrado = checklistSaidaRegistrado;
+    }
+
+    public boolean isChecklistRetornoRegistrado() {
+        return checklistRetornoRegistrado;
+    }
+
+    public void setChecklistRetornoRegistrado(boolean checklistRetornoRegistrado) {
+        this.checklistRetornoRegistrado = checklistRetornoRegistrado;
     }
 }

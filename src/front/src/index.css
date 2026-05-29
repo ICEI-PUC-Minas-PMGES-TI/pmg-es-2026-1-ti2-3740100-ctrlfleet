@@ -4915,6 +4915,224 @@ a {
   margin: 0;
 }
 
+.motorista-corrida-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.motorista-corrida-page__eyebrow {
+  display: block;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motorista-corrida-page__header h1 {
+  margin: 6px 0 4px;
+  font-size: 1.35rem;
+}
+
+.motorista-corrida-page__header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.motorista-corrida-page__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.motorista-corrida-page__badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.motorista-corrida-page__badge--running {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.motorista-corrida-page__badge--arrived,
+.motorista-corrida-page__badge--finished {
+  background: rgba(45, 139, 87, 0.15);
+  color: #1f6b43;
+}
+
+.motorista-corrida-page__progress {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.motorista-corrida-page__map-wrap {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  box-shadow: 0 12px 32px rgba(15, 17, 23, 0.08);
+}
+
+.route-simulation-map,
+.motorista-corrida-page__map {
+  width: 100%;
+  min-height: 420px;
+  height: min(58vh, 520px);
+}
+
+.route-simulation-map--loading {
+  display: grid;
+  place-items: center;
+  min-height: 420px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.route-map-vehicle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent);
+  box-shadow: 0 4px 14px rgba(207, 78, 54, 0.35);
+}
+
+.route-map-vehicle__emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.motorista-corrida-page__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.motorista-corrida-page__meta > div {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: var(--card-strong);
+}
+
+.motorista-corrida-page__meta span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.motorista-corrida-page__meta strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.05rem;
+}
+
+.motorista-corrida-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.trip-summary-modal {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.trip-summary-modal > div {
+  display: grid;
+  gap: 4px;
+}
+
+.trip-summary-modal dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trip-summary-modal dd {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.trip-summary-modal__route dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-summary-modal__point {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.trip-summary-modal__point--a {
+  background: #0d7a5f;
+}
+
+.trip-summary-modal__point--b {
+  background: #c2410c;
+}
+
+.trip-summary-modal__arrow {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.trip-summary-modal__times {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trip-summary-modal__times small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.trip-summary-modal__delta {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .trip-summary-modal__times {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-corrida-page__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
 .driver-trip-summary {
   display: grid;
   grid-template-columns: 1.3fr 1fr 1fr;
@@ -5763,7 +5981,7 @@ a {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5780,6 +5998,7 @@ a {
 
 .modal-shell {
   position: relative;
+  z-index: 1;
   width: 100%;
   max-height: calc(100vh - 48px);
   display: flex;
@@ -8134,6 +8353,27 @@ a {
   color: #fff;
   font-size: 0.68rem;
   font-weight: 800;
+}
+
+.route-map-marker__label--solo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(15, 17, 23, 0.2);
+}
+
+.motorista-corrida-page--modal-open .motorista-corrida-page__map-wrap {
+  z-index: 0;
+  isolation: isolate;
+}
+
+.motorista-corrida-page--modal-open .motorista-corrida-page__map-wrap .leaflet-container,
+.motorista-corrida-page--modal-open .motorista-corrida-page__map-wrap .leaflet-pane {
+  z-index: 0 !important;
 }
 
 .requester-list-toolbar {

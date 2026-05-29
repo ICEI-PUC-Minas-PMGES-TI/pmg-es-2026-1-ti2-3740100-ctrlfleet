@@ -22,8 +22,10 @@ import { ChecklistSaidaPage } from './modules/motorista/pages/ChecklistSaidaPage
 import { ChecklistSaidaTipoPage } from './modules/motorista/pages/ChecklistSaidaTipoPage';
 import { MotoristaDashboardPage } from './modules/motorista/pages/MotoristaDashboardPage';
 import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHistoricoPage';
+import { MotoristaCorridaPage } from './modules/motorista/pages/MotoristaCorridaPage';
 import { MotoristaIniciarCorridaPage } from './modules/motorista/pages/MotoristaIniciarCorridaPage';
 import { MotoristaReservaDetalhePage } from './modules/motorista/pages/MotoristaReservaDetalhePage';
+import { MotoristaReservaHistoricoPage } from './modules/motorista/pages/MotoristaReservaHistoricoPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
 import { RequesterDashboardPage } from './modules/solicitante/pages/RequesterDashboardPage';
@@ -112,6 +114,8 @@ function App() {
                 element={<ChecklistSaidaTipoPage />}
               />
               <Route path=":motoristaId/reservas/:reservaId/iniciar-corrida" element={<MotoristaIniciarCorridaPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/corrida" element={<MotoristaCorridaPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/historico" element={<MotoristaReservaHistoricoPage />} />
               <Route path=":motoristaId/reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
               <Route
                 path=":motoristaId/reservas/:reservaId/checklist-retorno/tipos/:tipoId"
@@ -119,6 +123,10 @@ function App() {
               />
               <Route
                 path=":motoristaId/reservas/:reservaId/checklist-retorno/finalizar"
+                element={<ChecklistRetornoFinalizarPage />}
+              />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-retorno/encerrar"
                 element={<ChecklistRetornoFinalizarPage />}
               />
               <Route path="reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />

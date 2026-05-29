@@ -535,6 +535,7 @@ ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lng DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lat DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lng DOUBLE PRECISION;
 ALTER TABLE registros_uso ADD COLUMN IF NOT EXISTS checklist_saida_registrado boolean NOT NULL DEFAULT false;
+ALTER TABLE registros_uso ADD COLUMN IF NOT EXISTS checklist_retorno_registrado boolean NOT NULL DEFAULT false;
 
 UPDATE reservas
 SET justificativa = 'Viagem de serviço'

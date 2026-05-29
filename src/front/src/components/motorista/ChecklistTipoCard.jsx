@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
-export function ChecklistTipoCard({ tipo, to, reserva, showDescription = true }) {
+export function ChecklistTipoCard({ tipo, to, reserva, linkState, showDescription = true }) {
+  const navState = linkState ?? { reserva };
   const done = Boolean(tipo.concluido);
 
   return (
@@ -23,7 +24,7 @@ export function ChecklistTipoCard({ tipo, to, reserva, showDescription = true })
       <footer className="checklist-tipo-card__footer">
         <Link
           className={`checklist-tipo-card__action ${done ? 'checklist-tipo-card__action--outline' : ''}`}
-          state={{ reserva }}
+          state={navState}
           to={to}
         >
           {done ? 'Revisar' : 'Preencher'}

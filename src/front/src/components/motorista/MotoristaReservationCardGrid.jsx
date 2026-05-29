@@ -22,15 +22,22 @@ function getSecondaryAction({ reserva, motoristaId, checklistDone, canFillCheckl
   const isConcluida = reserva.statusReserva === 'CONCLUIDA';
 
   if (isConcluida) {
-    return { type: 'muted', icon: 'history', label: 'Encerrada' };
+    return {
+      type: 'link',
+      icon: 'history',
+      label: 'Ver histórico',
+      to: `${base}/historico`,
+      state: { reserva },
+    };
   }
 
   if (isEmUso) {
     return {
       type: 'link',
-      icon: 'check',
-      label: 'Finalizar trajeto',
-      to: `${base}/checklist-retorno`,
+      icon: 'fleet',
+      label: 'Corrida em andamento',
+      to: `${base}/corrida`,
+      state: { reserva, tripStartedAt: Date.now() },
     };
   }
 
@@ -182,7 +189,7 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
               {secondaryAction.type === 'link' ? (
                 <Link
                   className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
-                  state={{ reserva }}
+                  state={secondaryAction.state ?? { reserva }}
                   to={secondaryAction.to}
                 >
                   <Icon name={secondaryAction.icon} />

@@ -19,6 +19,8 @@ public interface RegistroUsoRepository extends JpaRepository<RegistroUso, Long> 
 
     Optional<RegistroUso> findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(Long idReserva, Long motoristaId);
 
+    Optional<RegistroUso> findFirstByIdReservaAndMotoristaIdOrderByDataRetornoDesc(Long idReserva, Long motoristaId);
+
     boolean existsByIdReservaAndDataRetornoIsNull(Long idReserva);
 
     boolean existsByIdReserva(Long idReserva);

@@ -7,6 +7,7 @@ import { SectionCard } from '../../../components/common/SectionCard';
 import { MotoristaChecklistTipoPanel } from '../../../components/motorista/MotoristaChecklistTipoPanel';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { buscarChecklistPorTipo, registrarChecklistParcialRetorno } from '../../../services/motoristaApi';
+import { loadTripSummary } from '../../../utils/tripSummaryStorage';
 
 export function ChecklistRetornoTipoPage() {
   const { reservaId, tipoId } = useParams();
@@ -14,7 +15,9 @@ export function ChecklistRetornoTipoPage() {
   const navigate = useNavigate();
   const motoristaId = getCurrentMotoristaId();
   const reserva = location.state?.reserva;
+  const tripSummary = location.state?.tripSummary ?? loadTripSummary(reservaId);
   const hubPath = `/motorista/${motoristaId}/reservas/${reservaId}/checklist-retorno`;
+  const pageState = { reserva, tripSummary };
 
   const [checklistData, setChecklistData] = useState({ loading: true, error: null, tipo: null });
   const [checkedItems, setCheckedItems] = useState(() => new Set());
@@ -46,7 +49,7 @@ export function ChecklistRetornoTipoPage() {
         itensChecklist: Array.from(checkedItems),
         observacoesChecklist: observacoes,
       });
-      navigate(hubPath, { replace: true, state: { reserva } });
+      navigate(hubPath, { replace: true, state: pageState });
     } catch (error) {
       setSubmitState({ loading: false, error: error.message });
     }
@@ -55,7 +58,7 @@ export function ChecklistRetornoTipoPage() {
   return (
     <div className="page-stack motorista-page">
       <PageHeader title={checklistData.tipo?.nome || 'Checklist de retorno'} subtitle="Preencha os itens deste tipo." />
-      <Link className="motorista-viagem-detail__back" state={{ reserva }} to={hubPath}>
+      <Link className="motorista-viagem-detail__back" state={pageState} to={hubPath}>
         <Icon name="fleet" />
         <span>Voltar aos tipos</span>
       </Link>
@@ -82,7 +85,7 @@ export function ChecklistRetornoTipoPage() {
               tipo={checklistData.tipo}
             />
             <div className="driver-checklist-actions">
-              <Link className="action-button action-button--secondary" to={hubPath} state={{ reserva }}>
+              <Link className="action-button action-button--secondary" to={hubPath} state={pageState}>
                 Cancelar
               </Link>
               <ActionButton disabled={!canSubmit} icon="check" type="submit">

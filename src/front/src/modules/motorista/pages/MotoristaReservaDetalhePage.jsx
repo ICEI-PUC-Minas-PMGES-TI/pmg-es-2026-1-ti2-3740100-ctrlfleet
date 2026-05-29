@@ -220,21 +220,35 @@ export function MotoristaReservaDetalhePage() {
             ) : null}
 
             {isEmUso ? (
-              <Link
-                className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
-                state={{ reserva }}
-                to={`${detailBasePath}/checklist-retorno`}
-              >
-                <Icon name="check" />
-                <span>Finalizar trajeto</span>
-              </Link>
+              <>
+                <Link
+                  className="motorista-viagem-card__action motorista-viagem-card__action--primary"
+                  state={{ reserva, tripStartedAt: Date.now() }}
+                  to={`${detailBasePath}/corrida`}
+                >
+                  <Icon name="fleet" />
+                  <span>Ver corrida no mapa</span>
+                </Link>
+                <Link
+                  className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
+                  state={{ reserva }}
+                  to={`${detailBasePath}/checklist-retorno`}
+                >
+                  <Icon name="check" />
+                  <span>Checklist de retorno</span>
+                </Link>
+              </>
             ) : null}
 
             {isConcluida ? (
-              <span className="motorista-viagem-card__action motorista-viagem-card__action--muted">
+              <Link
+                className="motorista-viagem-card__action motorista-viagem-card__action--primary"
+                state={{ reserva }}
+                to={`${detailBasePath}/historico`}
+              >
                 <Icon name="history" />
-                <span>Viagem encerrada</span>
-              </span>
+                <span>Ver histórico da viagem</span>
+              </Link>
             ) : null}
           </div>
         </article>

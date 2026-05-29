@@ -2,11 +2,13 @@ package com.ctrlfleet.api.controller;
 
 import com.ctrlfleet.api.dto.motorista.ChecklistJornadaStatusDTO;
 import com.ctrlfleet.api.dto.motorista.ChecklistTipoResponseDTO;
+import com.ctrlfleet.api.dto.motorista.ConcluirChecklistRetornoRequestDTO;
 import com.ctrlfleet.api.dto.motorista.FinalizarTrajetoRequestDTO;
 import com.ctrlfleet.api.dto.motorista.IniciarCorridaRequestDTO;
 import com.ctrlfleet.api.dto.motorista.MotoristaResumoDTO;
 import com.ctrlfleet.api.dto.motorista.RegistrarChecklistParcialRequestDTO;
 import com.ctrlfleet.api.dto.motorista.ReservaMotoristaResponseDTO;
+import com.ctrlfleet.api.dto.motorista.ViagemHistoricoReservaDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
 import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
 import com.ctrlfleet.api.service.MotoristaFrotaService;
@@ -84,6 +86,12 @@ public class MotoristaJornadaController {
         return ResponseEntity.ok(motoristaJornadaService.obterStatusChecklistRetorno(reservaId, idMotorista));
     }
 
+    @GetMapping("/reservas/{reservaId}/viagem-historico")
+    public ResponseEntity<ViagemHistoricoReservaDTO> historicoViagemReserva(
+            @PathVariable Long reservaId, @RequestParam Long idMotorista) {
+        return ResponseEntity.ok(motoristaJornadaService.obterHistoricoViagemReserva(reservaId, idMotorista));
+    }
+
     @GetMapping("/checklists/tipos/{tipoId}")
     public ResponseEntity<ChecklistTipoResponseDTO> buscarChecklistPorTipo(@PathVariable Long tipoId) {
         return ResponseEntity.ok(motoristaJornadaService.buscarChecklistPorTipo(tipoId));
@@ -120,6 +128,36 @@ public class MotoristaJornadaController {
     public ResponseEntity<RegistroUsoResponseDTO> registrarChecklistSaidaFinal(
             @PathVariable Long reservaId, @RequestParam Long idMotorista) {
         return ResponseEntity.ok(motoristaJornadaService.registrarChecklistSaidaFinal(reservaId, idMotorista));
+    }
+
+    @PostMapping("/reservas/{reservaId}/checklist-retorno/quilometragem")
+    public ResponseEntity<RegistroUsoResponseDTO> registrarQuilometragemRetorno(
+            @PathVariable Long reservaId, @RequestBody Map<String, Object> body) {
+        Long idMotorista = Long.valueOf(body.get("idMotorista").toString());
+        Double quilometragemRetorno = Double.valueOf(body.get("quilometragemRetorno").toString());
+        return ResponseEntity.ok(
+                motoristaJornadaService.registrarQuilometragemRetorno(reservaId, idMotorista, quilometragemRetorno));
+    }
+
+    @PostMapping("/reservas/{reservaId}/checklist-retorno/quilometragem-automatica")
+    public ResponseEntity<RegistroUsoResponseDTO> registrarQuilometragemRetornoAutomatica(
+            @PathVariable Long reservaId, @RequestBody Map<String, Object> body) {
+        Long idMotorista = Long.valueOf(body.get("idMotorista").toString());
+        Double distanciaPercorridaKm = Double.valueOf(body.get("distanciaPercorridaKm").toString());
+        return ResponseEntity.ok(motoristaJornadaService.registrarQuilometragemRetornoAutomatica(
+                reservaId, idMotorista, distanciaPercorridaKm));
+    }
+
+    @PostMapping("/reservas/{reservaId}/checklist-retorno/registrar")
+    public ResponseEntity<RegistroUsoResponseDTO> registrarChecklistRetornoFinal(
+            @PathVariable Long reservaId, @RequestParam Long idMotorista) {
+        return ResponseEntity.ok(motoristaJornadaService.registrarChecklistRetornoFinal(reservaId, idMotorista));
+    }
+
+    @PostMapping("/reservas/{reservaId}/checklist-retorno/concluir")
+    public ResponseEntity<ViagemHistoricoReservaDTO> concluirViagemChecklistRetorno(
+            @PathVariable Long reservaId, @RequestBody @Valid ConcluirChecklistRetornoRequestDTO dto) {
+        return ResponseEntity.ok(motoristaJornadaService.concluirViagemComChecklistRetorno(reservaId, dto));
     }
 
     @PostMapping("/reservas/{reservaId}/iniciar-trajeto")
