@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { Icon } from '../../../components/common/Icon';
-import { PageHeader } from '../../../components/common/PageHeader';
-import { SectionCard } from '../../../components/common/SectionCard';
-import { StatCard } from '../../../components/common/StatCard';
 import { MotoristaReservationCardGrid } from '../../../components/motorista/MotoristaReservationCardGrid';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import {
@@ -60,7 +57,7 @@ export function MotoristaDashboardPage() {
       setState((current) => ({
         ...current,
         loading: false,
-        error: error.message || 'Não foi possível carregar as reservas.',
+        error: error.message || 'Não foi possível carregar as viagens.',
       }));
     }
   }, [motoristaId]);
@@ -108,93 +105,50 @@ export function MotoristaDashboardPage() {
     });
   }, [allReservas, search, selectedStatus]);
 
-  const summaryCards = useMemo(
-    () => [
-      {
-        title: 'Aprovadas',
-        value: String(state.aprovadas.length),
-        icon: 'reservations',
-        caption: 'Prontas para checklist de saída',
-      },
-      {
-        title: 'Em uso',
-        value: String(state.emUso.length),
-        icon: 'fleet',
-        caption: 'Trajetos em andamento',
-      },
-      {
-        title: 'Finalizadas',
-        value: String(state.concluidas.length),
-        icon: 'history',
-        caption: 'Corridas encerradas',
-      },
-    ],
-    [state.aprovadas.length, state.concluidas.length, state.emUso.length],
-  );
-
   if (!motoristaId) {
     return (
-      <div className="page-stack">
-        <PageHeader subtitle="Sessão inválida para o perfil de motorista." title="Minhas reservas" />
+      <div className="page-stack motorista-page">
+        <p className="motorista-dashboard__invalid">Sessão inválida para o perfil de motorista.</p>
       </div>
     );
   }
 
   return (
-    <div className="page-stack">
-      <PageHeader
-        actions={
-          <Link className="action-button action-button--secondary" to={`/motorista/${motoristaId}/historico`}>
-            <Icon name="history" />
-            <span>Histórico de corridas</span>
-          </Link>
-        }
-        subtitle="Reservas aprovadas e em uso — mesmo padrão visual do gestor de frota."
-        title="Minhas reservas"
+    <div className="page-stack motorista-page motorista-dashboard">
+      <FleetFilters
+        onSearchChange={setSearch}
+        onStatusChange={setSelectedStatus}
+        search={search}
+        searchPlaceholder="Buscar por viagem, destino, placa ou solicitante..."
+        selectedStatus={selectedStatus}
+        statusTabs={STATUS_TABS}
       />
 
-      <section aria-label="Resumo das reservas" className="stats-grid stats-grid--fleet">
-        {summaryCards.map((stat) => (
-          <StatCard key={stat.title} layout="vertical" {...stat} />
-        ))}
-      </section>
-
-      <SectionCard>
-        <FleetFilters
-          onSearchChange={setSearch}
-          onStatusChange={setSelectedStatus}
-          search={search}
-          searchPlaceholder="Buscar por destino, placa, solicitante ou nº..."
-          selectedStatus={selectedStatus}
-          statusTabs={STATUS_TABS}
-        />
-
-        {state.loading ? (
-          <div className="admin-dashboard__loading">
-            <span className="admin-dashboard__spinner" aria-hidden="true" />
-            <p>Carregando reservas...</p>
+      {state.loading ? (
+        <div className="admin-dashboard__loading">
+          <span aria-hidden="true" className="admin-dashboard__spinner" />
+          <p>Carregando viagens...</p>
+        </div>
+      ) : state.error ? (
+        <div className="admin-dashboard__error">
+          <Icon name="alert" />
+          <div>
+            <strong>Falha ao carregar viagens</strong>
+            <p>{state.error}</p>
           </div>
-        ) : state.error ? (
-          <div className="admin-dashboard__error">
-            <Icon name="alert" />
-            <div>
-              <strong>Falha nas reservas</strong>
-              <p>{state.error}</p>
-            </div>
+        </div>
+      ) : (
+        <>
+          <div className="motorista-dashboard__summary">
+            <span>
+              Mostrando {filteredReservas.length} de {allReservas.length} viagens
+            </span>
+            <span>Ordenadas da mais recente para a mais antiga (Viagem 1, 2, 3…)</span>
           </div>
-        ) : (
-          <>
-            <div className="table-summary">
-              <span>
-                Mostrando {filteredReservas.length} de {allReservas.length} reservas
-              </span>
-              <span>Cards com trajeto, veículo e ações de checklist.</span>
-            </div>
 
-            <MotoristaReservationCardGrid motoristaId={motoristaId} reservas={filteredReservas} />
-          </>
-        )}
-      </SectionCard>
+          <MotoristaReservationCardGrid motoristaId={motoristaId} reservas={filteredReservas} />
+        </>
+      )}
     </div>
   );
 }

@@ -6,10 +6,15 @@ import com.ctrlfleet.api.domain.model.CarroChecklist;
 import com.ctrlfleet.api.domain.model.ItemChecklist;
 import com.ctrlfleet.api.domain.model.RegistroUso;
 import com.ctrlfleet.api.domain.model.Reserva;
+import com.ctrlfleet.api.domain.model.TipoInspecao;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.dto.motorista.ChecklistItemResponseDTO;
+import com.ctrlfleet.api.dto.motorista.ChecklistJornadaStatusDTO;
+import com.ctrlfleet.api.dto.motorista.ChecklistTipoProgressoDTO;
+import com.ctrlfleet.api.dto.motorista.ChecklistTipoResponseDTO;
 import com.ctrlfleet.api.dto.motorista.FinalizarTrajetoRequestDTO;
 import com.ctrlfleet.api.dto.motorista.IniciarCorridaRequestDTO;
+import com.ctrlfleet.api.dto.motorista.RegistrarChecklistParcialRequestDTO;
 import com.ctrlfleet.api.dto.motorista.RegistrarChecklistSaidaRequestDTO;
 import com.ctrlfleet.api.dto.motorista.ReservaMotoristaResponseDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
@@ -17,7 +22,9 @@ import com.ctrlfleet.api.repository.CarroChecklistRepository;
 import com.ctrlfleet.api.repository.ItemChecklistRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.ReservaRepository;
+import com.ctrlfleet.api.repository.TipoInspecaoRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
+import com.ctrlfleet.api.util.HorarioOperacional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,14 +36,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MotoristaJornadaService {
-    private static final long TIPO_INSPECAO_SAIDA_ID = 1L;
-    private static final long TIPO_INSPECAO_RETORNO_ID = 2L;
+    private static final String FASE_CHECKLIST_SAIDA = "SAIDA";
+    private static final String FASE_CHECKLIST_RETORNO = "RETORNO";
+    private static final int CHECKLIST_JANELA_MINUTOS = 15;
     private static final Set<String> PALAVRAS_CHAVE_ITENS_CRITICOS = Set.of("freio", "pneu", "luz", "farol", "seta");
 
     private final ReservaRepository reservaRepository;
     private final UsuarioRepository usuarioRepository;
     private final RegistroUsoRepository registroUsoRepository;
     private final ItemChecklistRepository itemChecklistRepository;
+    private final TipoInspecaoRepository tipoInspecaoRepository;
     private final CarroChecklistRepository carroChecklistRepository;
     private final AuditoriaService auditoriaService;
 
@@ -45,19 +54,20 @@ public class MotoristaJornadaService {
             UsuarioRepository usuarioRepository,
             RegistroUsoRepository registroUsoRepository,
             ItemChecklistRepository itemChecklistRepository,
+            TipoInspecaoRepository tipoInspecaoRepository,
             CarroChecklistRepository carroChecklistRepository,
             AuditoriaService auditoriaService) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.registroUsoRepository = registroUsoRepository;
         this.itemChecklistRepository = itemChecklistRepository;
+        this.tipoInspecaoRepository = tipoInspecaoRepository;
         this.carroChecklistRepository = carroChecklistRepository;
         this.auditoriaService = auditoriaService;
     }
 
     public List<ReservaMotoristaResponseDTO> listarReservasAprovadas(Long motoristaId) {
         validarMotorista(motoristaId);
-        List<ChecklistItemResponseDTO> checklistSaida = listarChecklistSaida();
 
         return reservaRepository
                 .listarAprovadasDisponiveisParaMotorista(motoristaId, StatusReserva.APROVADA)
@@ -68,14 +78,13 @@ public class MotoristaJornadaService {
                             .map(RegistroUso::getQuilometragemSaida)
                             .orElse(null);
                     return toReservaResponseDTO(
-                            motoristaId, reserva, checklistSaida, Collections.emptyList(), kmChecklist);
+                            motoristaId, reserva, Collections.emptyList(), Collections.emptyList(), kmChecklist);
                 })
                 .toList();
     }
 
     public List<ReservaMotoristaResponseDTO> listarReservasEmUso(Long motoristaId) {
         validarMotorista(motoristaId);
-        List<ChecklistItemResponseDTO> checklistRetorno = listarChecklistRetorno();
         return reservaRepository
                 .listarEmUsoPorMotorista(motoristaId, StatusReserva.EM_USO)
                 .stream()
@@ -85,7 +94,7 @@ public class MotoristaJornadaService {
                             .map(RegistroUso::getQuilometragemSaida)
                             .orElse(null);
                     return toReservaResponseDTO(
-                            motoristaId, reserva, Collections.emptyList(), checklistRetorno, kmSaidaAberto);
+                            motoristaId, reserva, Collections.emptyList(), Collections.emptyList(), kmSaidaAberto);
                 })
                 .toList();
     }
@@ -106,67 +115,174 @@ public class MotoristaJornadaService {
                 .toList();
     }
 
+    public ChecklistJornadaStatusDTO obterStatusChecklistSaida(Long reservaId, Long motoristaId) {
+        Reserva reserva = buscarReserva(reservaId);
+        validarMotorista(motoristaId);
+        RegistroUso registro = obterOuCriarRegistroAberto(reserva, motoristaId, null);
+        return montarStatusJornada(registro, FASE_CHECKLIST_SAIDA);
+    }
+
+    public ChecklistJornadaStatusDTO obterStatusChecklistRetorno(Long reservaId, Long motoristaId) {
+        Reserva reserva = buscarReserva(reservaId);
+        validarMotorista(motoristaId);
+        RegistroUso registro = registroUsoRepository
+                .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motoristaId)
+                .orElseThrow(() -> new IllegalArgumentException("Não existe trajeto aberto para esta reserva."));
+        return montarStatusJornada(registro, FASE_CHECKLIST_RETORNO);
+    }
+
+    public ChecklistTipoResponseDTO buscarChecklistPorTipo(Long tipoInspecaoId) {
+        return listarChecklistPorTipo(tipoInspecaoId);
+    }
+
     public List<ChecklistItemResponseDTO> listarChecklistSaida() {
-        return itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_SAIDA_ID)
-                .stream()
-                .map(item -> new ChecklistItemResponseDTO(item.getId(), item.getNome(), isItemCritico(item)))
+        return tiposDaFase(FASE_CHECKLIST_SAIDA).stream()
+                .flatMap(tipo -> listarChecklistPorTipo(tipo.getId()).getItens().stream())
                 .toList();
     }
 
     public List<ChecklistItemResponseDTO> listarChecklistRetorno() {
-        return itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_RETORNO_ID)
-                .stream()
-                .map(item -> new ChecklistItemResponseDTO(item.getId(), item.getNome(), isItemCritico(item)))
+        return tiposDaFase(FASE_CHECKLIST_RETORNO).stream()
+                .flatMap(tipo -> listarChecklistPorTipo(tipo.getId()).getItens().stream())
                 .toList();
     }
 
-    @Transactional
-    public RegistroUsoResponseDTO registrarChecklistSaida(Long reservaId, RegistrarChecklistSaidaRequestDTO dto) {
-        Reserva reserva = reservaRepository
-                .findById(reservaId)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com id: " + reservaId));
+    private ChecklistTipoResponseDTO listarChecklistPorTipo(long tipoInspecaoId) {
+        TipoInspecao tipo = tipoInspecaoRepository
+                .findById(tipoInspecaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de inspeção não encontrado: " + tipoInspecaoId));
 
+        List<ChecklistItemResponseDTO> itens = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId)
+                .stream()
+                .map(item -> new ChecklistItemResponseDTO(item.getId(), item.getNome(), isItemCritico(item)))
+                .toList();
+
+        return new ChecklistTipoResponseDTO(tipo.getId(), tipo.getNome(), tipo.getDescricao(), itens);
+    }
+
+    @Transactional
+    public RegistroUsoResponseDTO registrarChecklistParcialSaida(
+            Long reservaId, Long tipoInspecaoId, RegistrarChecklistParcialRequestDTO dto) {
+        Reserva reserva = buscarReserva(reservaId);
         if (reserva.getStatusReserva() != StatusReserva.APROVADA) {
             throw new IllegalArgumentException("Checklist de saída só pode ser registrado em reservas aprovadas.");
         }
+        validarJanelaChecklistSaida(reserva);
+
+        TipoInspecao tipo = tipoInspecaoRepository
+                .findById(tipoInspecaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de checklist não encontrado."));
+        if (!FASE_CHECKLIST_SAIDA.equalsIgnoreCase(tipo.getFase())) {
+            throw new IllegalArgumentException("Tipo informado não pertence ao checklist de saída.");
+        }
 
         Usuario motorista = validarMotorista(dto.getIdMotorista());
-        validarQuilometragemSaida(reserva, dto.getQuilometragemSaida());
-        List<ItemChecklist> itensObrigatorios =
-                itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_SAIDA_ID);
-        validarChecklistObrigatorio(dto.getItensChecklist(), itensObrigatorios);
-        validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensObrigatorios);
+        RegistroUso registro = obterOuCriarRegistroAberto(reserva, motorista.getId(), dto.getQuilometragemSaida());
 
-        if (registroUsoRepository.existsByIdReservaAndDataRetornoIsNull(reserva.getId())) {
-            boolean vinculadaAoMotorista = registroUsoRepository
-                    .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motorista.getId())
-                    .isPresent();
-            if (!vinculadaAoMotorista) {
-                throw new IllegalArgumentException("Esta reserva já possui checklist ou trajeto de outro motorista.");
-            }
+        if (dto.getQuilometragemSaida() != null) {
+            validarQuilometragemSaida(reserva, dto.getQuilometragemSaida());
+            registro.setQuilometragemSaida(dto.getQuilometragemSaida());
         }
 
+        List<ItemChecklist> itensDoTipo = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
+        validarChecklistObrigatorio(dto.getItensChecklist(), itensDoTipo);
+        validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensDoTipo);
+        salvarChecklist(registro, itensDoTipo, dto.getObservacoesChecklist());
+
+        auditoriaService.registrar(
+                "CHECKLIST_PARCIAL_SAIDA",
+                motorista.getNome(),
+                "Reserva #" + reserva.getId(),
+                tipo.getNome(),
+                "success",
+                null,
+                "Checklist " + tipo.getNome() + " registrado no uso #" + registro.getId());
+
+        return toRegistroUsoResponseDTO(registro);
+    }
+
+    @Transactional
+    public RegistroUsoResponseDTO registrarChecklistParcialRetorno(
+            Long reservaId, Long tipoInspecaoId, RegistrarChecklistParcialRequestDTO dto) {
+        Reserva reserva = buscarReserva(reservaId);
+        if (reserva.getStatusReserva() != StatusReserva.EM_USO) {
+            throw new IllegalArgumentException("Checklist de retorno só pode ser registrado em reservas em uso.");
+        }
+
+        TipoInspecao tipo = tipoInspecaoRepository
+                .findById(tipoInspecaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de checklist não encontrado."));
+        if (!FASE_CHECKLIST_RETORNO.equalsIgnoreCase(tipo.getFase())) {
+            throw new IllegalArgumentException("Tipo informado não pertence ao checklist de retorno.");
+        }
+
+        Usuario motorista = validarMotorista(dto.getIdMotorista());
         RegistroUso registro = registroUsoRepository
                 .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motorista.getId())
-                .orElseGet(() -> criarRegistroUso(reserva, motorista, dto.getQuilometragemSaida()));
+                .orElseThrow(() -> new IllegalArgumentException("Não existe trajeto aberto para esta reserva."));
 
-        if (checklistSaidaConcluido(registro)) {
-            throw new IllegalArgumentException("Checklist de saída já registrado para esta reserva.");
+        List<ItemChecklist> itensDoTipo = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
+        validarChecklistObrigatorio(dto.getItensChecklist(), itensDoTipo);
+        validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensDoTipo);
+        salvarChecklist(registro, itensDoTipo, dto.getObservacoesChecklist());
+
+        return toRegistroUsoResponseDTO(registro);
+    }
+
+    @Transactional
+    public RegistroUsoResponseDTO registrarQuilometragemSaida(
+            Long reservaId, Long motoristaId, Double quilometragemSaida) {
+        Reserva reserva = buscarReserva(reservaId);
+        validarJanelaChecklistSaida(reserva);
+        validarMotorista(motoristaId);
+        validarQuilometragemSaida(reserva, quilometragemSaida);
+        RegistroUso registro = obterOuCriarRegistroAberto(reserva, motoristaId, quilometragemSaida);
+        registro.setQuilometragemSaida(quilometragemSaida);
+        return toRegistroUsoResponseDTO(registro);
+    }
+
+    @Transactional
+    public RegistroUsoResponseDTO registrarChecklistSaidaFinal(Long reservaId, Long motoristaId) {
+        Reserva reserva = buscarReserva(reservaId);
+        if (reserva.getStatusReserva() != StatusReserva.APROVADA) {
+            throw new IllegalArgumentException("Checklist de saída só pode ser registrado em reservas aprovadas.");
+        }
+        validarJanelaChecklistSaida(reserva);
+        Usuario motorista = validarMotorista(motoristaId);
+        RegistroUso registro = registroUsoRepository
+                .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motorista.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Preencha todos os tipos de checklist e a quilometragem antes de registrar."));
+
+        if (registro.isChecklistSaidaRegistrado()) {
+            return toRegistroUsoResponseDTO(registro);
         }
 
-        registro.setQuilometragemSaida(dto.getQuilometragemSaida());
-        salvarChecklist(registro, itensObrigatorios, dto.getObservacoesChecklist());
+        if (!checklistSaidaPreenchido(registro)) {
+            throw new IllegalArgumentException(
+                    "Conclua todos os tipos de checklist e informe a quilometragem de saída antes de registrar.");
+        }
+
+        registro.setChecklistSaidaRegistrado(true);
+        registroUsoRepository.save(registro);
 
         auditoriaService.registrar(
                 "CHECKLIST_SAIDA_REGISTRADO",
                 motorista.getNome(),
                 "Reserva #" + reserva.getId(),
-                "Checklist salvo",
+                "Checklist de saída",
                 "success",
                 null,
                 "Checklist de saída registrado no uso #" + registro.getId());
 
         return toRegistroUsoResponseDTO(registro);
+    }
+
+    @Transactional
+    @Deprecated
+    public RegistroUsoResponseDTO registrarChecklistSaida(Long reservaId, RegistrarChecklistSaidaRequestDTO dto) {
+        throw new IllegalArgumentException(
+                "Use o preenchimento por tipo de checklist: Limpeza, Mecânica, Iluminação e Combustível.");
     }
 
     @Transactional
@@ -185,17 +301,17 @@ public class MotoristaJornadaService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Registre o checklist de saída antes de iniciar a corrida."));
 
-        if (!checklistSaidaConcluido(registro)) {
-            throw new IllegalArgumentException("Conclua o checklist de saída antes de iniciar a corrida.");
+        if (!registro.isChecklistSaidaRegistrado()) {
+            throw new IllegalArgumentException("Registre o checklist de saída antes de iniciar a corrida.");
         }
 
         if (reserva.getVeiculo().getStatus() != StatusVeiculo.DISPONIVEL) {
             throw new IllegalArgumentException("O veículo desta reserva não está disponível para saída.");
         }
 
-        validarJanelaDeInicio(reserva);
+        validarHorarioReservaAtiva(reserva);
 
-        registro.setDataSaida(LocalDateTime.now());
+        registro.setDataSaida(HorarioOperacional.agora());
         reserva.setStatusReserva(StatusReserva.EM_USO);
         reserva.getVeiculo().setStatus(StatusVeiculo.EM_USO);
 
@@ -230,13 +346,15 @@ public class MotoristaJornadaService {
             throw new IllegalArgumentException("Quilometragem de retorno deve ser maior ou igual à de saída.");
         }
 
-        List<ItemChecklist> itensRetorno =
-                itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_RETORNO_ID);
-        validarChecklistObrigatorio(dto.getItensChecklist(), itensRetorno);
-        validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensRetorno);
-        salvarChecklist(registro, itensRetorno, dto.getObservacoesChecklist());
+        validarChecklistRetornoCompleto(registro);
+        if (dto.getItensChecklist() != null && !dto.getItensChecklist().isEmpty()) {
+            List<ItemChecklist> itensInformados = itemChecklistRepository.findByIdIn(dto.getItensChecklist());
+            validarChecklistObrigatorio(dto.getItensChecklist(), itensInformados);
+            validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensInformados);
+            salvarChecklist(registro, itensInformados, dto.getObservacoesChecklist());
+        }
 
-        registro.setDataRetorno(LocalDateTime.now());
+        registro.setDataRetorno(HorarioOperacional.agora());
         registro.setQuilometragemRetorno(dto.getQuilometragemRetorno());
         registro.setObservacoesVeiculo(
                 dto.getObservacoesVeiculo() == null || dto.getObservacoesVeiculo().isBlank()
@@ -275,7 +393,7 @@ public class MotoristaJornadaService {
         RegistroUso registro = new RegistroUso(
                 reserva.getVeiculo(),
                 motorista,
-                LocalDateTime.now(),
+                HorarioOperacional.agora(),
                 quilometragemSaida);
         registro.setIdReserva(reserva.getId());
         return registroUsoRepository.save(registro);
@@ -307,14 +425,19 @@ public class MotoristaJornadaService {
         }
     }
 
-    private void validarJanelaDeInicio(Reserva reserva) {
-        LocalDateTime agora = LocalDateTime.now();
+    private void validarJanelaChecklistSaida(Reserva reserva) {
+        LocalDateTime agora = HorarioOperacional.agora();
         if (reserva.getDataHoraInicioPrevista() != null
-                && agora.isBefore(reserva.getDataHoraInicioPrevista().minusMinutes(10))) {
+                && agora.isBefore(reserva.getDataHoraInicioPrevista().minusMinutes(CHECKLIST_JANELA_MINUTOS))) {
             throw new IllegalArgumentException(
-                    "Trajeto disponível somente a partir de " + reserva.getDataHoraInicioPrevista().minusMinutes(10) + ".");
+                    "Checklist disponível somente a partir de "
+                            + reserva.getDataHoraInicioPrevista().minusMinutes(CHECKLIST_JANELA_MINUTOS) + ".");
         }
-        if (reserva.getDataHoraFimEstimada() != null && agora.isAfter(reserva.getDataHoraFimEstimada())) {
+        validarHorarioReservaAtiva(reserva);
+    }
+
+    private void validarHorarioReservaAtiva(Reserva reserva) {
+        if (HorarioOperacional.reservaEncerrada(reserva.getDataHoraFimEstimada())) {
             throw new IllegalArgumentException("O horário previsto desta reserva já foi encerrado. Solicite nova aprovação.");
         }
     }
@@ -342,7 +465,7 @@ public class MotoristaJornadaService {
 
     private void salvarChecklist(
             RegistroUso registro, List<ItemChecklist> itensObrigatorios, Map<Long, String> observacoes) {
-        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime agora = HorarioOperacional.agora();
         for (ItemChecklist item : itensObrigatorios) {
             if (carroChecklistRepository.existsByRegistroUsoIdAndItemId(registro.getId(), item.getId())) {
                 continue;
@@ -357,23 +480,116 @@ public class MotoristaJornadaService {
         }
     }
 
-    private boolean checklistSaidaConcluido(RegistroUso registro) {
+    private Reserva buscarReserva(Long reservaId) {
+        return reservaRepository
+                .findById(reservaId)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com id: " + reservaId));
+    }
+
+    private List<TipoInspecao> tiposDaFase(String fase) {
+        return tipoInspecaoRepository.findByFaseOrderByIdAsc(fase).stream()
+                .filter(tipo -> !itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipo.getId()).isEmpty())
+                .toList();
+    }
+
+    private RegistroUso obterOuCriarRegistroAberto(Reserva reserva, Long motoristaId, Double quilometragemInicial) {
+        Usuario motorista = validarMotorista(motoristaId);
+
+        if (registroUsoRepository.existsByIdReservaAndDataRetornoIsNull(reserva.getId())) {
+            boolean vinculadaAoMotorista = registroUsoRepository
+                    .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reserva.getId(), motorista.getId())
+                    .isPresent();
+            if (!vinculadaAoMotorista) {
+                throw new IllegalArgumentException("Esta reserva já possui checklist ou trajeto de outro motorista.");
+            }
+        }
+
+        return registroUsoRepository
+                .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reserva.getId(), motorista.getId())
+                .orElseGet(() -> criarRegistroUso(
+                        reserva,
+                        motorista,
+                        quilometragemInicial != null ? quilometragemInicial : 0.0));
+    }
+
+    private ChecklistJornadaStatusDTO montarStatusJornada(RegistroUso registro, String fase) {
+        List<ChecklistTipoProgressoDTO> tipos = tiposDaFase(fase).stream()
+                .map(tipo -> {
+                    List<ItemChecklist> itens =
+                            itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipo.getId());
+                    int total = itens.size();
+                    long concluidos = registro.getId() == null
+                            ? 0
+                            : carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(
+                                    registro.getId(), tipo.getId());
+                    boolean concluido = total > 0 && concluidos >= total;
+                    return new ChecklistTipoProgressoDTO(
+                            tipo.getId(), tipo.getNome(), tipo.getDescricao(), total, (int) concluidos, concluido);
+                })
+                .toList();
+
+        boolean preenchimentoCompleto =
+                FASE_CHECKLIST_SAIDA.equals(fase)
+                        ? checklistSaidaPreenchido(registro)
+                        : checklistRetornoConcluido(registro);
+        boolean checklistRegistrado =
+                FASE_CHECKLIST_SAIDA.equals(fase) && registro.isChecklistSaidaRegistrado();
+
+        Double km = registro.getQuilometragemSaida();
+        Double ultimaKmVeiculo = registro.getVeiculo() == null
+                ? null
+                : registroUsoRepository
+                        .buscarUltimaQuilometragemVeiculo(registro.getVeiculo().getId())
+                        .orElse(null);
+        return new ChecklistJornadaStatusDTO(
+                km, ultimaKmVeiculo, preenchimentoCompleto, checklistRegistrado, tipos);
+    }
+
+    private boolean tipoConcluido(RegistroUso registro, Long tipoInspecaoId) {
+        List<ItemChecklist> itens = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
+        if (itens.isEmpty()) {
+            return true;
+        }
+        long marcados = carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(registro.getId(), tipoInspecaoId);
+        return marcados >= itens.size();
+    }
+
+    private boolean checklistSaidaPreenchido(RegistroUso registro) {
         if (registro == null || registro.getId() == null) {
             return false;
         }
-        List<ItemChecklist> itensObrigatorios =
-                itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(TIPO_INSPECAO_SAIDA_ID);
-        if (itensObrigatorios.isEmpty()) {
+        Double km = registro.getQuilometragemSaida();
+        if (km == null || km <= 0) {
             return false;
         }
-        long marcados = carroChecklistRepository.countByRegistroUsoId(registro.getId());
-        return marcados >= itensObrigatorios.size();
+        List<TipoInspecao> tipos = tiposDaFase(FASE_CHECKLIST_SAIDA);
+        if (tipos.isEmpty()) {
+            return false;
+        }
+        return tipos.stream().allMatch(tipo -> tipoConcluido(registro, tipo.getId()));
+    }
+
+    private boolean checklistRetornoConcluido(RegistroUso registro) {
+        if (registro == null || registro.getId() == null) {
+            return false;
+        }
+        List<TipoInspecao> tipos = tiposDaFase(FASE_CHECKLIST_RETORNO);
+        if (tipos.isEmpty()) {
+            return false;
+        }
+        return tipos.stream().allMatch(tipo -> tipoConcluido(registro, tipo.getId()));
+    }
+
+    private void validarChecklistRetornoCompleto(RegistroUso registro) {
+        if (!checklistRetornoConcluido(registro)) {
+            throw new IllegalArgumentException("Conclua todos os tipos de checklist de retorno antes de encerrar.");
+        }
     }
 
     private boolean checklistSaidaConcluido(Long reservaId, Long motoristaId) {
         return registroUsoRepository
                 .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motoristaId)
-                .map(this::checklistSaidaConcluido)
+                .map(RegistroUso::isChecklistSaidaRegistrado)
                 .orElse(false);
     }
 

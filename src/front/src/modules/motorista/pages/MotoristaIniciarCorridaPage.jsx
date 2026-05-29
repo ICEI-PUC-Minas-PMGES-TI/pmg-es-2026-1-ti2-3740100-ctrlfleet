@@ -8,7 +8,7 @@ import { SectionCard } from '../../../components/common/SectionCard';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { iniciarTrajeto } from '../../../services/motoristaApi';
 import {
-  canOpenChecklistSaida,
+  canStartTrip,
   formatDateTime,
   formatKm,
   getChecklistWindowMessage,
@@ -24,7 +24,7 @@ export function MotoristaIniciarCorridaPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
 
-  const canStart = canOpenChecklistSaida(reserva);
+  const canStart = canStartTrip(reserva);
   const windowMessage = getChecklistWindowMessage(reserva);
   const checklistDone = Boolean(reserva?.checklistSaidaConcluido);
 

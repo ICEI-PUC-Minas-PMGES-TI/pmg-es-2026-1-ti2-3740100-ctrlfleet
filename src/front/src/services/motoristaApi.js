@@ -39,12 +39,58 @@ export async function buscarReservaMotorista(motoristaId, reservaId, options = {
   ) ?? null;
 }
 
-export async function registrarChecklistSaida(reservaId, payload) {
-  return request(`/motoristas/reservas/${reservaId}/registrar-checklist-saida`, {
+export async function obterStatusChecklistSaida(reservaId, motoristaId, options = {}) {
+  const params = new URLSearchParams({ idMotorista: String(motoristaId) });
+  return request(`/motoristas/reservas/${reservaId}/checklist-saida/status?${params}`, {
+    signal: options.signal,
+  });
+}
+
+export async function obterStatusChecklistRetorno(reservaId, motoristaId, options = {}) {
+  const params = new URLSearchParams({ idMotorista: String(motoristaId) });
+  return request(`/motoristas/reservas/${reservaId}/checklist-retorno/status?${params}`, {
+    signal: options.signal,
+  });
+}
+
+export async function buscarChecklistPorTipo(tipoId, options = {}) {
+  return request(`/motoristas/checklists/tipos/${tipoId}`, { signal: options.signal });
+}
+
+export async function registrarChecklistParcialSaida(reservaId, tipoId, payload) {
+  return request(`/motoristas/reservas/${reservaId}/checklist-saida/tipos/${tipoId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
+
+export async function registrarChecklistParcialRetorno(reservaId, tipoId, payload) {
+  return request(`/motoristas/reservas/${reservaId}/checklist-retorno/tipos/${tipoId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function registrarQuilometragemSaida(reservaId, payload) {
+  return request(`/motoristas/reservas/${reservaId}/checklist-saida/quilometragem`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function registrarChecklistSaidaFinal(reservaId, motoristaId) {
+  const params = new URLSearchParams({ idMotorista: String(motoristaId) });
+  return request(`/motoristas/reservas/${reservaId}/checklist-saida/registrar?${params}`, {
+    method: 'POST',
+  });
+}
+
+/** @deprecated Use registrarChecklistParcialSaida por tipo */
+export async function registrarChecklistSaida(reservaId, payload) {
+  return registrarChecklistParcialSaida(reservaId, payload.tipoId, payload);
 }
 
 export async function listarHistoricoMotorista(motoristaId, options = {}) {
@@ -53,16 +99,14 @@ export async function listarHistoricoMotorista(motoristaId, options = {}) {
   });
 }
 
+/** @deprecated Use buscarChecklistPorTipo */
 export async function listarChecklistSaida(options = {}) {
-  return request('/motoristas/checklists/saida', {
-    signal: options.signal,
-  });
+  return request('/motoristas/checklists/tipos/4', { signal: options.signal });
 }
 
+/** @deprecated Use buscarChecklistPorTipo */
 export async function listarChecklistRetorno(options = {}) {
-  return request('/motoristas/checklists/retorno', {
-    signal: options.signal,
-  });
+  return request('/motoristas/checklists/tipos/8', { signal: options.signal });
 }
 
 export async function iniciarTrajeto(reservaId, payload) {

@@ -1,61 +1,152 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '../common/Icon';
+import { StatusBadge } from '../common/StatusBadge';
+import { getAuthSession } from '../../services/authSession';
 import {
   canOpenChecklistSaida,
+  canStartTrip,
   formatDateTime,
   formatKm,
+  formatStatusReserva,
+  getChecklistStartWindow,
   getChecklistWindowMessage,
 } from '../../utils/motoristaReservaUtils';
-import { ReservationCardThumbnail } from '../gestor/ReservationCardThumbnail';
+
+function statusHeaderModifier(status) {
+  return (status || 'APROVADA').toLowerCase().replace(/_/g, '-');
+}
+
+function getSecondaryAction({ reserva, motoristaId, checklistDone, canFillChecklist }) {
+  const base = `/motorista/${motoristaId}/reservas/${reserva.idReserva}`;
+  const isEmUso = reserva.statusReserva === 'EM_USO';
+  const isConcluida = reserva.statusReserva === 'CONCLUIDA';
+
+  if (isConcluida) {
+    return { type: 'muted', icon: 'history', label: 'Encerrada' };
+  }
+
+  if (isEmUso) {
+    return {
+      type: 'link',
+      icon: 'check',
+      label: 'Finalizar trajeto',
+      to: `${base}/checklist-retorno`,
+    };
+  }
+
+  if (checklistDone && canStartTrip(reserva)) {
+    return {
+      type: 'link',
+      icon: 'fleet',
+      label: 'Iniciar corrida',
+      to: `${base}/iniciar-corrida`,
+    };
+  }
+
+  if (canFillChecklist) {
+    return {
+      type: 'link',
+      icon: 'check',
+      label: 'Preencher checklist',
+      to: `${base}/checklist-saida`,
+    };
+  }
+
+  const windowStart = getChecklistStartWindow(reserva.dataHoraInicioPrevista);
+  const label = windowStart
+    ? `Saída a partir de ${formatDateTime(windowStart)}`
+    : 'Saída a partir de...';
+  return { type: 'muted', icon: 'calendar', label };
+}
 
 export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
+  const driverName = getAuthSession()?.nome || 'Motorista';
+
   if (!reservas.length) {
     return (
-      <div className="reservation-grid-empty">
+      <div className="motorista-viagens-empty">
         <Icon name="reservations" />
-        <p>Nenhuma reserva encontrada com os filtros atuais.</p>
+        <p>Nenhuma viagem encontrada com os filtros atuais.</p>
       </div>
     );
   }
 
   return (
-    <div className="reservation-grid">
-      {reservas.map((reserva) => {
+    <div className="motorista-viagens-grid">
+      {reservas.map((reserva, index) => {
         const isEmUso = reserva.statusReserva === 'EM_USO';
         const isConcluida = reserva.statusReserva === 'CONCLUIDA';
         const checklistDone = Boolean(reserva.checklistSaidaConcluido);
-        const canStart = canOpenChecklistSaida(reserva);
+        const canFillChecklist = canOpenChecklistSaida(reserva);
         const windowMessage = getChecklistWindowMessage(reserva);
+        const statusLabel = formatStatusReserva(reserva.statusReserva);
+        const secondaryAction = getSecondaryAction({
+          reserva,
+          motoristaId,
+          checklistDone,
+          canFillChecklist,
+        });
 
         return (
-          <article className="reservation-card" key={reserva.idReserva}>
-            <ReservationCardThumbnail reserva={reserva} />
+          <article className="motorista-viagem-card" key={reserva.idReserva}>
+            <header
+              className={`motorista-viagem-card__header motorista-viagem-card__header--${statusHeaderModifier(reserva.statusReserva)}`}
+            >
+              <span className="motorista-viagem-card__trip-label">VIAGEM {index + 1}</span>
+              <StatusBadge label={statusLabel} />
+            </header>
 
-            <div className="reservation-card__body">
-              <div className="reservation-card__headline">
-                <h3 className="reservation-card__title">{reserva.modeloVeiculo}</h3>
+            <div className="motorista-viagem-card__body">
+              <div
+                aria-label={`Trajeto de ${reserva.origem} para ${reserva.destino}`}
+                className="motorista-viagem-card__route"
+              >
+                <div className="motorista-viagem-card__route-point">
+                  <span aria-hidden="true" className="motorista-viagem-card__route-badge motorista-viagem-card__route-badge--origem">
+                    A
+                  </span>
+                  <div>
+                    <span className="motorista-viagem-card__route-label">Origem</span>
+                    <strong>{reserva.origem}</strong>
+                  </div>
+                </div>
+
+                <div className="motorista-viagem-card__route-point">
+                  <span aria-hidden="true" className="motorista-viagem-card__route-badge motorista-viagem-card__route-badge--destino">
+                    B
+                  </span>
+                  <div>
+                    <span className="motorista-viagem-card__route-label">Destino</span>
+                    <strong>{reserva.destino}</strong>
+                  </div>
+                </div>
               </div>
 
-              <p className="reservation-card__requester">
+              <div className="motorista-viagem-card__vehicle">
+                <strong>{reserva.modeloVeiculo || 'Veículo não informado'}</strong>
+                <span className="motorista-viagem-card__plate">{reserva.placaVeiculo || '—'}</span>
+              </div>
+
+              <p className="motorista-viagem-card__driver">
                 <Icon name="users" />
-                <span>{reserva.nomeSolicitante || 'Solicitante não informado'}</span>
+                <span>{driverName}</span>
               </p>
 
               {checklistDone && !isEmUso && !isConcluida ? (
-                <p className="reservation-card__window-hint reservation-card__window-hint--ok">
+                <div className="motorista-viagem-card__alert motorista-viagem-card__alert--ok">
                   <Icon name="check" />
                   <span>Checklist de saída registrado — você pode iniciar a corrida quando quiser.</span>
-                </p>
+                </div>
               ) : null}
 
               {windowMessage ? (
-                <p className="reservation-card__window-hint">
+                <div className="motorista-viagem-card__alert">
                   <Icon name="alert" />
                   <span>{windowMessage}</span>
-                </p>
+                </div>
               ) : null}
 
-              <dl className="reservation-card__meta">
+              <dl className="motorista-viagem-card__meta">
                 <div>
                   <dt>Saída prevista</dt>
                   <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
@@ -68,64 +159,40 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
                   <dt>Última KM</dt>
                   <dd>{formatKm(reserva.ultimaQuilometragemVeiculo)}</dd>
                 </div>
-                {checklistDone || isEmUso ? (
-                  <div>
-                    <dt>KM no checklist</dt>
-                    <dd>{formatKm(reserva.quilometragemSaidaTrajeto)}</dd>
-                  </div>
-                ) : null}
+                <div>
+                  <dt>KM no checklist</dt>
+                  <dd>
+                    {checklistDone || isEmUso || isConcluida
+                      ? formatKm(reserva.quilometragemSaidaTrajeto)
+                      : 'Sem registro'}
+                  </dd>
+                </div>
               </dl>
             </div>
 
-            <footer className="reservation-card__actions">
+            <footer className="motorista-viagem-card__actions">
               <Link
-                className="reservation-card__action reservation-card__action--primary"
+                className="motorista-viagem-card__action motorista-viagem-card__action--primary"
                 state={{ reserva }}
                 to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}`}
               >
-                <Icon name="reports" />
-                <span>Ver detalhes</span>
+                Ver detalhes
               </Link>
 
-              {isConcluida ? (
-                <span className="reservation-card__action reservation-card__action--muted" aria-hidden="true">
-                  <Icon name="history" />
-                  <span>Encerrada</span>
-                </span>
-              ) : isEmUso ? (
+              {secondaryAction.type === 'link' ? (
                 <Link
-                  className="reservation-card__action reservation-card__action--success"
+                  className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
                   state={{ reserva }}
-                  to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-retorno`}
+                  to={secondaryAction.to}
                 >
-                  <Icon name="check" />
-                  <span>Finalizar trajeto</span>
+                  <Icon name={secondaryAction.icon} />
+                  <span>{secondaryAction.label}</span>
                 </Link>
-              ) : checklistDone ? (
-                canStart ? (
-                  <Link
-                    className="reservation-card__action reservation-card__action--success"
-                    state={{ reserva }}
-                    to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/iniciar-corrida`}
-                  >
-                    <Icon name="fleet" />
-                    <span>Iniciar corrida</span>
-                  </Link>
-                ) : (
-                  <span className="reservation-card__action reservation-card__action--muted" aria-hidden="true">
-                    <Icon name="fleet" />
-                    <span>Aguardando janela</span>
-                  </span>
-                )
               ) : (
-                <Link
-                  className="reservation-card__action reservation-card__action--success"
-                  state={{ reserva }}
-                  to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-saida`}
-                >
-                  <Icon name="check" />
-                  <span>Checklist de saída</span>
-                </Link>
+                <span className="motorista-viagem-card__action motorista-viagem-card__action--muted">
+                  <Icon name={secondaryAction.icon} />
+                  <span>{secondaryAction.label}</span>
+                </span>
               )}
             </footer>
           </article>

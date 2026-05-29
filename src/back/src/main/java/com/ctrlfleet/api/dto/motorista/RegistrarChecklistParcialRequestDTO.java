@@ -6,26 +6,33 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.Map;
 
-public class FinalizarTrajetoRequestDTO {
+public class RegistrarChecklistParcialRequestDTO {
     @NotNull(message = "Motorista é obrigatório")
     private Long idMotorista;
 
-    @NotNull(message = "Quilometragem de retorno é obrigatória")
-    @PositiveOrZero(message = "Quilometragem de retorno deve ser maior ou igual a zero")
-    private Double quilometragemRetorno;
+    @PositiveOrZero(message = "Quilometragem de saída deve ser maior ou igual a zero")
+    private Double quilometragemSaida;
 
-    private String observacoesVeiculo;
-
+    @NotEmpty(message = "Marque todos os itens deste tipo de checklist")
     private List<Long> itensChecklist;
 
     private Map<Long, String> observacoesChecklist;
 
-    public Long getIdMotorista() { return idMotorista; }
-    public void setIdMotorista(Long idMotorista) { this.idMotorista = idMotorista; }
-    public Double getQuilometragemRetorno() { return quilometragemRetorno; }
-    public void setQuilometragemRetorno(Double quilometragemRetorno) { this.quilometragemRetorno = quilometragemRetorno; }
-    public String getObservacoesVeiculo() { return observacoesVeiculo; }
-    public void setObservacoesVeiculo(String observacoesVeiculo) { this.observacoesVeiculo = observacoesVeiculo; }
+    public Long getIdMotorista() {
+        return idMotorista;
+    }
+
+    public void setIdMotorista(Long idMotorista) {
+        this.idMotorista = idMotorista;
+    }
+
+    public Double getQuilometragemSaida() {
+        return quilometragemSaida;
+    }
+
+    public void setQuilometragemSaida(Double quilometragemSaida) {
+        this.quilometragemSaida = quilometragemSaida;
+    }
 
     public List<Long> getItensChecklist() {
         return itensChecklist;

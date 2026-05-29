@@ -314,31 +314,58 @@ UPDATE veiculos SET id_motorista = 22 WHERE id BETWEEN 55 AND 60;
 -- =====================================================================
 -- 4. TIPO_INSPECAO
 -- =====================================================================
-INSERT INTO tipo_inspecao (id_tipo_inspecao, nome, descricao) VALUES
-(1, 'Saída de viagem', 'Checklist obrigatório antes da retirada do veículo da garagem.'),
-(2, 'Retorno de viagem', 'Conferência de itens e estado do veículo após o uso.'),
-(3, 'Inspeção mensal', 'Vistoria periódica preventiva da frota.')
-ON CONFLICT DO NOTHING;
+ALTER TABLE tipo_inspecao ADD COLUMN IF NOT EXISTS fase varchar(20);
+UPDATE tipo_inspecao SET fase = 'MENSAL' WHERE fase IS NULL OR btrim(fase) = '';
 
+INSERT INTO tipo_inspecao (id_tipo_inspecao, nome, descricao, fase) VALUES
+(1,  'Saída de viagem (legado)', 'Substituído por tipos Limpeza, Mecânica, Iluminação e Combustível.', 'SAIDA'),
+(2,  'Retorno de viagem (legado)', 'Substituído por tipos de retorno abaixo.', 'RETORNO'),
+(3,  'Inspeção mensal', 'Vistoria periódica preventiva da frota.', 'MENSAL'),
+(4,  'Limpeza', 'Higienização e apresentação do veículo antes da saída.', 'SAIDA'),
+(5,  'Mecânica', 'Itens mecânicos e de segurança para a saída.', 'SAIDA'),
+(6,  'Iluminação', 'Sistema de iluminação e sinalização.', 'SAIDA'),
+(7,  'Combustível', 'Nível de combustível e abastecimento para o trajeto.', 'SAIDA'),
+(8,  'Estado do veículo', 'Conferência visual e itens deixados no veículo.', 'RETORNO'),
+(9,  'Combustível e entrega', 'Combustível remanescente e condição na devolução.', 'RETORNO')
+ON CONFLICT (id_tipo_inspecao) DO UPDATE SET
+  nome = EXCLUDED.nome,
+  descricao = EXCLUDED.descricao,
+  fase = EXCLUDED.fase;
+
+UPDATE tipo_inspecao SET fase = 'LEGADO' WHERE id_tipo_inspecao IN (1, 2);
+UPDATE tipo_inspecao SET fase = 'SAIDA' WHERE id_tipo_inspecao IN (4, 5, 6, 7);
+UPDATE tipo_inspecao SET fase = 'RETORNO' WHERE id_tipo_inspecao IN (8, 9);
+UPDATE tipo_inspecao SET fase = 'MENSAL' WHERE id_tipo_inspecao = 3;
 
 -- =====================================================================
--- 5. ITEM_CHECKLIST
+-- 5. ITEM_CHECKLIST (itens por tipo de inspeção)
 -- =====================================================================
+DELETE FROM carro_checklist WHERE id_item IN (SELECT id_item FROM item_checklist WHERE id_tipo_inspecao IN (1, 2));
+DELETE FROM item_checklist WHERE id_tipo_inspecao IN (1, 2);
+
 INSERT INTO item_checklist (id_item, id_tipo_inspecao, nome) VALUES
-(1,  1, 'Pneus calibrados'),
-(2,  1, 'Triângulo, macaco e chave de roda'),
-(3,  1, 'Nível de combustível'),
-(4,  1, 'Documentação do veículo'),
-(5,  1, 'Limpeza interna e externa'),
-(6,  2, 'Quilometragem registrada'),
-(7,  2, 'Avarias visíveis'),
-(8,  2, 'Combustível remanescente'),
-(9,  2, 'Itens pessoais retirados'),
-(10, 3, 'Óleo do motor'),
-(11, 3, 'Sistema de freios'),
-(12, 3, 'Iluminação e setas'),
-(13, 3, 'Bateria e sistema elétrico')
-ON CONFLICT DO NOTHING;
+(1,  4, 'Limpeza interna'),
+(2,  4, 'Limpeza externa'),
+(3,  4, 'Vidros e espelhos limpos'),
+(4,  5, 'Pneus calibrados'),
+(5,  5, 'Freios e pedal conferidos'),
+(6,  5, 'Triângulo, macaco e chave de roda'),
+(7,  6, 'Faróis, lanternas e setas'),
+(8,  6, 'Luz de freio e ré'),
+(9,  7, 'Nível de combustível adequado'),
+(10, 8, 'Avarias visíveis'),
+(11, 8, 'Itens pessoais retirados'),
+(12, 9, 'Combustível remanescente registrado'),
+(13, 9, 'Veículo entregue em condições de uso'),
+(14, 3, 'Óleo do motor'),
+(15, 3, 'Sistema de freios'),
+(16, 3, 'Iluminação e setas'),
+(17, 3, 'Bateria e sistema elétrico')
+ON CONFLICT (id_item) DO UPDATE SET
+  id_tipo_inspecao = EXCLUDED.id_tipo_inspecao,
+  nome = EXCLUDED.nome;
+
+DELETE FROM item_checklist WHERE nome ILIKE '%documenta%';
 
 
 -- =====================================================================
@@ -507,6 +534,7 @@ ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lat DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lng DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lat DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lng DOUBLE PRECISION;
+ALTER TABLE registros_uso ADD COLUMN IF NOT EXISTS checklist_saida_registrado boolean NOT NULL DEFAULT false;
 
 UPDATE reservas
 SET justificativa = 'Viagem de serviço'
@@ -560,9 +588,9 @@ SELECT
   9,
   10,
   1,
-  now() - interval '24 hours',
-  now() - interval '1 hour',
-  now() + interval '30 days',
+  '2026-05-27 22:00:00',
+  '2026-05-28 22:00:00',
+  '2026-05-28 23:30:00',
   'Treinamento operacional (mock teste Patrícia Melo)',
   'Garagem Central',
   'Viagem de serviço',
@@ -588,9 +616,9 @@ WHERE r.id_reserva = 9
 -- Mantém a janela da reserva #9 sempre válida (evita "fora da janela" após passar maio/2026).
 UPDATE reservas
 SET
-  datahora_solicitacao = now() - interval '24 hours',
-  datahora_inicio_prevista = now() - interval '1 hour',
-  datahora_fim_estimada = now() + interval '30 days'
+  datahora_solicitacao = '2026-05-27 22:00:00',
+  datahora_inicio_prevista = '2026-05-28 22:00:00',
+  datahora_fim_estimada = '2026-05-28 23:30:00'
 WHERE id_reserva = 9
   AND status_reserva = 'APROVADA';
 

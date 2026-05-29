@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Icon } from '../../../components/common/Icon';
-import { PageHeader } from '../../../components/common/PageHeader';
-import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { ReservationRouteMapPanel } from '../../../components/motorista/ReservationRouteMapPanel';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
@@ -13,12 +11,12 @@ import {
 } from '../../../services/motoristaApi';
 import {
   canOpenChecklistSaida,
+  canStartTrip,
   formatDateTime,
-  formatKm,
   formatStatusReserva,
   getChecklistWindowMessage,
 } from '../../../utils/motoristaReservaUtils';
-import { resolveVehicleTypeImageUrl } from '../../../utils/vehicleImage';
+import { resolveVehicleImageUrl } from '../../../utils/vehicleImage';
 
 function normalizeReserva(reserva) {
   return {
@@ -62,10 +60,10 @@ export function MotoristaReservaDetalhePage() {
       if (found) {
         setReserva(normalizeReserva(found));
       } else {
-        setError('Reserva não encontrada ou não disponível para este motorista.');
+        setError('Viagem não encontrada ou não disponível para este motorista.');
       }
     } catch (err) {
-      setError(err.message || 'Não foi possível carregar a reserva.');
+      setError(err.message || 'Não foi possível carregar a viagem.');
     } finally {
       setLoading(false);
     }
@@ -76,30 +74,37 @@ export function MotoristaReservaDetalhePage() {
   }, [loadReserva]);
 
   const vehicleImageUrl = useMemo(
-    () => resolveVehicleTypeImageUrl(reserva?.tipoVeiculo),
-    [reserva?.tipoVeiculo],
+    () =>
+      resolveVehicleImageUrl({
+        tipoVeiculo: reserva?.tipoVeiculo,
+        model: reserva?.modeloVeiculo,
+      }),
+    [reserva?.modeloVeiculo, reserva?.tipoVeiculo],
   );
 
   const isEmUso = reserva?.statusReserva === 'EM_USO';
   const isConcluida = reserva?.statusReserva === 'CONCLUIDA';
   const checklistDone = Boolean(reserva?.checklistSaidaConcluido);
-  const canStart = canOpenChecklistSaida(reserva);
+  const canFillChecklist = canOpenChecklistSaida(reserva);
+  const canStart = canStartTrip(reserva);
   const windowMessage = getChecklistWindowMessage(reserva);
+  const flashMessage = location.state?.flashMessage;
+  const detailBasePath = `/motorista/${motoristaId}/reservas/${reserva?.idReserva}`;
 
   if (!motoristaId) {
     return (
-      <div className="page-stack">
-        <PageHeader subtitle="Sessão inválida." title="Detalhe da reserva" />
+      <div className="page-stack motorista-page">
+        <p className="motorista-dashboard__invalid">Sessão inválida.</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="page-stack">
-        <PageHeader subtitle="Carregando dados da reserva…" title="Detalhe da reserva" />
+      <div className="page-stack motorista-page">
         <div className="admin-dashboard__loading">
-          <span className="admin-dashboard__spinner" aria-hidden="true" />
+          <span aria-hidden="true" className="admin-dashboard__spinner" />
+          <p>Carregando detalhes da viagem…</p>
         </div>
       </div>
     );
@@ -107,188 +112,138 @@ export function MotoristaReservaDetalhePage() {
 
   if (error || !reserva) {
     return (
-      <div className="page-stack">
-        <PageHeader
-          actions={
-            <Link className="action-button action-button--secondary" to={`/motorista/${motoristaId}`}>
-              Voltar
-            </Link>
-          }
-          subtitle={error || 'Reserva indisponível.'}
-          title="Detalhe da reserva"
-        />
+      <div className="page-stack motorista-page">
+        <Link className="motorista-viagem-detail__back" to={`/motorista/${motoristaId}`}>
+          <Icon name="fleet" />
+          <span>Voltar às viagens</span>
+        </Link>
+        <div className="admin-dashboard__error">
+          <Icon name="alert" />
+          <div>
+            <strong>Viagem indisponível</strong>
+            <p>{error || 'Não foi possível carregar os detalhes.'}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="page-stack driver-reserva-detail-v2">
-      <PageHeader
-        actions={
-          <Link className="action-button action-button--secondary" to={`/motorista/${motoristaId}`}>
-            <Icon name="fleet" />
-            <span>Voltar às reservas</span>
-          </Link>
-        }
-        subtitle={`${reserva.placaVeiculo} · ${reserva.modeloVeiculo}`}
-        title={`Reserva #${reserva.idReserva}`}
-      />
+    <div className="page-stack motorista-page motorista-viagem-detail">
+      <Link className="motorista-viagem-detail__back" to={`/motorista/${motoristaId}`}>
+        <Icon name="fleet" />
+        <span>Voltar às viagens</span>
+      </Link>
 
-      <div className="driver-reserva-detail-v2__layout">
-        <div className="driver-reserva-detail-v2__main">
-          <SectionCard>
-            <div className="driver-reserva-detail-v2__hero">
-              <div className="driver-reserva-detail-v2__vehicle">
-                <img alt="" className="driver-reserva-detail-v2__vehicle-img" src={vehicleImageUrl} />
-                <div>
-                  <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
-                  <h2>{reserva.modeloVeiculo}</h2>
-                  <p>
-                    {reserva.placaVeiculo}
-                    {reserva.tipoVeiculo ? ` · ${reserva.tipoVeiculo}` : ''}
-                  </p>
-                </div>
-              </div>
-
-              <dl className="driver-reserva-detail-v2__meta">
-                <div>
-                  <dt>Solicitante</dt>
-                  <dd>{reserva.nomeSolicitante || '—'}</dd>
-                </div>
-                <div>
-                  <dt>Saída prevista</dt>
-                  <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
-                </div>
-                <div>
-                  <dt>Chegada prevista</dt>
-                  <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
-                </div>
-                <div>
-                  <dt>Última quilometragem</dt>
-                  <dd>{formatKm(reserva.ultimaQuilometragemVeiculo)}</dd>
-                </div>
-                {isEmUso ? (
-                  <div>
-                    <dt>KM na saída do trajeto</dt>
-                    <dd>{formatKm(reserva.quilometragemSaidaTrajeto)}</dd>
-                  </div>
-                ) : null}
-              </dl>
-
-              {reserva.justificativa ? (
-                <div className="driver-reserva-detail-v2__justificativa">
-                  <strong>Justificativa da solicitação</strong>
-                  <p>{reserva.justificativa}</p>
-                </div>
-              ) : null}
-
-              {windowMessage ? (
-                <p className="driver-reserva-detail-v2__hint">
-                  <Icon name="alert" />
-                  <span>{windowMessage}</span>
-                </p>
-              ) : null}
-
-              <div className="driver-reserva-detail-v2__actions">
-                {isConcluida ? null : isEmUso ? (
-                  <Link
-                    className="action-button action-button--primary"
-                    state={{ reserva }}
-                    to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-retorno`}
-                  >
-                    <Icon name="check" />
-                    <span>Finalizar trajeto</span>
-                  </Link>
-                ) : checklistDone ? (
-                  <Link
-                    aria-disabled={!canStart}
-                    className={`action-button ${canStart ? 'action-button--primary' : 'action-button--secondary'}`}
-                    state={{ reserva }}
-                    to={
-                      canStart
-                        ? `/motorista/${motoristaId}/reservas/${reserva.idReserva}/iniciar-corrida`
-                        : '#'
-                    }
-                  >
-                    <Icon name="fleet" />
-                    <span>{canStart ? 'Iniciar corrida' : 'Corrida indisponível na janela'}</span>
-                  </Link>
-                ) : (
-                  <Link
-                    className="action-button action-button--primary"
-                    state={{ reserva }}
-                    to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-saida`}
-                  >
-                    <Icon name="check" />
-                    <span>Registrar checklist de saída</span>
-                  </Link>
-                )}
-
-                {!isConcluida && !isEmUso && !checklistDone ? (
-                  <Link
-                    className="action-button action-button--secondary"
-                    state={{ reserva }}
-                    to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-saida`}
-                  >
-                    Checklist de saída
-                  </Link>
-                ) : null}
-                {isEmUso ? (
-                  <Link
-                    className="action-button action-button--secondary"
-                    state={{ reserva }}
-                    to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-retorno`}
-                  >
-                    Checklist de retorno
-                  </Link>
-                ) : null}
+      <div className="motorista-viagem-detail__layout">
+        <article className="motorista-viagem-detail__card">
+          <header className="motorista-viagem-detail__header">
+            <div className="motorista-viagem-detail__vehicle">
+              <img
+                alt=""
+                className="motorista-viagem-detail__vehicle-img"
+                src={vehicleImageUrl}
+              />
+              <div>
+                <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
+                <h1>{reserva.modeloVeiculo || 'Veículo não informado'}</h1>
+                <p>{reserva.placaVeiculo || '—'}</p>
               </div>
             </div>
-          </SectionCard>
+          </header>
 
-          <SectionCard title="Etapas da jornada">
-            <ol className="driver-reserva-detail-v2__timeline">
-              <li className={checklistDone || isEmUso || isConcluida ? 'is-done' : ''}>
-                <span>1</span>
-                <div>
-                  <strong>Checklist de saída</strong>
-                  <p>
-                    {checklistDone || isEmUso || isConcluida
-                      ? 'Registrado'
-                      : 'Pendente — salve antes de iniciar a corrida'}
-                  </p>
-                </div>
-              </li>
-              <li className={isEmUso || isConcluida ? 'is-done' : ''}>
-                <span>2</span>
-                <div>
-                  <strong>Corrida em andamento</strong>
-                  <p>
-                    {isConcluida
-                      ? 'Encerrada'
-                      : isEmUso
-                        ? 'Veículo em uso'
-                        : checklistDone
-                          ? 'Pronta para iniciar'
-                          : 'Aguardando checklist'}
-                  </p>
-                </div>
-              </li>
-              <li className={isConcluida ? 'is-done' : ''}>
-                <span>3</span>
-                <div>
-                  <strong>Checklist de retorno</strong>
-                  <p>{isConcluida ? 'Concluído' : 'Ao encerrar o trajeto'}</p>
-                </div>
-              </li>
-            </ol>
-          </SectionCard>
-        </div>
+          <dl className="motorista-viagem-detail__info">
+            <div>
+              <dt>Solicitante</dt>
+              <dd>{reserva.nomeSolicitante || '—'}</dd>
+            </div>
+            <div>
+              <dt>Saída prevista</dt>
+              <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
+            </div>
+            <div>
+              <dt>Chegada prevista</dt>
+              <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
+            </div>
+            <div>
+              <dt>Origem</dt>
+              <dd>{reserva.origem || '—'}</dd>
+            </div>
+            <div>
+              <dt>Destino</dt>
+              <dd>{reserva.destino || '—'}</dd>
+            </div>
+          </dl>
 
-        <aside className="driver-reserva-detail-v2__aside">
-          <SectionCard title="Trajeto no mapa">
+          {flashMessage ? (
+            <div className="motorista-viagem-card__alert motorista-viagem-card__alert--ok">
+              <Icon name="check" />
+              <span>{flashMessage}</span>
+            </div>
+          ) : null}
+
+          {windowMessage ? (
+            <div className="motorista-viagem-card__alert">
+              <Icon name="alert" />
+              <span>{windowMessage}</span>
+            </div>
+          ) : null}
+
+          {checklistDone && !isEmUso && !isConcluida ? (
+            <div className="motorista-viagem-card__alert motorista-viagem-card__alert--ok">
+              <Icon name="check" />
+              <span>Checklist de saída registrado. Você já pode iniciar a corrida.</span>
+            </div>
+          ) : null}
+
+          <div className="motorista-viagem-detail__actions">
+            {!isConcluida && !isEmUso && canFillChecklist ? (
+              <Link
+                className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
+                state={{ reserva }}
+                to={`${detailBasePath}/checklist-saida`}
+              >
+                <Icon name="check" />
+                <span>Preencher checklist</span>
+              </Link>
+            ) : null}
+
+            {!isConcluida && !isEmUso && canStart ? (
+              <Link
+                className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
+                state={{ reserva }}
+                to={`${detailBasePath}/iniciar-corrida`}
+              >
+                <Icon name="fleet" />
+                <span>Iniciar corrida</span>
+              </Link>
+            ) : null}
+
+            {isEmUso ? (
+              <Link
+                className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
+                state={{ reserva }}
+                to={`${detailBasePath}/checklist-retorno`}
+              >
+                <Icon name="check" />
+                <span>Finalizar trajeto</span>
+              </Link>
+            ) : null}
+
+            {isConcluida ? (
+              <span className="motorista-viagem-card__action motorista-viagem-card__action--muted">
+                <Icon name="history" />
+                <span>Viagem encerrada</span>
+              </span>
+            ) : null}
+          </div>
+        </article>
+
+        <aside className="motorista-viagem-detail__aside">
+          <div className="motorista-viagem-detail__map-card">
+            <h2>Trajeto no mapa</h2>
             <ReservationRouteMapPanel reserva={reserva} />
-          </SectionCard>
+          </div>
         </aside>
       </div>
     </div>

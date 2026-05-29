@@ -45,6 +45,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ctrl_fleet
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      TZ: America/Sao_Paulo
+      JAVA_TOOL_OPTIONS: -Duser.timezone=America/Sao_Paulo
     volumes:
       - ./back:/app
       - maven_repo:/root/.m2

@@ -16,7 +16,10 @@ import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
 import { VehicleHistoryPage } from './modules/gestor/pages/VehicleHistoryPage';
 import { ChecklistRetornoPage } from './modules/motorista/pages/ChecklistRetornoPage';
+import { ChecklistRetornoFinalizarPage } from './modules/motorista/pages/ChecklistRetornoFinalizarPage';
+import { ChecklistRetornoTipoPage } from './modules/motorista/pages/ChecklistRetornoTipoPage';
 import { ChecklistSaidaPage } from './modules/motorista/pages/ChecklistSaidaPage';
+import { ChecklistSaidaTipoPage } from './modules/motorista/pages/ChecklistSaidaTipoPage';
 import { MotoristaDashboardPage } from './modules/motorista/pages/MotoristaDashboardPage';
 import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHistoricoPage';
 import { MotoristaIniciarCorridaPage } from './modules/motorista/pages/MotoristaIniciarCorridaPage';
@@ -104,8 +107,20 @@ function App() {
               <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
               <Route path=":motoristaId/reservas/:reservaId" element={<MotoristaReservaDetalhePage />} />
               <Route path=":motoristaId/reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-saida/tipos/:tipoId"
+                element={<ChecklistSaidaTipoPage />}
+              />
               <Route path=":motoristaId/reservas/:reservaId/iniciar-corrida" element={<MotoristaIniciarCorridaPage />} />
               <Route path=":motoristaId/reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-retorno/tipos/:tipoId"
+                element={<ChecklistRetornoTipoPage />}
+              />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-retorno/finalizar"
+                element={<ChecklistRetornoFinalizarPage />}
+              />
               <Route path="reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
               <Route path="reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
             </Route>
