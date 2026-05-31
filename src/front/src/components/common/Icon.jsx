@@ -321,6 +321,28 @@ const iconMap = {
       <path d="M4.8 11.2h14.4M8.2 18.3l2.6-4.8M15.8 18.3l-2.6-4.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </>
   ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" fill="none" r="4.2" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M12 3.2v2.2M12 18.6v2.2M3.2 12h2.2M18.6 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M5.4 18.6l1.6-1.6M17 7l1.6-1.6"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
+    </>
+  ),
+  moon: (
+    <path
+      d="M18.2 14.8a6.8 6.8 0 0 1-8.6-8.6A7 7 0 1 0 19.5 16.5a6.2 6.2 0 0 1-1.3-1.7Z"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    />
+  ),
   users: (
     <>
       <circle cx="9" cy="9.5" fill="none" r="3" stroke="currentColor" strokeWidth="1.8" />

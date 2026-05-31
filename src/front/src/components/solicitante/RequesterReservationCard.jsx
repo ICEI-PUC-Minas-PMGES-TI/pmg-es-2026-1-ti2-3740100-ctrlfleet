@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchDrivingRoute } from '../../services/geocodingApi';
 import { coordsFromReservation, resolveReservationCoords } from '../../utils/resolveReservationCoords';
+import { formatReservaUsuarioLabel } from '../../utils/userReservaNumbers';
 import { Icon } from '../common/Icon';
 import { StatusBadge } from '../common/StatusBadge';
 import { RouteMapPreview } from './RouteMapPreview';
@@ -137,7 +138,9 @@ export function RequesterReservationCard({ onCancel, onDelete, cancelingId, dele
       <div className="requester-reservation-card__body">
         <header className="requester-reservation-card__header">
           <div>
-            <span className="requester-reservation-card__id">Reserva #{reservation.idReserva}</span>
+            <span className="requester-reservation-card__id">
+              {formatReservaUsuarioLabel(reservation.reservaNumber)}
+            </span>
             <h3>{reservation.destino}</h3>
             <p>{reservation.veiculo}</p>
           </div>

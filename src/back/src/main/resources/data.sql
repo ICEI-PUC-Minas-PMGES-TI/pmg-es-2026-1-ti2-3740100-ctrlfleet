@@ -208,8 +208,8 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (2,  'XYZ5B67', 'HB20',         'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (3,  'LMN9C12', 'Corsa',        'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (4,  'VXY8D01', 'March',        'Nissan',     2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
-(5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'EM_USO',     'Garagem Central',               'SEDAN'),
-(6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'EM_USO',     'Garagem Central',               'HATCH'),
+(5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
+(6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (7,  'JKL2G45', 'Celta',        'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central',               'HATCH'),
 (8,  'OPQ6H89', 'Fit',          'Honda',      2021, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
 (9,  'RST0I23', 'Palio',        'Fiat',       2015, 'DESATIVADO', 'Garagem Central',               'HATCH'),
@@ -300,6 +300,24 @@ WHERE secretaria IS NULL OR btrim(secretaria) = '';
 ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS id_motorista bigint;
 
 UPDATE veiculos SET id_motorista = 5  WHERE id BETWEEN 1  AND 6;
+UPDATE veiculos SET status = 'DISPONIVEL' WHERE id BETWEEN 1 AND 6 AND id_motorista = 5;
+
+-- Documentação em dia nos veículos da Patrícia (ids 1–6) — status Ativo na UI
+UPDATE documentacao SET data_vencimento = '2027-06-30', status_pagamento = 'PAGO' WHERE id_documento = 1;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 2;
+UPDATE documentacao SET data_vencimento = '2027-01-15', status_pagamento = 'PAGO' WHERE id_documento = 3;
+UPDATE documentacao SET data_vencimento = '2027-03-20', status_pagamento = 'PAGO' WHERE id_documento = 4;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 5;
+UPDATE documentacao SET data_vencimento = '2027-02-10', status_pagamento = 'PAGO' WHERE id_documento = 6;
+UPDATE documentacao SET data_vencimento = '2027-04-30', status_pagamento = 'PAGO' WHERE id_documento = 7;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 8;
+UPDATE documentacao SET data_vencimento = '2027-02-10', status_pagamento = 'PAGO' WHERE id_documento = 9;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 10;
+UPDATE documentacao SET data_vencimento = '2027-04-30', status_pagamento = 'PAGO' WHERE id_documento = 11;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 12;
+UPDATE documentacao SET data_vencimento = '2027-07-22', status_pagamento = 'PAGO' WHERE id_documento = 13;
+UPDATE documentacao SET data_vencimento = '2027-05-01', status_pagamento = 'PAGO' WHERE id_documento = 14;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 15;
 UPDATE veiculos SET id_motorista = 6  WHERE id BETWEEN 7  AND 12;
 UPDATE veiculos SET id_motorista = 8  WHERE id BETWEEN 13 AND 18;
 UPDATE veiculos SET id_motorista = 16 WHERE id BETWEEN 19 AND 24;
@@ -314,52 +332,79 @@ UPDATE veiculos SET id_motorista = 22 WHERE id BETWEEN 55 AND 60;
 -- =====================================================================
 -- 4. TIPO_INSPECAO
 -- =====================================================================
-INSERT INTO tipo_inspecao (id_tipo_inspecao, nome, descricao) VALUES
-(1, 'Saída de viagem', 'Checklist obrigatório antes da retirada do veículo da garagem.'),
-(2, 'Retorno de viagem', 'Conferência de itens e estado do veículo após o uso.'),
-(3, 'Inspeção mensal', 'Vistoria periódica preventiva da frota.')
-ON CONFLICT DO NOTHING;
+ALTER TABLE tipo_inspecao ADD COLUMN IF NOT EXISTS fase varchar(20);
+UPDATE tipo_inspecao SET fase = 'MENSAL' WHERE fase IS NULL OR btrim(fase) = '';
 
+INSERT INTO tipo_inspecao (id_tipo_inspecao, nome, descricao, fase) VALUES
+(1,  'Saída de viagem (legado)', 'Substituído por tipos Limpeza, Mecânica, Iluminação e Combustível.', 'SAIDA'),
+(2,  'Retorno de viagem (legado)', 'Substituído por tipos de retorno abaixo.', 'RETORNO'),
+(3,  'Inspeção mensal', 'Vistoria periódica preventiva da frota.', 'MENSAL'),
+(4,  'Limpeza', 'Higienização e apresentação do veículo antes da saída.', 'SAIDA'),
+(5,  'Mecânica', 'Itens mecânicos e de segurança para a saída.', 'SAIDA'),
+(6,  'Iluminação', 'Sistema de iluminação e sinalização.', 'SAIDA'),
+(7,  'Combustível', 'Nível de combustível e abastecimento para o trajeto.', 'SAIDA'),
+(8,  'Estado do veículo', 'Conferência visual e itens deixados no veículo.', 'RETORNO'),
+(9,  'Combustível e entrega', 'Combustível remanescente e condição na devolução.', 'RETORNO')
+ON CONFLICT (id_tipo_inspecao) DO UPDATE SET
+  nome = EXCLUDED.nome,
+  descricao = EXCLUDED.descricao,
+  fase = EXCLUDED.fase;
+
+UPDATE tipo_inspecao SET fase = 'LEGADO' WHERE id_tipo_inspecao IN (1, 2);
+UPDATE tipo_inspecao SET fase = 'SAIDA' WHERE id_tipo_inspecao IN (4, 5, 6, 7);
+UPDATE tipo_inspecao SET fase = 'RETORNO' WHERE id_tipo_inspecao IN (8, 9);
+UPDATE tipo_inspecao SET fase = 'MENSAL' WHERE id_tipo_inspecao = 3;
 
 -- =====================================================================
--- 5. ITEM_CHECKLIST
+-- 5. ITEM_CHECKLIST (itens por tipo de inspeção)
 -- =====================================================================
+DELETE FROM carro_checklist WHERE id_item IN (SELECT id_item FROM item_checklist WHERE id_tipo_inspecao IN (1, 2));
+DELETE FROM item_checklist WHERE id_tipo_inspecao IN (1, 2);
+
 INSERT INTO item_checklist (id_item, id_tipo_inspecao, nome) VALUES
-(1,  1, 'Pneus calibrados'),
-(2,  1, 'Triângulo, macaco e chave de roda'),
-(3,  1, 'Nível de combustível'),
-(4,  1, 'Documentação do veículo'),
-(5,  1, 'Limpeza interna e externa'),
-(6,  2, 'Quilometragem registrada'),
-(7,  2, 'Avarias visíveis'),
-(8,  2, 'Combustível remanescente'),
-(9,  2, 'Itens pessoais retirados'),
-(10, 3, 'Óleo do motor'),
-(11, 3, 'Sistema de freios'),
-(12, 3, 'Iluminação e setas'),
-(13, 3, 'Bateria e sistema elétrico')
-ON CONFLICT DO NOTHING;
+(1,  4, 'Limpeza interna'),
+(2,  4, 'Limpeza externa'),
+(3,  4, 'Vidros e espelhos limpos'),
+(4,  5, 'Pneus calibrados'),
+(5,  5, 'Freios e pedal conferidos'),
+(6,  5, 'Triângulo, macaco e chave de roda'),
+(7,  6, 'Faróis, lanternas e setas'),
+(8,  6, 'Luz de freio e ré'),
+(9,  7, 'Nível de combustível adequado'),
+(10, 8, 'Avarias visíveis'),
+(11, 8, 'Itens pessoais retirados'),
+(12, 9, 'Combustível remanescente registrado'),
+(13, 9, 'Veículo entregue em condições de uso'),
+(14, 3, 'Óleo do motor'),
+(15, 3, 'Sistema de freios'),
+(16, 3, 'Iluminação e setas'),
+(17, 3, 'Bateria e sistema elétrico')
+ON CONFLICT (id_item) DO UPDATE SET
+  id_tipo_inspecao = EXCLUDED.id_tipo_inspecao,
+  nome = EXCLUDED.nome;
+
+DELETE FROM item_checklist WHERE nome ILIKE '%documenta%';
 
 
 -- =====================================================================
 -- 6. DOCUMENTACAO
 -- =====================================================================
 INSERT INTO documentacao (id_documento, id_veiculo, tipo_documento, data_vencimento, valor_pago, status_pagamento) VALUES
-(1,  1,  'IPVA',          '2024-06-30', 1450.00, 'ATRASADO'),
-(2,  1,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(3,  1,  'SEGURO',        '2024-01-15', 2380.00, 'ATRASADO'),
-(4,  2,  'IPVA',          '2024-03-20', 1620.00, 'ATRASADO'),
-(5,  2,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
+(1,  1,  'IPVA',          '2027-06-30', 1450.00, 'PAGO'),
+(2,  1,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(3,  1,  'SEGURO',        '2027-01-15', 2380.00, 'PAGO'),
+(4,  2,  'IPVA',          '2027-03-20', 1620.00, 'PAGO'),
+(5,  2,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
 (6,  2,  'SEGURO',        '2027-02-10', 2510.00, 'PAGO'),
-(7,  3,  'IPVA',          '2026-04-30', 980.00,  'PAGO'),
-(8,  3,  'LICENCIAMENTO', '2024-08-01', 165.00,  'ATRASADO'),
-(9,  4,  'IPVA',          '2024-02-10', 1740.00, 'ATRASADO'),
-(10, 4,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(11, 5,  'IPVA',          '2026-04-30', 1180.00, 'PAGO'),
-(12, 5,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(13, 5,  'SEGURO',        '2026-07-22', 2110.00, 'PAGO'),
-(14, 6,  'IPVA',          '2024-05-01', 1290.00, 'ATRASADO'),
-(15, 6,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
+(7,  3,  'IPVA',          '2027-04-30', 980.00,  'PAGO'),
+(8,  3,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(9,  4,  'IPVA',          '2027-02-10', 1740.00, 'PAGO'),
+(10, 4,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(11, 5,  'IPVA',          '2027-04-30', 1180.00, 'PAGO'),
+(12, 5,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(13, 5,  'SEGURO',        '2027-07-22', 2110.00, 'PAGO'),
+(14, 6,  'IPVA',          '2027-05-01', 1290.00, 'PAGO'),
+(15, 6,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
 (16, 7,  'IPVA',          '2026-04-30', 720.00,  'PAGO'),
 (17, 7,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (18, 8,  'IPVA',          '2026-04-30', 1080.00, 'PAGO'),
@@ -443,7 +488,8 @@ INSERT INTO manutencoes (id_manutencao, id_veiculo, tipo_manutencao, descricao_p
 (5, 6, 'CORRETIVA',  'Substituição da bateria após falha em partida fria.',                       '2026-03-22', 27500.00, 690.00,  'Baterias Express',      'CONCLUIDA'),
 (6, 9, 'CORRETIVA',  'Diagnóstico de falha geral no motor — viabilidade de reparo em análise.',   '2026-01-10', 141900.00,0.00,    'Mecânica Central LTDA', 'CANCELADA'),
 (7, 2, 'PREVENTIVA', 'Alinhamento, balanceamento e rodízio de pneus.',                            '2026-04-02', 8100.00,  240.00,  'Pneus & Cia',           'CONCLUIDA'),
-(8, 3, 'PREVENTIVA', 'Revisão programada dos 45.000 km.',                                         '2026-04-25', 46900.00, 560.00,  'Concessionária GM',     'AGENDADA')
+(8, 3, 'PREVENTIVA', 'Revisão programada dos 45.000 km.',                                         '2026-04-25', 46900.00, 560.00,  'Concessionária GM',     'AGENDADA'),
+(9, 1, 'PREVENTIVA', 'Revisão programada dos 60.000 km — fluido de freio e filtros.',            '2026-06-15', 60000.00, null,    null,                    'AGENDADA')
 ON CONFLICT DO NOTHING;
 
 
@@ -507,6 +553,8 @@ ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lat DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS origem_lng DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lat DOUBLE PRECISION;
 ALTER TABLE reservas ADD COLUMN IF NOT EXISTS destino_lng DOUBLE PRECISION;
+ALTER TABLE registros_uso ADD COLUMN IF NOT EXISTS checklist_saida_registrado boolean NOT NULL DEFAULT false;
+ALTER TABLE registros_uso ADD COLUMN IF NOT EXISTS checklist_retorno_registrado boolean NOT NULL DEFAULT false;
 
 UPDATE reservas
 SET justificativa = 'Viagem de serviço'
@@ -523,11 +571,69 @@ INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, 
 (2, 10, 2, '2026-04-03 11:00:00', '2026-04-05 06:30:00', '2026-04-05 14:30:00', 'Secretaria de Educação',          'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
 (3, 11, 5, '2026-03-30 09:40:00', '2026-04-02 08:00:00', '2026-04-02 18:00:00', 'Fiscalização de obras Zona Sul',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
 (4, 10, 5, '2026-04-13 13:25:00', '2026-04-15 07:00:00', '2026-04-15 12:00:00', 'Entrega de documentos no Fórum',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
-(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'Viagem de serviço', 'APROVADA'),
-(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'Viagem de serviço', 'APROVADA'),
+(5, 3,  6, '2026-05-08 15:10:00', '2026-05-12 08:00:00', '2026-05-12 17:30:00', 'Reunião na Secretaria de Saúde',  'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
+(6, 11, 4, '2026-05-09 10:00:00', '2026-05-11 09:00:00', '2026-05-11 16:00:00', 'Visita técnica ao distrito',      'Garagem Central', 'Viagem de serviço', 'CONCLUIDA'),
 (7, 10, 3, '2026-05-09 14:30:00', '2026-05-13 07:30:00', '2026-05-13 18:00:00', 'Auditoria em escola municipal',   'Garagem Central', 'Viagem de serviço', 'SOLICITADA'),
 (8, 3,  10,'2026-05-09 16:45:00', '2026-05-14 06:00:00', '2026-05-14 19:00:00', 'Transporte de equipamentos',      'Garagem Central', 'Viagem de serviço', 'SOLICITADA')
 ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+
+-- ---------------------------------------------------------------------
+-- Mock teste Patrícia Melo (usuario id 5): encerra trajetos 5/6 legados
+-- ---------------------------------------------------------------------
+UPDATE registros_uso ru
+SET
+  data_retorno = CASE ru.id_uso
+    WHEN 5 THEN '2026-05-12 17:45:00'::timestamp
+    WHEN 6 THEN '2026-05-11 16:10:00'::timestamp
+  END,
+  quilometragem_retorno = CASE ru.id_uso WHEN 5 THEN 28148.0 WHEN 6 THEN 5488.0 END,
+  observacoes_veiculo = COALESCE(ru.observacoes_veiculo, 'Encerrado no seed para teste de fluxo.')
+WHERE ru.id_uso IN (5, 6)
+  AND ru.data_retorno IS NULL;
+
+UPDATE reservas r
+SET status_reserva = 'CONCLUIDA'
+WHERE r.id_reserva IN (5, 6)
+  AND r.status_reserva = 'APROVADA';
+
+UPDATE veiculos v
+SET status = 'DISPONIVEL'
+WHERE v.id = 6
+  AND NOT EXISTS (SELECT 1 FROM registros_uso ru WHERE ru.id_veiculo = v.id AND ru.data_retorno IS NULL);
+
+INSERT INTO reservas (id_reserva, id_usuario, id_veiculo, datahora_solicitacao, datahora_inicio_prevista, datahora_fim_estimada, destino, origem, justificativa, status_reserva)
+SELECT
+  9,
+  10,
+  1,
+  '2026-05-27 22:00:00',
+  '2026-05-28 22:00:00',
+  '2026-05-28 23:30:00',
+  'Praça da Liberdade — Savassi, Belo Horizonte',
+  'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte',
+  'Viagem de serviço',
+  'APROVADA'
+ON CONFLICT (id_reserva) DO UPDATE SET
+  id_usuario = EXCLUDED.id_usuario,
+  id_veiculo = EXCLUDED.id_veiculo,
+  datahora_solicitacao = EXCLUDED.datahora_solicitacao,
+  datahora_inicio_prevista = EXCLUDED.datahora_inicio_prevista,
+  datahora_fim_estimada = EXCLUDED.datahora_fim_estimada,
+  destino = EXCLUDED.destino,
+  origem = EXCLUDED.origem,
+  justificativa = EXCLUDED.justificativa,
+  status_reserva = EXCLUDED.status_reserva;
+
+UPDATE reservas r
+SET matricula_solicitante = u.matricula
+FROM usuarios u
+WHERE r.id_reserva = 9
+  AND r.id_usuario = u.id
+  AND (r.matricula_solicitante IS NULL OR trim(r.matricula_solicitante) = '');
+
+-- (Datas da reserva #9 são atualizadas no bloco Patrícia Melo abaixo.)
 
 SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
 
@@ -548,6 +654,8 @@ UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = 
 WHERE id_reserva = 7 AND (origem_lat IS NULL OR destino_lat IS NULL);
 UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9050, destino_lng = -43.9420
 WHERE id_reserva = 8 AND (origem_lat IS NULL OR destino_lat IS NULL);
+UPDATE reservas SET origem_lat = -19.9167, origem_lng = -43.9345, destino_lat = -19.9080, destino_lng = -43.9360
+WHERE id_reserva = 9 AND (origem_lat IS NULL OR destino_lat IS NULL);
 
 -- Demais reservas: origem na garagem quando texto for Garagem Central
 UPDATE reservas
@@ -567,12 +675,12 @@ ALTER TABLE reservas ALTER COLUMN justificativa SET NOT NULL;
 --   e usuários motoristas existentes (id_motorista).
 -- =====================================================================
 INSERT INTO registros_uso (id_uso, id_reserva, id_veiculo, id_motorista, data_saida, quilometragem_saida, data_retorno, quilometragem_retorno, observacoes_veiculo) VALUES
-(1, 1, 1, 5, '2026-04-10 08:00:00', 15200.00, '2026-04-10 17:30:00', 15340.00, 'Viagem para vistoria na regional norte. Veículo entregue em ordem.'),
+(1, 1, 1, 5, '2026-04-10 08:00:00', 45230.00, '2026-04-10 17:30:00', 45278.00, 'Viagem para vistoria na regional norte. Veículo entregue em ordem.'),
 (2, 2, 2, 6, '2026-04-05 06:45:00', 32100.00, '2026-04-05 14:00:00', 32250.00, 'Deslocamento à Secretaria de Educação. Sem ocorrências.'),
 (3, 3, 5, 4, '2026-04-02 08:15:00', 48000.00, '2026-04-02 17:00:00', 48180.00, 'Fiscalização de obras na zona sul.'),
 (4, 4, 5, 6, '2026-04-15 07:00:00', 48180.00, '2026-04-15 11:30:00', 48260.00, 'Entrega de documentos no fórum.'),
-(5, 5, 6, 5, '2026-05-12 08:00:00', 28100.00, NULL,                  NULL,     NULL),
-(6, 6, 4, 6, '2026-05-11 09:00:00', 5400.00,  NULL,                  NULL,     NULL)
+(5, 5, 6, 5, '2026-05-12 08:00:00', 27950.00, '2026-05-12 17:45:00', 28012.00, 'Viagem concluída — KM saída +62 km.'),
+(6, 6, 4, 5, '2026-05-11 09:00:00', 5312.00,  '2026-05-11 16:10:00', 5380.00,  'Viagem concluída — KM saída +68 km.')
 ON CONFLICT (id_uso) DO UPDATE SET
   id_reserva = EXCLUDED.id_reserva,
   id_veiculo = EXCLUDED.id_veiculo,
@@ -604,3 +712,132 @@ INSERT INTO carro_checklist (id_checklist, id_uso, id_item, data_checklist, obse
 (8, 5, 3,  '2026-05-12 07:55:00', 'Tanque cheio.'),
 (9, 6, 5,  '2026-05-11 08:50:00', 'Higienização interna realizada.')
 ON CONFLICT DO NOTHING;
+
+
+-- =====================================================================
+-- 14. MOCK VIAGENS PATRÍCIA MELO (motorista id 5) — datas relativas e KM alinhados
+--     Lista no app: Viagem 1 (mais recente) … Viagem N. Filtros: 7d / 30d / 90d / 180d.
+-- =====================================================================
+
+INSERT INTO reservas (
+  id_reserva, id_usuario, id_veiculo, datahora_solicitacao,
+  datahora_inicio_prevista, datahora_fim_estimada, destino, origem, justificativa, status_reserva
+) VALUES
+(10, 10, 2, NOW() - INTERVAL '26 days', NOW() - INTERVAL '25 days' + TIME '08:00', NOW() - INTERVAL '25 days' + TIME '17:00',
+ 'Cidade Administrativa Minas Gerais — Belo Horizonte', 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte', 'Viagem de serviço', 'CONCLUIDA'),
+(11, 3,  3, NOW() - INTERVAL '51 days', NOW() - INTERVAL '50 days' + TIME '07:30', NOW() - INTERVAL '50 days' + TIME '16:30',
+ 'Parque Municipal Américo Renné Giannetti — Belo Horizonte', 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte', 'Viagem de serviço', 'CONCLUIDA'),
+(12, 11, 4, NOW() - INTERVAL '2 days',  NOW() + INTERVAL '1 day'  + TIME '09:00',  NOW() + INTERVAL '1 day'  + TIME '18:00',
+ 'Aeroporto Internacional de Confins — Confins, MG', 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte', 'Viagem de serviço', 'APROVADA')
+ON CONFLICT (id_reserva) DO UPDATE SET
+  id_usuario = EXCLUDED.id_usuario,
+  id_veiculo = EXCLUDED.id_veiculo,
+  datahora_solicitacao = EXCLUDED.datahora_solicitacao,
+  datahora_inicio_prevista = EXCLUDED.datahora_inicio_prevista,
+  datahora_fim_estimada = EXCLUDED.datahora_fim_estimada,
+  destino = EXCLUDED.destino,
+  origem = EXCLUDED.origem,
+  justificativa = EXCLUDED.justificativa,
+  status_reserva = EXCLUDED.status_reserva;
+
+-- Viagens concluídas recentes (Patrícia / veículos 1–6)
+UPDATE reservas SET
+  datahora_solicitacao = NOW() - INTERVAL '2 days',
+  datahora_inicio_prevista = NOW() - INTERVAL '1 day' + TIME '08:00',
+  datahora_fim_estimada = NOW() - INTERVAL '1 day' + TIME '17:30',
+  status_reserva = 'CONCLUIDA',
+  destino = 'Hospital Risoleta Tolentino Neves — Ribeirão das Neves, MG',
+  origem = 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte'
+WHERE id_reserva = 1;
+
+UPDATE reservas SET
+  datahora_solicitacao = NOW() - INTERVAL '6 days',
+  datahora_inicio_prevista = NOW() - INTERVAL '5 days' + TIME '08:00',
+  datahora_fim_estimada = NOW() - INTERVAL '5 days' + TIME '17:30',
+  status_reserva = 'CONCLUIDA',
+  destino = 'Hospital Júlia Kubitschek — Av. Cristiano Machado, Belo Horizonte',
+  origem = 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte'
+WHERE id_reserva = 5;
+
+UPDATE reservas SET
+  datahora_solicitacao = NOW() - INTERVAL '14 days',
+  datahora_inicio_prevista = NOW() - INTERVAL '13 days' + TIME '09:00',
+  datahora_fim_estimada = NOW() - INTERVAL '13 days' + TIME '16:00',
+  status_reserva = 'CONCLUIDA',
+  destino = 'Prefeitura de Contagem — Centro, Contagem, MG',
+  origem = 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte'
+WHERE id_reserva = 6;
+
+-- Reservas de teste em aberto ficam fora da listagem do motorista (somente CONCLUIDA por enquanto)
+UPDATE reservas SET status_reserva = 'CANCELADA' WHERE id_reserva IN (9, 12);
+
+INSERT INTO registros_uso (
+  id_uso, id_reserva, id_veiculo, id_motorista,
+  data_saida, quilometragem_saida, data_retorno, quilometragem_retorno,
+  observacoes_veiculo, checklist_saida_registrado, checklist_retorno_registrado
+) VALUES
+(1, 1,  1, 5, NOW() - INTERVAL '1 day' + TIME '08:05', 45230.0, NOW() - INTERVAL '1 day' + TIME '17:20', 45278.0,
+ 'Viagem concluída sem ocorrências.', true, true),
+(5, 5,  6, 5, NOW() - INTERVAL '5 days' + TIME '08:10', 27950.0, NOW() - INTERVAL '5 days' + TIME '17:40', 28012.0,
+ 'Retorno com tanque acima de meio.', true, true),
+(6, 6,  4, 5, NOW() - INTERVAL '13 days' + TIME '09:05', 5312.0,  NOW() - INTERVAL '13 days' + TIME '15:55', 5380.0,
+ 'Veículo liberado na garagem.', true, true),
+(10, 10, 2, 5, NOW() - INTERVAL '25 days' + TIME '08:00', 32148.0, NOW() - INTERVAL '25 days' + TIME '16:50', 32220.0,
+ 'Deslocamento institucional concluído.', true, true),
+(11, 11, 3, 5, NOW() - INTERVAL '50 days' + TIME '07:45', 46800.0, NOW() - INTERVAL '50 days' + TIME '16:20', 46892.0,
+ 'Auditoria regional finalizada.', true, true)
+ON CONFLICT (id_uso) DO UPDATE SET
+  id_reserva = EXCLUDED.id_reserva,
+  id_veiculo = EXCLUDED.id_veiculo,
+  id_motorista = EXCLUDED.id_motorista,
+  data_saida = EXCLUDED.data_saida,
+  quilometragem_saida = EXCLUDED.quilometragem_saida,
+  data_retorno = EXCLUDED.data_retorno,
+  quilometragem_retorno = EXCLUDED.quilometragem_retorno,
+  observacoes_veiculo = EXCLUDED.observacoes_veiculo,
+  checklist_saida_registrado = EXCLUDED.checklist_saida_registrado,
+  checklist_retorno_registrado = EXCLUDED.checklist_retorno_registrado;
+
+-- Garante coerência: km final = km inicial + km percorrida (evita leituras antigas no ON CONFLICT)
+UPDATE registros_uso SET quilometragem_saida = 45230.0, quilometragem_retorno = 45278.0
+WHERE id_uso = 1 AND id_reserva = 1;
+UPDATE registros_uso SET quilometragem_saida = 27950.0, quilometragem_retorno = 28012.0
+WHERE id_uso = 5 AND id_reserva = 5;
+UPDATE registros_uso SET quilometragem_saida = 5312.0, quilometragem_retorno = 5380.0
+WHERE id_uso = 6 AND id_reserva = 6;
+UPDATE registros_uso SET quilometragem_saida = 32148.0, quilometragem_retorno = 32220.0
+WHERE id_uso = 10 AND id_reserva = 10;
+UPDATE registros_uso SET quilometragem_saida = 46800.0, quilometragem_retorno = 46892.0
+WHERE id_uso = 11 AND id_reserva = 11;
+
+-- Checklist completo (tipos saída 4–7 e retorno 8–9) nos registros de viagem da Patrícia
+DELETE FROM carro_checklist WHERE id_uso IN (1, 5, 6, 10, 11);
+
+INSERT INTO carro_checklist (id_checklist, id_uso, id_item, data_checklist, observacoes)
+SELECT
+  1000 + ru.id_uso * 20 + ic.id_item,
+  ru.id_uso,
+  ic.id_item,
+  ru.data_saida - INTERVAL '10 minutes',
+  NULL
+FROM registros_uso ru
+CROSS JOIN item_checklist ic
+WHERE ru.id_uso IN (1, 5, 6, 10, 11)
+  AND ic.id_tipo_inspecao IN (4, 5, 6, 7)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO carro_checklist (id_checklist, id_uso, id_item, data_checklist, observacoes)
+SELECT
+  2000 + ru.id_uso * 20 + ic.id_item,
+  ru.id_uso,
+  ic.id_item,
+  ru.data_retorno - INTERVAL '5 minutes',
+  NULL
+FROM registros_uso ru
+CROSS JOIN item_checklist ic
+WHERE ru.id_uso IN (1, 5, 6, 10, 11)
+  AND ic.id_tipo_inspecao IN (8, 9)
+ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
+SELECT setval(pg_get_serial_sequence('registros_uso', 'id_uso'), COALESCE((SELECT MAX(id_uso) FROM registros_uso), 0));

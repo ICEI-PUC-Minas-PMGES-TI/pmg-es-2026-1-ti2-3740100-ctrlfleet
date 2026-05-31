@@ -13,6 +13,7 @@ import {
   parseReservationDate,
 } from '../../../services/requesterReservationUtils';
 import { buscarUsuario } from '../../../services/usuarioApi';
+import { attachSolicitanteReservaNumbers, formatReservaUsuarioLabel } from '../../../utils/userReservaNumbers';
 
 function pad2(value) {
   return String(value).padStart(2, '0');
@@ -79,8 +80,13 @@ export function RequesterDashboardPage() {
     return () => controller.abort();
   }, [carregarReservas, matriculaFallback, solicitanteId]);
 
+  const reservations = useMemo(
+    () => attachSolicitanteReservaNumbers(reservationsData.items),
+    [reservationsData.items],
+  );
+
   const stats = useMemo(() => {
-    const items = reservationsData.items;
+    const items = reservations;
     const count = (statusKey) => items.filter((item) => item.statusKey === statusKey).length;
 
     return [
@@ -109,10 +115,10 @@ export function RequesterDashboardPage() {
         value: pad2(count('EM_USO')),
       },
     ];
-  }, [reservationsData.items]);
+  }, [reservations]);
 
   const upcomingTrips = useMemo(() => {
-    return reservationsData.items
+    return reservations
       .filter((item) => ['APROVADA', 'EM_USO'].includes(item.statusKey) && isUpcoming(item))
       .sort((a, b) => {
         const dateA = parseReservationDate(a.inicioPrevistoRaw)?.getTime() ?? Number.MAX_SAFE_INTEGER;
@@ -120,10 +126,10 @@ export function RequesterDashboardPage() {
         return dateA - dateB;
       })
       .slice(0, 5);
-  }, [reservationsData.items]);
+  }, [reservations]);
 
   const attentionItems = useMemo(() => {
-    return reservationsData.items
+    return reservations
       .filter((item) => ['SOLICITADA', 'REPROVADA'].includes(item.statusKey))
       .sort((a, b) => {
         const dateA = parseReservationDate(a.solicitacaoRaw)?.getTime() ?? 0;
@@ -131,20 +137,20 @@ export function RequesterDashboardPage() {
         return dateB - dateA;
       })
       .slice(0, 5);
-  }, [reservationsData.items]);
+  }, [reservations]);
 
   const recentActivity = useMemo(() => {
-    return [...reservationsData.items]
+    return [...reservations]
       .sort((a, b) => {
         const dateA = parseReservationDate(a.solicitacaoRaw)?.getTime() ?? 0;
         const dateB = parseReservationDate(b.solicitacaoRaw)?.getTime() ?? 0;
         return dateB - dateA;
       })
       .slice(0, 6);
-  }, [reservationsData.items]);
+  }, [reservations]);
 
   const statusBreakdown = useMemo(() => {
-    const items = reservationsData.items;
+    const items = reservations;
     if (items.length === 0) return [];
 
     const groups = [
@@ -162,7 +168,7 @@ export function RequesterDashboardPage() {
         return { ...group, count, percent: Math.round((count / items.length) * 100) };
       })
       .filter((group) => group.count > 0);
-  }, [reservationsData.items]);
+  }, [reservations]);
 
   const greetingName = profile.name?.split(' ')[0] ?? 'Solicitante';
 
@@ -233,7 +239,9 @@ export function RequesterDashboardPage() {
                 {upcomingTrips.map((trip) => (
                   <article className="requester-trip-item" key={trip.idReserva}>
                     <div className="requester-trip-item__main">
-                      <span className="requester-trip-item__kicker">Reserva #{trip.idReserva}</span>
+                      <span className="requester-trip-item__kicker">
+                        {formatReservaUsuarioLabel(trip.reservaNumber)}
+                      </span>
                       <h3>{trip.destino}</h3>
                       <p>
                         {trip.origem} → {trip.destino}
@@ -269,7 +277,7 @@ export function RequesterDashboardPage() {
                 {recentActivity.map((item) => (
                   <article className="requester-activity-item" key={`activity-${item.idReserva}`}>
                     <div>
-                      <strong>#{item.idReserva} · {item.destino}</strong>
+                      <strong>{formatReservaUsuarioLabel(item.reservaNumber)} · {item.destino}</strong>
                       <span>{item.dataHoraSolicitacao}</span>
                     </div>
                     <StatusBadge label={item.statusLabel} />
@@ -317,7 +325,7 @@ export function RequesterDashboardPage() {
                     <div>
                       <StatusBadge label={item.statusLabel} />
                       <p>
-                        <strong>#{item.idReserva}</strong> — {item.destino}
+                        <strong>{formatReservaUsuarioLabel(item.reservaNumber)}</strong> — {item.destino}
                         {item.statusKey === 'REPROVADA' ? ' (reprovada pelo gestor)' : ' (aguardando análise)'}
                       </p>
                     </div>

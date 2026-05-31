@@ -3,6 +3,7 @@ package com.ctrlfleet.api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,13 +15,17 @@ import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.domain.model.ItemChecklist;
 import com.ctrlfleet.api.domain.model.RegistroUso;
 import com.ctrlfleet.api.domain.model.Reserva;
+import com.ctrlfleet.api.domain.model.TipoInspecao;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
-import com.ctrlfleet.api.dto.motorista.IniciarTrajetoRequestDTO;
+import com.ctrlfleet.api.dto.motorista.FinalizarTrajetoRequestDTO;
+import com.ctrlfleet.api.dto.motorista.IniciarCorridaRequestDTO;
+import com.ctrlfleet.api.dto.motorista.RegistrarChecklistParcialRequestDTO;
 import com.ctrlfleet.api.repository.CarroChecklistRepository;
 import com.ctrlfleet.api.repository.ItemChecklistRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.ReservaRepository;
+import com.ctrlfleet.api.repository.TipoInspecaoRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +41,7 @@ class MotoristaJornadaServiceTest {
     private UsuarioRepository usuarioRepository;
     private RegistroUsoRepository registroUsoRepository;
     private ItemChecklistRepository itemChecklistRepository;
+    private TipoInspecaoRepository tipoInspecaoRepository;
     private CarroChecklistRepository carroChecklistRepository;
     private AuditoriaService auditoriaService;
     private MotoristaJornadaService service;
@@ -46,85 +52,88 @@ class MotoristaJornadaServiceTest {
         usuarioRepository = mock(UsuarioRepository.class);
         registroUsoRepository = mock(RegistroUsoRepository.class);
         itemChecklistRepository = mock(ItemChecklistRepository.class);
+        tipoInspecaoRepository = mock(TipoInspecaoRepository.class);
         carroChecklistRepository = mock(CarroChecklistRepository.class);
         auditoriaService = mock(AuditoriaService.class);
+
+        when(tipoInspecaoRepository.findByFaseOrderByIdAsc("SAIDA"))
+                .thenReturn(List.of(tipo(4L, "Limpeza", "SAIDA"), tipo(5L, "Mecânica", "SAIDA")));
+        when(tipoInspecaoRepository.findByFaseOrderByIdAsc("RETORNO"))
+                .thenReturn(List.of(tipo(8L, "Estado do veículo", "RETORNO")));
 
         service = new MotoristaJornadaService(
                 reservaRepository,
                 usuarioRepository,
                 registroUsoRepository,
                 itemChecklistRepository,
+                tipoInspecaoRepository,
                 carroChecklistRepository,
                 auditoriaService);
     }
 
     @Test
-    void iniciarTrajetoCriaRegistroEAtualizaReservaEVeiculo() {
+    void registrarChecklistParcialSaidaSalvaUmTipoPorVez() {
         Reserva reserva = reservaAprovada(LocalDateTime.now().minusMinutes(10), LocalDateTime.now().plusHours(2));
         Usuario motorista = motoristaAtivo();
-        List<ItemChecklist> checklist = List.of(item(1L, "Freios"), item(2L, "Documentos"));
-        IniciarTrajetoRequestDTO dto = request(List.of(1L, 2L), Map.of(), 12500.0);
+        List<ItemChecklist> itensLimpeza = List.of(item(1L, "Limpeza interna"), item(2L, "Limpeza externa"));
+        RegistrarChecklistParcialRequestDTO dto = parcialRequest(List.of(1L, 2L), Map.of(), 12500.0);
 
-        prepararCenario(reserva, motorista, checklist);
+        prepararCenario(reserva, motorista);
+        when(tipoInspecaoRepository.findById(4L)).thenReturn(Optional.of(tipo(4L, "Limpeza", "SAIDA")));
+        when(itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(4L)).thenReturn(itensLimpeza);
+        when(registroUsoRepository.existsByIdReservaAndDataRetornoIsNull(10L)).thenReturn(false);
+        when(registroUsoRepository.findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(10L, 5L))
+                .thenReturn(Optional.empty());
         when(registroUsoRepository.save(any(RegistroUso.class))).thenAnswer(invocation -> {
             RegistroUso registro = invocation.getArgument(0);
             registro.setId(44L);
             return registro;
         });
+        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(44L, 4L)).thenReturn(2L);
+        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(44L, 5L)).thenReturn(0L);
 
-        var response = service.iniciarTrajeto(10L, dto);
+        var response = service.registrarChecklistParcialSaida(10L, 4L, dto);
 
         assertThat(response.getId()).isEqualTo(44L);
-        assertThat(response.getQuilometragemSaida()).isEqualTo(12500.0);
-        assertThat(reserva.getStatusReserva()).isEqualTo(StatusReserva.EM_USO);
-        assertThat(reserva.getVeiculo().getStatus()).isEqualTo(StatusVeiculo.EM_USO);
         verify(carroChecklistRepository, times(2)).save(any());
-        verify(auditoriaService).registrar(
-                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
-    void iniciarTrajetoBloqueiaChecklistIncompleto() {
+    void iniciarTrajetoExigeTodosTiposDeSaidaConcluidos() {
         Reserva reserva = reservaAprovada(LocalDateTime.now().minusMinutes(10), LocalDateTime.now().plusHours(2));
-        prepararCenario(reserva, motoristaAtivo(), List.of(item(1L, "Freios"), item(2L, "Documentos")));
+        Usuario motorista = motoristaAtivo();
+        RegistroUso registro = registroAberto(reserva, motorista, 12500.0);
 
-        assertThatThrownBy(() -> service.iniciarTrajeto(10L, request(List.of(1L), Map.of(), 12500.0)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Todos os itens obrigatórios");
-    }
-
-    @Test
-    void iniciarTrajetoBloqueiaHorarioFuturo() {
-        Reserva reserva = reservaAprovada(LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(3));
-        prepararCenario(reserva, motoristaAtivo(), List.of(item(1L, "Freios")));
-
-        assertThatThrownBy(() -> service.iniciarTrajeto(10L, request(List.of(1L), Map.of(), 12500.0)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("disponível somente");
-    }
-
-    @Test
-    void iniciarTrajetoBloqueiaOcorrenciaEmItemCritico() {
-        Reserva reserva = reservaAprovada(LocalDateTime.now().minusMinutes(10), LocalDateTime.now().plusHours(2));
-        prepararCenario(reserva, motoristaAtivo(), List.of(item(1L, "Freios")));
-
-        assertThatThrownBy(() -> service.iniciarTrajeto(10L, request(List.of(1L), Map.of(1L, "ruído"), 12500.0)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Item crítico");
-    }
-
-    private void prepararCenario(Reserva reserva, Usuario motorista, List<ItemChecklist> checklist) {
         when(reservaRepository.findById(10L)).thenReturn(Optional.of(reserva));
         when(usuarioRepository.findById(5L)).thenReturn(Optional.of(motorista));
-        when(registroUsoRepository.existsByIdReservaAndDataRetornoIsNull(10L)).thenReturn(false);
+        when(registroUsoRepository.findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(10L, 5L))
+                .thenReturn(Optional.of(registro));
+        when(itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(4L))
+                .thenReturn(List.of(item(1L, "Limpeza interna")));
+        when(itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(5L))
+                .thenReturn(List.of(item(2L, "Pneus")));
+        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(99L, 4L)).thenReturn(1L);
+        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(99L, 5L)).thenReturn(0L);
+
+        IniciarCorridaRequestDTO dto = new IniciarCorridaRequestDTO();
+        dto.setIdMotorista(5L);
+
+        assertThatThrownBy(() -> service.iniciarTrajeto(10L, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("checklist");
+    }
+
+    private void prepararCenario(Reserva reserva, Usuario motorista) {
+        when(reservaRepository.findById(10L)).thenReturn(Optional.of(reserva));
+        when(usuarioRepository.findById(5L)).thenReturn(Optional.of(motorista));
         when(registroUsoRepository.buscarUltimaQuilometragemVeiculo(reserva.getVeiculo().getId()))
                 .thenReturn(Optional.of(12000.0));
-        when(itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(1L)).thenReturn(checklist);
         when(carroChecklistRepository.existsByRegistroUsoIdAndItemId(any(), any())).thenReturn(false);
     }
 
-    private IniciarTrajetoRequestDTO request(List<Long> itens, Map<Long, String> observacoes, Double quilometragem) {
-        IniciarTrajetoRequestDTO dto = new IniciarTrajetoRequestDTO();
+    private RegistrarChecklistParcialRequestDTO parcialRequest(
+            List<Long> itens, Map<Long, String> observacoes, Double quilometragem) {
+        RegistrarChecklistParcialRequestDTO dto = new RegistrarChecklistParcialRequestDTO();
         dto.setIdMotorista(5L);
         dto.setQuilometragemSaida(quilometragem);
         dto.setItensChecklist(itens);
@@ -162,5 +171,22 @@ class MotoristaJornadaServiceTest {
         ReflectionTestUtils.setField(item, "id", id);
         ReflectionTestUtils.setField(item, "nome", nome);
         return item;
+    }
+
+    private TipoInspecao tipo(Long id, String nome, String fase) {
+        TipoInspecao tipo = new TipoInspecao();
+        ReflectionTestUtils.setField(tipo, "id", id);
+        ReflectionTestUtils.setField(tipo, "nome", nome);
+        ReflectionTestUtils.setField(tipo, "descricao", "Descrição");
+        ReflectionTestUtils.setField(tipo, "fase", fase);
+        return tipo;
+    }
+
+    private RegistroUso registroAberto(Reserva reserva, Usuario motorista, double kmSaida) {
+        RegistroUso registro =
+                new RegistroUso(reserva.getVeiculo(), motorista, LocalDateTime.now().minusHours(1), kmSaida);
+        registro.setIdReserva(10L);
+        registro.setId(99L);
+        return registro;
     }
 }

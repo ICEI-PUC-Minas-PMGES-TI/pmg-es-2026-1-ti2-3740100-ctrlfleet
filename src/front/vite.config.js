@@ -28,6 +28,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/geocode\/nominatim/, ''),
       },
+      '/routing/osrm': {
+        target: 'https://router.project-osrm.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/routing\/osrm/, ''),
+      },
     },
   },
 })

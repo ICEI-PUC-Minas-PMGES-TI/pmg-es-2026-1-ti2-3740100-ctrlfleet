@@ -24,6 +24,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
             select r
             from Reserva r
             where r.statusReserva = :status
+              and r.veiculo.motorista.id = :motoristaId
               and (
                 not exists (
                   select 1 from RegistroUso ru
@@ -36,7 +37,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
                     and ru.dataRetorno is null
                 )
               )
-            order by r.dataHoraInicioPrevista asc
+            order by r.dataHoraInicioPrevista desc, r.id desc
             """)
     List<Reserva> listarAprovadasDisponiveisParaMotorista(
             @Param("motoristaId") Long motoristaId, @Param("status") StatusReserva status);
@@ -51,9 +52,24 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
                   and ru.motorista.id = :motoristaId
                   and ru.dataRetorno is null
               )
-            order by r.dataHoraInicioPrevista asc
+            order by r.dataHoraInicioPrevista desc, r.id desc
             """)
     List<Reserva> listarEmUsoPorMotorista(
+            @Param("motoristaId") Long motoristaId, @Param("status") StatusReserva status);
+
+    @Query("""
+            select r
+            from Reserva r
+            where r.statusReserva = :status
+              and exists (
+                select 1 from RegistroUso ru
+                where ru.idReserva = r.id
+                  and ru.motorista.id = :motoristaId
+                  and ru.dataRetorno is not null
+              )
+            order by r.dataHoraInicioPrevista asc, r.id asc
+            """)
+    List<Reserva> listarConcluidasPorMotorista(
             @Param("motoristaId") Long motoristaId, @Param("status") StatusReserva status);
 
     @Query("""

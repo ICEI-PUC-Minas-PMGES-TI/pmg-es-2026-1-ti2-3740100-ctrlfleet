@@ -15,9 +15,21 @@ import { ReservationTimelinePage } from './modules/gestor/pages/ReservationTimel
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
 import { VehicleDetailPage } from './modules/gestor/pages/VehicleDetailPage';
 import { VehicleHistoryPage } from './modules/gestor/pages/VehicleHistoryPage';
+import { ChecklistRetornoPage } from './modules/motorista/pages/ChecklistRetornoPage';
+import { ChecklistRetornoFinalizarPage } from './modules/motorista/pages/ChecklistRetornoFinalizarPage';
+import { ChecklistRetornoTipoPage } from './modules/motorista/pages/ChecklistRetornoTipoPage';
 import { ChecklistSaidaPage } from './modules/motorista/pages/ChecklistSaidaPage';
+import { ChecklistSaidaTipoPage } from './modules/motorista/pages/ChecklistSaidaTipoPage';
 import { MotoristaDashboardPage } from './modules/motorista/pages/MotoristaDashboardPage';
 import { MotoristaHistoricoPage } from './modules/motorista/pages/MotoristaHistoricoPage';
+import { MotoristaCorridaPage } from './modules/motorista/pages/MotoristaCorridaPage';
+import { MotoristaIniciarCorridaPage } from './modules/motorista/pages/MotoristaIniciarCorridaPage';
+import { MotoristaReservaDetalhePage } from './modules/motorista/pages/MotoristaReservaDetalhePage';
+import { MotoristaReservaHistoricoPage } from './modules/motorista/pages/MotoristaReservaHistoricoPage';
+import { MotoristaVeiculoDetalhePage } from './modules/motorista/pages/MotoristaVeiculoDetalhePage';
+import { MotoristaManutencaoPage } from './modules/motorista/pages/MotoristaManutencaoPage';
+import { MotoristaSolicitarManutencaoPage } from './modules/motorista/pages/MotoristaSolicitarManutencaoPage';
+import { MotoristaVeiculosPage } from './modules/motorista/pages/MotoristaVeiculosPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
 import { RequesterDashboardPage } from './modules/solicitante/pages/RequesterDashboardPage';
@@ -98,9 +110,35 @@ function App() {
             <Route path="motorista" element={<ManagerLayout />}>
               <Route index element={<Navigate replace to={getMotoristaHomePathFromSession()} />} />
               <Route path=":motoristaId" element={<MotoristaDashboardPage />} />
+              <Route path=":motoristaId/veiculos" element={<MotoristaVeiculosPage />} />
+              <Route path=":motoristaId/veiculos/:vehicleId" element={<MotoristaVeiculoDetalhePage />} />
               <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
+              <Route path=":motoristaId/manutencao" element={<MotoristaManutencaoPage />} />
+              <Route path=":motoristaId/manutencao/solicitar" element={<MotoristaSolicitarManutencaoPage />} />
+              <Route path=":motoristaId/reservas/:reservaId" element={<MotoristaReservaDetalhePage />} />
               <Route path=":motoristaId/reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-saida/tipos/:tipoId"
+                element={<ChecklistSaidaTipoPage />}
+              />
+              <Route path=":motoristaId/reservas/:reservaId/iniciar-corrida" element={<MotoristaIniciarCorridaPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/corrida" element={<MotoristaCorridaPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/historico" element={<MotoristaReservaHistoricoPage />} />
+              <Route path=":motoristaId/reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-retorno/tipos/:tipoId"
+                element={<ChecklistRetornoTipoPage />}
+              />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-retorno/finalizar"
+                element={<ChecklistRetornoFinalizarPage />}
+              />
+              <Route
+                path=":motoristaId/reservas/:reservaId/checklist-retorno/encerrar"
+                element={<ChecklistRetornoFinalizarPage />}
+              />
               <Route path="reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
+              <Route path="reservas/:reservaId/checklist-retorno" element={<ChecklistRetornoPage />} />
             </Route>
           </Route>
 

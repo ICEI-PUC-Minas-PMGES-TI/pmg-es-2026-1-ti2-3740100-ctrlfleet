@@ -743,6 +743,266 @@ a {
   grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
 }
 
+.content-grid__main,
+.content-grid__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.driver-reserva-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(320px, 0.95fr);
+  gap: 18px;
+}
+
+.driver-reserva-detail-main,
+.driver-reserva-detail-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.driver-detail-hero {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.driver-detail-hero__copy h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.driver-detail-hero__copy p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.driver-detail-hero__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.driver-detail-hero__plate {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.06);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: 0.82rem;
+}
+
+.driver-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+}
+
+.driver-detail-meta > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.78);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  min-width: 0;
+}
+
+.driver-detail-meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.driver-detail-meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.driver-detail-justificativa {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.16);
+}
+
+.driver-detail-justificativa strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.driver-detail-justificativa p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.driver-detail-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.driver-route-map {
+  height: 320px;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  overflow: hidden;
+}
+
+.driver-route-map--compact {
+  height: 230px;
+}
+
+.driver-vehicle-photo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.driver-vehicle-photo {
+  width: 100%;
+  max-width: 260px;
+  height: 142px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: #fff;
+}
+
+.driver-vehicle-photo-card span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.driver-detail-hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(254, 243, 199, 0.45);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  color: #92400e;
+}
+
+.driver-detail-hint svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.driver-detail-hint p {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.driver-detail-side-meta {
+  margin: 14px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.driver-detail-side-meta > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-detail-side-meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.driver-detail-side-meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.driver-ab-points {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.driver-ab-points > div {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(249, 250, 252, 0.8);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-ab-points span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.driver-ab-points p {
+  margin: 2px 0 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.action-button--disabled {
+  pointer-events: none;
+  opacity: 0.55;
+  filter: grayscale(0.1);
+}
+
 .content-grid--form {
   align-items: start;
 }
@@ -1066,6 +1326,40 @@ a {
   border-color: rgba(209, 79, 74, 0.2);
 }
 
+.flash-banner--inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.flash-banner--inline svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.stat-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  border-radius: 22px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card-link:hover .stat-card {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.admin-empty__hint {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 380px;
+  line-height: 1.45;
+}
+
 .fleet-filters {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1073,15 +1367,91 @@ a {
   align-items: start;
 }
 
+.fleet-filters--motorista {
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+}
+
+.fleet-filters--compact {
+  padding: 0;
+  border: none;
+  background: none;
+  gap: 0;
+}
+
+.fleet-filters--compact .fleet-filters__toolbar,
+.fleet-filters--compact .fleet-filters__controls {
+  justify-content: flex-start;
+}
+
+.fleet-filters__search {
+  margin: 0;
+}
+
 .fleet-filters__toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  align-items: center;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.fleet-filters__toolbar--selects {
+  justify-content: flex-start;
+}
+
+.fleet-filters__toolbar--selects .fleet-filters__controls {
+  justify-content: flex-start;
+  flex: 1 1 auto;
 }
 
 .fleet-filters__toolbar .filter-tabs {
   flex: 1 1 280px;
+}
+
+.fleet-filters__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.fleet-filters__control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fleet-filters__control-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fleet-filters__select {
+  min-width: 180px;
+  width: auto;
+  margin: 0;
+}
+
+.fleet-filters__sort-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fleet-filters__sort-tabs .filter-tab {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.84rem;
+  white-space: nowrap;
 }
 
 .fleet-filters__type-wrap {
@@ -1558,6 +1928,25 @@ a {
   letter-spacing: -0.01em;
 }
 
+.fleet-vehicle-card__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.fleet-vehicle-card__alert svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
 .fleet-vehicle-card__meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1648,6 +2037,10 @@ a {
 .fleet-vehicle-card__action:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.fleet-vehicle-card__action--full {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 640px) {
@@ -2045,6 +2438,271 @@ a {
   opacity: 0.55;
   cursor: default;
   pointer-events: none;
+}
+
+.reservation-card__window-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(207, 78, 54, 0.08);
+  color: #8a3b2c;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.reservation-card__window-hint svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.reservation-card__window-hint--ok {
+  background: rgba(34, 139, 84, 0.1);
+  color: #1a6b42;
+}
+
+.reservation-route-map-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.reservation-route-map-panel__map,
+.reservation-route-map-panel__map.route-map-preview {
+  width: 100%;
+  min-height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.reservation-route-map-panel__map--compact,
+.reservation-route-map-panel__map--compact.route-map-preview {
+  min-height: 220px;
+}
+
+.reservation-route-map-panel__placeholder {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px dashed rgba(47, 76, 107, 0.25);
+  background: rgba(248, 250, 252, 0.9);
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.reservation-route-map-panel__points {
+  display: grid;
+  gap: 12px;
+}
+
+.reservation-route-map-panel__points > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.reservation-route-map-panel__points span {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(47, 76, 107, 0.72);
+}
+
+.reservation-route-map-panel__points strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.reservation-route-map-panel__dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.reservation-route-map-panel__dot--origin {
+  background: #2563eb;
+}
+
+.reservation-route-map-panel__dot--dest {
+  background: var(--accent);
+}
+
+.driver-reserva-detail-v2__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.driver-reserva-detail-v2__main,
+.driver-reserva-detail-v2__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.driver-reserva-detail-v2__aside {
+  position: sticky;
+  top: 88px;
+}
+
+.driver-reserva-detail-v2__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.driver-reserva-detail-v2__vehicle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.driver-reserva-detail-v2__vehicle-img {
+  width: 120px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  padding: 8px;
+}
+
+.driver-reserva-detail-v2__vehicle h2 {
+  margin: 8px 0 4px;
+  font-size: 1.35rem;
+}
+
+.driver-reserva-detail-v2__vehicle p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.driver-reserva-detail-v2__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.driver-reserva-detail-v2__meta > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.driver-reserva-detail-v2__meta dt {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(47, 76, 107, 0.72);
+}
+
+.driver-reserva-detail-v2__meta dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.driver-reserva-detail-v2__justificativa {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 246, 232, 0.7);
+  border: 1px solid rgba(207, 78, 54, 0.15);
+}
+
+.driver-reserva-detail-v2__justificativa p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.driver-reserva-detail-v2__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(207, 78, 54, 0.08);
+  color: #8a3b2c;
+  font-size: 0.88rem;
+}
+
+.driver-reserva-detail-v2__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.driver-reserva-detail-v2__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.driver-reserva-detail-v2__timeline li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.driver-reserva-detail-v2__timeline li.is-done {
+  border-color: rgba(34, 139, 84, 0.25);
+  background: rgba(233, 245, 238, 0.6);
+}
+
+.driver-reserva-detail-v2__timeline li > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  font-weight: 800;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.driver-reserva-detail-v2__timeline li.is-done > span {
+  background: rgba(34, 139, 84, 0.15);
+  color: #1a6b42;
+}
+
+.driver-reserva-detail-v2__timeline p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 960px) {
+  .driver-reserva-detail-v2__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-reserva-detail-v2__aside {
+    position: static;
+  }
 }
 
 @media (max-width: 640px) {
@@ -3254,6 +3912,1372 @@ a {
   max-width: 1280px;
 }
 
+.motorista-dashboard {
+  gap: 20px;
+}
+
+.motorista-dashboard__invalid {
+  margin: 0;
+  color: var(--muted);
+}
+
+.motorista-dashboard__summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.motorista-dashboard__summary span:last-child {
+  text-align: right;
+  max-width: 320px;
+}
+
+.motorista-viagens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.motorista-viagens-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--muted);
+  border-radius: 22px;
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.motorista-viagens-empty svg {
+  width: 32px;
+  height: 32px;
+  color: var(--accent);
+}
+
+.motorista-viagem-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(15, 17, 23, 0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.motorista-viagem-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(15, 17, 23, 0.1);
+}
+
+.motorista-viagem-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+.motorista-viagem-card__header--aprovada,
+.motorista-viagem-card__header--em-uso {
+  background: linear-gradient(145deg, #e9f5ee 0%, #d4e8dc 100%);
+}
+
+.motorista-viagem-card__header--concluida {
+  background: linear-gradient(145deg, #e8f0f8 0%, #d2dfea 100%);
+}
+
+.motorista-viagem-card__header--solicitada,
+.motorista-viagem-card__header--reprovada,
+.motorista-viagem-card__header--cancelada {
+  background: linear-gradient(145deg, #fff0ec 0%, #f5d8d0 100%);
+}
+
+.motorista-viagem-card__trip-label {
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.motorista-viagem-card__body {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.motorista-viagem-card__route {
+  display: grid;
+  gap: 12px;
+}
+
+.motorista-viagem-card__route-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.motorista-viagem-card__route-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  flex: 0 0 28px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.motorista-viagem-card__route-badge--origem {
+  background: #2d8b57;
+}
+
+.motorista-viagem-card__route-badge--destino {
+  background: #d58d21;
+}
+
+.motorista-viagem-card__route-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motorista-viagem-card__route-point strong {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.motorista-viagem-card__vehicle {
+  display: grid;
+  gap: 4px;
+}
+
+.motorista-viagem-card__vehicle strong {
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.motorista-viagem-card__plate {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.motorista-viagem-card__driver {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.motorista-viagem-card__driver svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.motorista-viagem-card__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(207, 78, 54, 0.18);
+  background: rgba(207, 78, 54, 0.08);
+  color: #8f3a2d;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.motorista-viagem-card__alert svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-top: 1px;
+}
+
+.motorista-viagem-card__alert--ok {
+  border-color: rgba(45, 139, 87, 0.22);
+  background: rgba(45, 139, 87, 0.08);
+  color: #1f6b43;
+}
+
+.motorista-viagem-card__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.motorista-viagem-card__meta > div {
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.9);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-viagem-card__meta dt {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.motorista-viagem-card__meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.motorista-viagem-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 18px 18px;
+  margin-top: auto;
+}
+
+.motorista-viagem-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.motorista-viagem-card__action svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.motorista-viagem-card__action--primary {
+  background: rgba(207, 78, 54, 0.12);
+  color: var(--accent);
+}
+
+.motorista-viagem-card__action--primary:hover {
+  background: rgba(207, 78, 54, 0.18);
+}
+
+.motorista-viagem-card__action--secondary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.motorista-viagem-card__action--secondary:hover {
+  background: var(--accent-dark);
+}
+
+.motorista-viagem-card__action--muted {
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--muted);
+  cursor: default;
+}
+
+.motorista-viagem-card__action--muted span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .motorista-dashboard__summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .motorista-viagens-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-viagem-card__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-viagem-detail__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.motorista-viagem-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.motorista-viagem-detail__back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.motorista-veiculo-doc-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.95);
+  border: 1px solid rgba(231, 230, 235, 0.95);
+}
+
+.motorista-veiculo-doc-highlight strong {
+  font-size: 0.95rem;
+}
+
+.motorista-veiculo-doc-highlight__warning {
+  color: #b45309;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.documents-list--readonly .documents-list__item {
+  display: grid;
+  gap: 4px;
+}
+
+/* ===================================================
+   Motorista — detalhe do veículo
+   =================================================== */
+
+.motorista-veiculo-detail {
+  gap: 22px;
+}
+
+.motorista-veiculo-detail__hero {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
+}
+
+.motorista-veiculo-detail__media {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(248, 250, 252, 0.98), rgba(226, 232, 240, 0.55));
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  min-height: 220px;
+  height: 100%;
+}
+
+.motorista-veiculo-detail__photo {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.motorista-veiculo-detail__type-badge {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.motorista-veiculo-detail__hero-copy h1 {
+  margin: 12px 0 8px;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.motorista-veiculo-detail__hero-copy > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.motorista-veiculo-detail__secretaria {
+  margin-top: 8px !important;
+  font-weight: 600;
+}
+
+.motorista-veiculo-detail__odometer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px !important;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+  font-size: 0.9rem !important;
+}
+
+.motorista-veiculo-detail__odometer svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.motorista-veiculo-detail__odometer strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.motorista-veiculo-detail__hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.motorista-veiculo-detail__plate {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.07);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 0.88rem;
+}
+
+.motorista-veiculo-detail__stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.motorista-veiculo-detail__stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+}
+
+.motorista-veiculo-detail__stat svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.motorista-veiculo-detail__stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.motorista-veiculo-detail__stat strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.motorista-veiculo-detail__docs-panel,
+.motorista-historico-viagem__panel {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+}
+
+.motorista-veiculo-detail__section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.motorista-veiculo-detail__section-head h2 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+}
+
+.motorista-veiculo-detail__section-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.motorista-veiculo-detail__eyebrow {
+  display: inline-flex;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motorista-veiculo-detail__docs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.motorista-doc-card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(249, 250, 252, 0.85);
+}
+
+.motorista-doc-card--ok {
+  border-color: rgba(45, 139, 87, 0.28);
+  background: rgba(240, 253, 244, 0.75);
+}
+
+.motorista-doc-card--warning {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: rgba(254, 249, 195, 0.45);
+}
+
+.motorista-doc-card--expired {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(254, 242, 242, 0.75);
+}
+
+.motorista-doc-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.motorista-doc-card__head strong {
+  font-size: 0.98rem;
+}
+
+.motorista-doc-card__state {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.motorista-doc-card__state--ok {
+  background: rgba(45, 139, 87, 0.14);
+  color: #166534;
+}
+
+.motorista-doc-card__state--warning {
+  background: rgba(234, 179, 8, 0.18);
+  color: #92400e;
+}
+
+.motorista-doc-card__state--expired {
+  background: rgba(239, 68, 68, 0.14);
+  color: #991b1b;
+}
+
+.motorista-doc-card__due,
+.motorista-doc-card__payment {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.motorista-doc-card__payment strong {
+  color: var(--foreground);
+}
+
+/* ===================================================
+   Motorista — histórico da viagem (detalhe)
+   =================================================== */
+
+.motorista-historico-viagem {
+  gap: 20px;
+}
+
+.motorista-historico-viagem__hero {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(45, 139, 87, 0.22);
+  background: linear-gradient(145deg, rgba(240, 253, 244, 0.92), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 18px 44px rgba(45, 139, 87, 0.08);
+}
+
+.motorista-historico-viagem__hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.motorista-historico-viagem__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(45, 139, 87, 0.14);
+  color: #166534;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.motorista-historico-viagem__hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  letter-spacing: -0.02em;
+}
+
+.motorista-historico-viagem__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.motorista-historico-viagem__route-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.motorista-historico-viagem__route-point strong {
+  display: block;
+  line-height: 1.35;
+}
+
+.motorista-historico-viagem__route-arrow {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.motorista-historico-viagem__route-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.motorista-historico-viagem__vehicle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.motorista-historico-viagem__vehicle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.motorista-historico-viagem__kpi {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.motorista-historico-viagem__kpi-card {
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
+}
+
+.motorista-historico-viagem__kpi-card svg {
+  width: 22px;
+  height: 22px;
+}
+
+.motorista-historico-viagem__kpi-card span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.motorista-historico-viagem__kpi-card strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.motorista-historico-viagem__kpi-card--start {
+  border-color: rgba(59, 130, 246, 0.25);
+  background: linear-gradient(160deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.motorista-historico-viagem__kpi-card--start svg {
+  color: #2563eb;
+}
+
+.motorista-historico-viagem__kpi-card--distance {
+  border-color: rgba(45, 139, 87, 0.25);
+  background: linear-gradient(160deg, rgba(240, 253, 244, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.motorista-historico-viagem__kpi-card--distance svg {
+  color: var(--accent);
+}
+
+.motorista-historico-viagem__kpi-card--end {
+  border-color: rgba(168, 85, 247, 0.22);
+  background: linear-gradient(160deg, rgba(250, 245, 255, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.motorista-historico-viagem__kpi-card--end svg {
+  color: #7c3aed;
+}
+
+.motorista-historico-viagem__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.motorista-historico-viagem__main {
+  display: grid;
+  gap: 18px;
+}
+
+.motorista-historico-viagem__panel--notes p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.motorista-historico-viagem__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 8px;
+  display: grid;
+  gap: 0;
+  position: relative;
+}
+
+.motorista-historico-viagem__timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: linear-gradient(180deg, #2563eb, var(--accent), #7c3aed);
+  border-radius: 999px;
+}
+
+.motorista-historico-viagem__timeline li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+}
+
+.motorista-historico-viagem__timeline-dot {
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
+  justify-self: center;
+}
+
+.motorista-historico-viagem__timeline-dot--start {
+  background: #2563eb;
+}
+
+.motorista-historico-viagem__timeline-dot--mid {
+  background: var(--accent);
+}
+
+.motorista-historico-viagem__timeline-dot--end {
+  background: #7c3aed;
+}
+
+.motorista-historico-viagem__timeline li strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.motorista-historico-viagem__timeline li span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.motorista-historico-viagem__planned {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-historico-viagem__planned svg {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.motorista-historico-viagem__planned strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.motorista-historico-viagem__planned span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.motorista-historico-viagem__simulation {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-historico-viagem__simulation h3 {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.motorista-historico-viagem__simulation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.motorista-historico-viagem__simulation-grid > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(231, 230, 235, 0.85);
+}
+
+.motorista-historico-viagem__simulation-grid dt {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.motorista-historico-viagem__simulation-grid dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.motorista-historico-viagem__aside {
+  position: sticky;
+  top: 88px;
+}
+
+.motorista-historico-viagem__map {
+  padding: 20px;
+}
+
+.motorista-historico-page .driver-journey-card__banner {
+  align-items: flex-start;
+}
+
+.motorista-historico-page .driver-journey-card__banner svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.motorista-historico-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+}
+
+.motorista-historico-page__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.motorista-historico-page__hint {
+  flex: 1 1 100%;
+  margin: 0;
+  padding-top: 4px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.motorista-historico-page__timeline-panel {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+.motorista-historico-page__timeline-head h2 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+}
+
+.motorista-historico-page__timeline-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.motorista-historico-page__timeline {
+  margin-top: 20px;
+}
+
+.motorista-historico-page__timeline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.motorista-historico-page__timeline-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 960px) {
+  .motorista-veiculo-detail__hero,
+  .motorista-historico-viagem__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-veiculo-detail__stats,
+  .motorista-veiculo-detail__docs-grid,
+  .motorista-historico-viagem__kpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .motorista-historico-viagem__aside {
+    position: static;
+  }
+
+  .motorista-historico-viagem__route {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-historico-viagem__route-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .motorista-veiculo-detail__stats,
+  .motorista-veiculo-detail__docs-grid,
+  .motorista-historico-viagem__kpi,
+  .motorista-historico-viagem__simulation-grid,
+  .driver-journey-card__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+.motorista-viagem-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.motorista-viagem-detail__card,
+.motorista-viagem-detail__map-card {
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 12px 32px rgba(15, 17, 23, 0.07);
+}
+
+.motorista-viagem-detail__card {
+  padding: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.motorista-viagem-detail__header {
+  padding-bottom: 4px;
+}
+
+.motorista-viagem-detail__vehicle {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.motorista-viagem-detail__vehicle-img {
+  width: 140px;
+  height: 88px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.95);
+  padding: 10px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-viagem-detail__vehicle h1 {
+  margin: 10px 0 4px;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.motorista-viagem-detail__vehicle p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.motorista-viagem-detail__info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.motorista-viagem-detail__info > div {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.95);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-viagem-detail__info dt {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.motorista-viagem-detail__info dd {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.motorista-viagem-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.motorista-viagem-detail__actions .motorista-viagem-card__action {
+  min-width: 180px;
+}
+
+.motorista-viagem-detail__map-card {
+  padding: 18px;
+  position: sticky;
+  top: 88px;
+}
+
+.motorista-viagem-detail__map-card h2 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+
+.driver-journey-list {
+  display: grid;
+  gap: 18px;
+}
+
+.driver-journey-card {
+  position: relative;
+  display: flex;
+  border-radius: 22px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.driver-journey-card--active {
+  border-color: rgba(45, 139, 87, 0.28);
+  box-shadow: 0 20px 48px rgba(45, 139, 87, 0.1);
+}
+
+.driver-journey-card__accent {
+  width: 5px;
+  align-self: stretch;
+  background: linear-gradient(180deg, var(--accent), #166534);
+  flex: 0 0 5px;
+}
+
+.driver-journey-card__body {
+  flex: 1;
+  padding: 20px 22px 20px 18px;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.driver-journey-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.driver-journey-card__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  margin-bottom: 8px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.driver-journey-card__chip--muted {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--muted);
+}
+
+.driver-journey-card__title {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+.driver-journey-card__route {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.driver-journey-card__modelo {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.driver-journey-card__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.driver-journey-card__meta > div {
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(231, 230, 235, 0.85);
+}
+
+.driver-journey-card__meta dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.driver-journey-card__meta dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.driver-placa-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.06);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+
+.driver-journey-card__banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  background: rgba(254, 243, 199, 0.45);
+  color: #92400e;
+}
+
+.driver-journey-card__banner strong,
+.driver-journey-card__banner span {
+  display: block;
+}
+
+.driver-journey-card__banner strong {
+  font-size: 0.88rem;
+  margin-bottom: 2px;
+}
+
+.driver-journey-card__banner span {
+  font-size: 0.86rem;
+  opacity: 0.95;
+}
+
+.driver-journey-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.driver-flow-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.driver-flow-steps li {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.driver-flow-steps__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.driver-flow-steps strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+  color: var(--foreground);
+}
+
+.driver-flow-steps p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.driver-flow-hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #1e3a5f;
+}
+
+.driver-flow-hint svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.driver-flow-hint p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.driver-trip-summary--retorno {
+  border-left: 4px solid var(--accent);
+  padding-left: 4px;
+}
+
 .stats-grid--compact {
   grid-template-columns: repeat(4, minmax(180px, 1fr));
 }
@@ -3422,6 +5446,498 @@ a {
 .driver-checklist-form {
   display: grid;
   gap: 18px;
+}
+
+.driver-checklist-tipo {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(249, 250, 252, 0.85);
+}
+
+.driver-checklist-tipo__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.driver-checklist-tipo__eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.driver-checklist-tipo__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.driver-checklist-tipo__desc {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.driver-checklist-tipo__count {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.driver-checklist-tipo__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(207, 78, 54, 0.08);
+  color: #8a3b2c;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.driver-checklist-tipo__hint svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-top: 1px;
+}
+
+.driver-checklist-tipo--empty {
+  color: var(--muted);
+  text-align: center;
+}
+
+.checklist-tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 720px) {
+  .checklist-tipo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1100px) {
+  .checklist-tipo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.checklist-tipo-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 200px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 8px 24px rgba(15, 17, 23, 0.05);
+}
+
+.checklist-tipo-card--done {
+  border-color: rgba(45, 139, 87, 0.35);
+  background: linear-gradient(145deg, rgba(233, 245, 238, 0.5), rgba(255, 255, 255, 0.95));
+}
+
+.checklist-tipo-card__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.checklist-tipo-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checklist-tipo-card__title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.checklist-tipo-card__badge {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(207, 78, 54, 0.12);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.checklist-tipo-card__badge.is-done {
+  background: rgba(45, 139, 87, 0.15);
+  color: #1f6b43;
+}
+
+.checklist-tipo-card__desc {
+  margin: 0;
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.checklist-tipo-card__progress {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.checklist-tipo-card__progress span:first-child {
+  color: var(--foreground);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.checklist-tipo-card__footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(231, 230, 235, 0.85);
+}
+
+.checklist-tipo-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.checklist-tipo-card__action:hover {
+  background: var(--accent-dark);
+}
+
+.checklist-tipo-card__action--outline {
+  background: rgba(45, 139, 87, 0.12);
+  color: #1f6b43;
+}
+
+.checklist-tipo-card__action--outline:hover {
+  background: rgba(45, 139, 87, 0.2);
+}
+
+.checklist-km-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.checklist-km-panel__vehicle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(207, 78, 54, 0.2);
+  background: linear-gradient(135deg, rgba(255, 247, 244, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.checklist-km-panel__label {
+  display: block;
+  color: var(--foreground);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.checklist-km-panel__hint {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.checklist-km-panel__value {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.checklist-km-panel__saved {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(45, 139, 87, 0.1);
+  color: #1f6b43;
+  font-size: 0.88rem;
+}
+
+.checklist-km-panel__saved svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.checklist-km-panel__input {
+  margin: 0;
+}
+
+.motorista-corrida-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.motorista-corrida-page__eyebrow {
+  display: block;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motorista-corrida-page__header h1 {
+  margin: 6px 0 4px;
+  font-size: 1.35rem;
+}
+
+.motorista-corrida-page__header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.motorista-corrida-page__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.motorista-corrida-page__badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.motorista-corrida-page__badge--running {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.motorista-corrida-page__badge--arrived,
+.motorista-corrida-page__badge--finished {
+  background: rgba(45, 139, 87, 0.15);
+  color: #1f6b43;
+}
+
+.motorista-corrida-page__progress {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.motorista-corrida-page__map-wrap {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  box-shadow: 0 12px 32px rgba(15, 17, 23, 0.08);
+}
+
+.route-simulation-map,
+.motorista-corrida-page__map {
+  width: 100%;
+  min-height: 420px;
+  height: min(58vh, 520px);
+}
+
+.route-simulation-map--loading {
+  display: grid;
+  place-items: center;
+  min-height: 420px;
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.route-map-vehicle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent);
+  box-shadow: 0 4px 14px rgba(207, 78, 54, 0.35);
+}
+
+.route-map-vehicle__emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.motorista-corrida-page__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.motorista-corrida-page__meta > div {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: var(--card-strong);
+}
+
+.motorista-corrida-page__meta span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.motorista-corrida-page__meta strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.05rem;
+}
+
+.motorista-corrida-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.trip-summary-modal {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.trip-summary-modal > div {
+  display: grid;
+  gap: 4px;
+}
+
+.trip-summary-modal dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trip-summary-modal dd {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.trip-summary-modal__route dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-summary-modal__point {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.trip-summary-modal__point--a {
+  background: #0d7a5f;
+}
+
+.trip-summary-modal__point--b {
+  background: #c2410c;
+}
+
+.trip-summary-modal__arrow {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.trip-summary-modal__times {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trip-summary-modal__times small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.trip-summary-modal__delta {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .trip-summary-modal__times {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-corrida-page__meta {
+    grid-template-columns: 1fr;
+  }
 }
 
 .driver-trip-summary {
@@ -4272,7 +6788,7 @@ a {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4289,6 +6805,7 @@ a {
 
 .modal-shell {
   position: relative;
+  z-index: 1;
   width: 100%;
   max-height: calc(100vh - 48px);
   display: flex;
@@ -4526,11 +7043,16 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .driver-reserva-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
   .stats-grid--compact {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .driver-reservation-card__meta {
+  .driver-reservation-card__meta,
+  .driver-journey-card__meta {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -4553,6 +7075,14 @@ a {
 @media (max-width: 920px) {
   .driver-required-grid,
   .driver-trip-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-detail-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-detail-meta {
     grid-template-columns: 1fr;
   }
 
@@ -4591,7 +7121,8 @@ a {
 
 @media (max-width: 640px) {
   .stats-grid--compact,
-  .driver-reservation-card__meta {
+  .driver-reservation-card__meta,
+  .driver-journey-card__meta {
     grid-template-columns: 1fr;
   }
 
@@ -6631,6 +9162,27 @@ a {
   font-weight: 800;
 }
 
+.route-map-marker__label--solo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(15, 17, 23, 0.2);
+}
+
+.motorista-corrida-page--modal-open .motorista-corrida-page__map-wrap {
+  z-index: 0;
+  isolation: isolate;
+}
+
+.motorista-corrida-page--modal-open .motorista-corrida-page__map-wrap .leaflet-container,
+.motorista-corrida-page--modal-open .motorista-corrida-page__map-wrap .leaflet-pane {
+  z-index: 0 !important;
+}
+
 .requester-list-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -6929,4 +9481,289 @@ a {
     width: 100%;
     justify-content: center;
   }
+}
+
+.motorista-maintenance-page,
+.motorista-maintenance-request-page {
+  gap: 20px;
+}
+
+.maintenance-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 107, 107, 0.18);
+  background: linear-gradient(145deg, rgba(255, 247, 247, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.maintenance-quick-actions h2 {
+  margin: 6px 0 4px;
+  font-size: 1.15rem;
+}
+
+.maintenance-quick-actions p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.maintenance-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.maintenance-section__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.maintenance-section__header h2 {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+}
+
+.maintenance-section__header p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.maintenance-section__eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.maintenance-section__count {
+  min-width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  font-weight: 800;
+}
+
+.maintenance-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.maintenance-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.maintenance-card--highlight {
+  border-color: rgba(255, 176, 59, 0.35);
+  background: linear-gradient(145deg, rgba(255, 251, 243, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.maintenance-card__header h3 {
+  margin: 4px 0 0;
+  font-size: 1rem;
+}
+
+.maintenance-card__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.maintenance-card__description {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.maintenance-card__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.maintenance-card__meta dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.maintenance-card__meta dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.maintenance-card__proximity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 176, 59, 0.12);
+  color: #9a6700;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.maintenance-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.maintenance-card__priority {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.maintenance-card__priority--critica,
+.maintenance-alert__priority--critica {
+  color: #b42318;
+}
+
+.maintenance-card__priority--alta,
+.maintenance-alert__priority--alta {
+  color: #c05621;
+}
+
+.maintenance-card__priority--media,
+.maintenance-alert__priority--media {
+  color: #946200;
+}
+
+.maintenance-card__priority--baixa,
+.maintenance-alert__priority--baixa {
+  color: #027a48;
+}
+
+.maintenance-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.maintenance-alert {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.maintenance-alert__priority {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.maintenance-alert p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.maintenance-alert__date {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.maintenance-empty-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(231, 230, 235, 0.95);
+  color: var(--text-muted);
+}
+
+.maintenance-request-banner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 107, 107, 0.22);
+  background: rgba(255, 247, 247, 0.95);
+}
+
+.maintenance-request-banner p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.maintenance-request-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.maintenance-request-vehicle-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.maintenance-request-vehicle-summary span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.maintenance-request-counter {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.maintenance-request-counter.is-valid {
+  color: #027a48;
+  font-weight: 700;
+}
+
+.maintenance-request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.maintenance-request-footnote {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
 }

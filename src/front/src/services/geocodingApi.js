@@ -11,7 +11,9 @@ const NOMINATIM_URL = GEOCODE_VIA_PROXY
 const NOMINATIM_REVERSE_URL = GEOCODE_VIA_PROXY
   ? '/geocode/nominatim/reverse'
   : 'https://nominatim.openstreetmap.org/reverse';
-const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving';
+const OSRM_URL = GEOCODE_VIA_PROXY
+  ? '/routing/osrm/route/v1/driving'
+  : 'https://router.project-osrm.org/route/v1/driving';
 
 const GEOCODE_HEADERS = {
   Accept: 'application/json',

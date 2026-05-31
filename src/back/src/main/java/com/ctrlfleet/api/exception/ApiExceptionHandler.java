@@ -3,6 +3,7 @@ package com.ctrlfleet.api.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +13,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<Map<String, Object>> banco(DataAccessException e) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        String msg = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : e.getMessage();
+        if (msg != null && msg.contains("checklist_retorno_registrado")) {
+            body.put(
+                    "mensagem",
+                    "Banco desatualizado: execute ALTER TABLE registros_uso ADD COLUMN IF NOT EXISTS "
+                            + "checklist_retorno_registrado boolean NOT NULL DEFAULT false; e reinicie o backend.");
+        } else {
+            body.put("mensagem", "Erro ao acessar o banco de dados. Reinicie o backend após atualizar o projeto.");
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> ilegal(IllegalArgumentException e) {

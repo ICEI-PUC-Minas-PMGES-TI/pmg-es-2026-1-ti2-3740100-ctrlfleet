@@ -14,6 +14,18 @@ export const TIPO_VEICULO_LABELS = {
   CAMINHONETE: 'Caminhonete',
 };
 
+export const AVAILABILITY_STATUS_LABELS = {
+  DISPONIVEL: 'Disponível',
+  EM_USO: 'Em uso',
+  MANUTENCAO: 'Em manutenção',
+  DESATIVADO: 'Indisponível',
+};
+
+export function resolveAvailabilityLabel(availabilityStatus) {
+  const key = String(availabilityStatus || 'DISPONIVEL').toUpperCase();
+  return AVAILABILITY_STATUS_LABELS[key] || key;
+}
+
 export const STATUS_VEICULO_VALUES = {
   Ativo: 'DISPONIVEL',
   Manutencao: 'MANUTENCAO',
@@ -107,8 +119,9 @@ export function buildMockDocuments(dto) {
     id: `mock-${dto?.id || 'new'}-${tipoDocumento}`,
     tipoDocumento,
     dataVencimento: '',
-    dueDate: 'Pendente',
-    state: 'ok',
+    dueDate: 'Sem registro',
+    state: 'warning',
+    statusPagamento: 'PENDENTE',
   }));
 }
 
@@ -155,12 +168,15 @@ export function mapBackendVehicleToView(dto) {
     marca: dto.marca || '-',
     model: dto.modelo || buildModelLabel(dto),
     year: dto.ano ? String(dto.ano) : '-',
+    secretaria: dto.secretaria || '-',
     status,
     availabilityStatus,
+    availabilityLabel: resolveAvailabilityLabel(availabilityStatus),
     isDisponivel: availabilityStatus === 'DISPONIVEL' && status !== 'Bloqueado' && status !== 'Inativo',
     tipoVeiculo,
     vehicleTypeLabel: resolveTipoVeiculoLabel(dto) || 'Outros',
     licenseCategory: inferLicenseCategory(dto),
+    quilometragemAtual: dto.quilometragemAtual ?? null,
     documents,
     location: resolveVehicleLocation(dto),
   };

@@ -22,6 +22,10 @@ public class TipoInspecao {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    /** SAIDA, RETORNO ou MENSAL — agrupa tipos exibidos em cada etapa da jornada. */
+    @Column(nullable = false, length = 20)
+    private String fase;
+
     public Long getId() {
         return id;
     }
@@ -32,5 +36,9 @@ public class TipoInspecao {
 
     public String getDescricao() {
         return descricao;
+    }
+
+    public String getFase() {
+        return fase;
     }
 }

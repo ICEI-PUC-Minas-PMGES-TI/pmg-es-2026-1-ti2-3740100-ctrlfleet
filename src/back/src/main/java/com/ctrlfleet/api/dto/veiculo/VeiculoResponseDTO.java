@@ -24,6 +24,8 @@ public class VeiculoResponseDTO {
     private StatusVeiculo status;
     private TipoVeiculo tipoVeiculo;
     private List<DocumentacaoResponseDTO> documentos = new ArrayList<>();
+    /** Hodômetro mais recente (registros de uso / abastecimentos). */
+    private Double quilometragemAtual;
 
     public VeiculoResponseDTO() {}
 
@@ -80,5 +82,13 @@ public class VeiculoResponseDTO {
 
     public List<DocumentacaoResponseDTO> getDocumentos() {
         return documentos;
+    }
+
+    public Double getQuilometragemAtual() {
+        return quilometragemAtual;
+    }
+
+    public void setQuilometragemAtual(Double quilometragemAtual) {
+        this.quilometragemAtual = quilometragemAtual;
     }
 }

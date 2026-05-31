@@ -7,6 +7,7 @@ import com.ctrlfleet.api.dto.veiculo.DocumentacaoResponseDTO;
 import com.ctrlfleet.api.dto.veiculo.VeiculoRequestDTO;
 import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
 import com.ctrlfleet.api.repository.DocumentacaoRepository;
+import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.util.List;
 import org.springframework.data.domain.Sort;
@@ -18,10 +19,15 @@ public class VeiculoService {
 
     private final VeiculoRepository veiculoRepository;
     private final DocumentacaoRepository documentacaoRepository;
+    private final RegistroUsoRepository registroUsoRepository;
 
-    public VeiculoService(VeiculoRepository veiculoRepository, DocumentacaoRepository documentacaoRepository) {
+    public VeiculoService(
+            VeiculoRepository veiculoRepository,
+            DocumentacaoRepository documentacaoRepository,
+            RegistroUsoRepository registroUsoRepository) {
         this.veiculoRepository = veiculoRepository;
         this.documentacaoRepository = documentacaoRepository;
+        this.registroUsoRepository = registroUsoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -183,6 +189,10 @@ public class VeiculoService {
                 documentacaoRepository.findByVeiculoIdOrderByIdAsc(veiculo.getId()).stream()
                         .map(DocumentacaoResponseDTO::fromEntity)
                         .toList();
-        return VeiculoResponseDTO.fromEntity(veiculo, documentos);
+        VeiculoResponseDTO dto = VeiculoResponseDTO.fromEntity(veiculo, documentos);
+        registroUsoRepository
+                .buscarUltimaQuilometragemVeiculo(veiculo.getId())
+                .ifPresent(dto::setQuilometragemAtual);
+        return dto;
     }
 }

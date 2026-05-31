@@ -1,137 +1,88 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
-import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
-import { iniciarTrajeto, listarChecklistSaida } from '../../../services/motoristaApi';
-
-function formatKm(value) {
-  if (value == null) return 'Sem registro';
-  return `${Number(value).toLocaleString('pt-BR')} km`;
-}
-
-function formatDateTime(value) {
-  if (!value) return '-';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
+import {
+  buscarReservaMotorista,
+  obterStatusChecklistSaida,
+  registrarChecklistSaidaFinal,
+  registrarQuilometragemSaida,
+} from '../../../services/motoristaApi';
+import { ChecklistTipoCard } from '../../../components/motorista/ChecklistTipoCard';
+import { canOpenChecklistSaida, formatKm, getChecklistWindowMessage } from '../../../utils/motoristaReservaUtils';
 
 export function ChecklistSaidaPage() {
-  const { motoristaId: motoristaIdParam, reservaId } = useParams();
+  const { reservaId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const motoristaId = getCurrentMotoristaId();
   const reserva = location.state?.reserva;
 
+  const [status, setStatus] = useState({ loading: true, error: null, data: null });
   const [quilometragemSaida, setQuilometragemSaida] = useState('');
-  const [checkedItems, setCheckedItems] = useState(() => new Set());
-  const [observacoes, setObservacoes] = useState({});
-  const [checklistData, setChecklistData] = useState({
-    loading: true,
-    error: null,
-    items: reserva?.checklistSaida || [],
-  });
-  const [submitState, setSubmitState] = useState({ loading: false, error: null });
-  const [confirmStartOpen, setConfirmStartOpen] = useState(false);
+  const [kmState, setKmState] = useState({ saving: false, error: null });
+  const [registerState, setRegisterState] = useState({ loading: false, error: null });
+
+  const loadStatus = useCallback(async () => {
+    if (!motoristaId || !reservaId) return;
+    setStatus((s) => ({ ...s, loading: true, error: null }));
+    try {
+      const data = await obterStatusChecklistSaida(reservaId, motoristaId);
+      setStatus({ loading: false, error: null, data });
+      if (data.quilometragemSaida != null) {
+        setQuilometragemSaida(String(data.quilometragemSaida));
+      }
+    } catch (error) {
+      setStatus({ loading: false, error: error.message || 'Não foi possível carregar os tipos de checklist.', data: null });
+    }
+  }, [motoristaId, reservaId]);
 
   useEffect(() => {
-    if (reserva?.checklistSaida?.length) {
-      Promise.resolve().then(() =>
-        setChecklistData({ loading: false, error: null, items: reserva.checklistSaida }),
-      );
-      return undefined;
-    }
+    loadStatus();
+  }, [loadStatus, location.key]);
 
-    const controller = new AbortController();
+  const canFillChecklist = canOpenChecklistSaida(reserva);
+  const windowMessage = getChecklistWindowMessage(reserva);
+  const tipos = status.data?.tipos || [];
+  const preenchimentoCompleto = Boolean(status.data?.preenchimentoCompleto);
+  const checklistRegistrado = Boolean(status.data?.checklistRegistrado);
+  const ultimaKmVeiculo =
+    status.data?.ultimaQuilometragemVeiculo ?? reserva?.ultimaQuilometragemVeiculo ?? null;
+  const kmRegistrada = status.data?.quilometragemSaida;
+  const basePath = `/motorista/${motoristaId}/reservas/${reservaId}`;
 
-    Promise.resolve().then(() => {
-      if (controller.signal.aborted) return;
-      listarChecklistSaida({ signal: controller.signal })
-        .then((items) => setChecklistData({ loading: false, error: null, items: items || [] }))
-        .catch((error) => {
-          if (error.name === 'AbortError') return;
-          setChecklistData({
-            loading: false,
-            error: error.message || 'Não foi possível carregar o checklist.',
-            items: [],
-          });
-        });
-    });
-
-    return () => controller.abort();
-  }, [reserva]);
-
-  const allChecked = useMemo(
-    () => checklistData.items.length > 0 && checklistData.items.every((item) => checkedItems.has(item.id)),
-    [checkedItems, checklistData.items],
-  );
-  const missingItems = useMemo(
-    () => checklistData.items.filter((item) => !checkedItems.has(item.id)),
-    [checkedItems, checklistData.items],
-  );
-  const criticalObservationItems = useMemo(
-    () =>
-      checklistData.items.filter(
-        (item) => item.critico && observacoes[item.id] && observacoes[item.id].trim().length > 0,
-      ),
-    [checklistData.items, observacoes],
-  );
-
-  const hasMileage = quilometragemSaida !== '' && Number(quilometragemSaida) >= 0;
-  const respectsLastMileage =
-    reserva?.ultimaQuilometragemVeiculo == null || Number(quilometragemSaida) >= reserva.ultimaQuilometragemVeiculo;
-  const canSubmit =
-    allChecked && hasMileage && respectsLastMileage && criticalObservationItems.length === 0 && !submitState.loading;
-  const checkedCount = checkedItems.size;
-  const totalChecklist = checklistData.items.length;
-
-  function toggleItem(itemId) {
-    setCheckedItems((current) => {
-      const next = new Set(current);
-      if (next.has(itemId)) {
-        next.delete(itemId);
-      } else {
-        next.add(itemId);
-      }
-      return next;
-    });
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    if (!canSubmit) return;
-    setConfirmStartOpen(true);
-  }
-
-  async function confirmStartTrip() {
-    if (!canSubmit) return;
-    setSubmitState({ loading: true, error: null });
+  async function registrarChecklist() {
+    setRegisterState({ loading: true, error: null });
     try {
-      await iniciarTrajeto(reservaId, {
-        idMotorista: motoristaId,
-        quilometragemSaida: Number(quilometragemSaida),
-        itensChecklist: Array.from(checkedItems),
-        observacoesChecklist: observacoes,
-      });
-      setConfirmStartOpen(false);
-      navigate(`/motorista/${motoristaId}`, {
+      await registrarChecklistSaidaFinal(reservaId, motoristaId);
+      const atualizada = await buscarReservaMotorista(motoristaId, reservaId);
+      navigate(basePath, {
         replace: true,
-        state: { flashMessage: 'Trajeto iniciado com sucesso.' },
+        state: {
+          reserva: atualizada
+            ? { ...reserva, ...atualizada, checklistSaidaConcluido: true }
+            : { ...reserva, checklistSaidaConcluido: true },
+          flashMessage: 'Checklist de saída registrado com sucesso.',
+        },
       });
     } catch (error) {
-      setSubmitState({
-        loading: false,
-        error: error.message || 'Não foi possível iniciar o trajeto.',
-      });
-      setConfirmStartOpen(false);
+      setRegisterState({ loading: false, error: error.message || 'Não foi possível registrar o checklist.' });
+    }
+  }
+
+  async function salvarQuilometragem() {
+    const km = Number(String(quilometragemSaida).replace(',', '.'));
+    if (!Number.isFinite(km) || km < 0) return;
+    setKmState({ saving: true, error: null });
+    try {
+      await registrarQuilometragemSaida(reservaId, { idMotorista: motoristaId, quilometragemSaida: km });
+      await loadStatus();
+      setKmState({ saving: false, error: null });
+    } catch (error) {
+      setKmState({ saving: false, error: error.message || 'Não foi possível salvar a quilometragem.' });
     }
   }
 
@@ -139,212 +90,141 @@ export function ChecklistSaidaPage() {
     <div className="page-stack motorista-page">
       <PageHeader
         eyebrow="Checklist de saída"
-        subtitle="Quilometragem e todos os itens do checklist são obrigatórios para iniciar."
-        title="Iniciar trajeto"
+        subtitle="Preencha cada tipo de inspeção separadamente: Limpeza, Mecânica, Iluminação e Combustível."
+        title="Tipos de checklist"
       />
 
-      <SectionCard title="Conferência obrigatória">
-        {checklistData.loading ? (
-          <div className="admin-dashboard__loading">
-            <span className="admin-dashboard__spinner" aria-hidden="true" />
-            <p>Carregando checklist...</p>
+      <Link className="motorista-viagem-detail__back" state={{ reserva }} to={basePath}>
+        <Icon name="fleet" />
+        <span>Voltar ao detalhe da viagem</span>
+      </Link>
+
+      {!canFillChecklist ? (
+        <div className="admin-dashboard__error">
+          <Icon name="alert" />
+          <div>
+            <strong>Checklist indisponível</strong>
+            <p>{windowMessage || 'O checklist só pode ser preenchido 15 minutos antes da saída prevista.'}</p>
           </div>
-        ) : checklistData.error ? (
-          <div className="admin-dashboard__error">
-            <Icon name="alert" />
-            <div>
-              <strong>Falha ao carregar checklist</strong>
-              <p>{checklistData.error}</p>
-            </div>
-          </div>
-        ) : (
-          <form className="driver-checklist-form" onSubmit={handleSubmit}>
-            <div className="driver-required-banner">
-              <Icon name="alert" />
-              <div>
-                <strong>Registro obrigatório</strong>
-                <span>
-                  Informe a quilometragem de saída e marque todos os {totalChecklist} itens do checklist.
-                </span>
+        </div>
+      ) : null}
+
+      {status.loading ? (
+        <div className="admin-dashboard__loading">
+          <span aria-hidden="true" className="admin-dashboard__spinner" />
+          <p>Carregando tipos de checklist...</p>
+        </div>
+      ) : status.error ? (
+        <div className="admin-dashboard__error">
+          <Icon name="alert" />
+          <p>{status.error}</p>
+        </div>
+      ) : (
+        <>
+          <SectionCard title="Quilometragem de saída">
+            <div className="checklist-km-panel">
+              <div className="checklist-km-panel__vehicle">
+                <div>
+                  <span className="checklist-km-panel__label">Quilometragem atual do veículo</span>
+                  <p className="checklist-km-panel__hint">Último registro na frota (hodômetro de referência)</p>
+                </div>
+                <strong className="checklist-km-panel__value">{formatKm(ultimaKmVeiculo)}</strong>
               </div>
-            </div>
 
-            {reserva ? (
-              <div className="driver-trip-summary">
-                <div>
-                  <strong>{reserva.placaVeiculo}</strong>
-                  <span>{reserva.destino}</span>
-                </div>
-                <div>
-                  <strong>Última KM</strong>
-                  <span>{formatKm(reserva.ultimaQuilometragemVeiculo)}</span>
-                </div>
-                <div>
-                  <strong>Saída prevista</strong>
-                  <span>{formatDateTime(reserva.dataHoraInicioPrevista)}</span>
-                </div>
-              </div>
-            ) : null}
+              {kmRegistrada != null && kmRegistrada > 0 ? (
+                <p className="checklist-km-panel__saved">
+                  <Icon name="check" />
+                  <span>
+                    Saída registrada nesta viagem: <strong>{formatKm(kmRegistrada)}</strong>
+                  </span>
+                </p>
+              ) : null}
 
-            <label className="driver-mileage-field">
-              <span>Quilometragem de saída obrigatória</span>
-              <input
-                min="0"
-                onChange={(event) => setQuilometragemSaida(event.target.value)}
-                placeholder="Ex.: 28100"
-                required
-                step="0.1"
-                type="number"
-                value={quilometragemSaida}
-              />
-            </label>
-
-            <div className="driver-checklist-progress">
-              <span>
-                Checklist obrigatório: {checkedCount}/{totalChecklist} itens marcados
-              </span>
-              <strong>{allChecked ? 'Completo' : 'Pendente'}</strong>
-            </div>
-
-            {!allChecked && missingItems.length > 0 ? (
-              <div className="driver-required-banner">
+              <p className="driver-checklist-tipo__hint">
                 <Icon name="alert" />
-                <div>
-                  <strong>Itens pendentes</strong>
-                  <span>{missingItems.map((item) => item.nome).join(', ')}</span>
-                </div>
-              </div>
-            ) : null}
+                <span>Informe a leitura do hodômetro agora, deve ser igual ou maior que a quilometragem atual do veículo.</span>
+              </p>
 
-            {hasMileage && !respectsLastMileage ? (
-              <div className="admin-dashboard__error">
-                <Icon name="alert" />
-                <div>
-                  <strong>Quilometragem abaixo do último registro</strong>
-                  <p>
-                    Informe uma quilometragem maior ou igual a {formatKm(reserva.ultimaQuilometragemVeiculo)}.
-                  </p>
-                </div>
-              </div>
-            ) : null}
+              <label className="driver-mileage-field checklist-km-panel__input">
+                <span>Quilometragem na saída</span>
+                <input
+                  min={ultimaKmVeiculo != null ? ultimaKmVeiculo : 0}
+                  onChange={(e) => setQuilometragemSaida(e.target.value)}
+                  placeholder={ultimaKmVeiculo != null ? `Ex.: ${Math.ceil(ultimaKmVeiculo)}` : 'Ex.: 28100'}
+                  step="0.1"
+                  type="number"
+                  value={quilometragemSaida}
+                />
+              </label>
 
-            {criticalObservationItems.length > 0 ? (
-              <div className="admin-dashboard__error">
-                <Icon name="alert" />
-                <div>
-                  <strong>Ocorrência crítica encontrada</strong>
-                  <p>
-                    {criticalObservationItems.map((item) => item.nome).join(', ')} precisa de avaliação do gestor antes
-                    da saída.
-                  </p>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="driver-checklist-list">
-              {checklistData.items.map((item) => (
-                <div className="driver-checklist-item" key={item.id}>
-                  <label>
-                    <input
-                      checked={checkedItems.has(item.id)}
-                      onChange={() => toggleItem(item.id)}
-                      type="checkbox"
-                    />
-                    <span>{item.nome}</span>
-                    {item.critico ? <span className="driver-critical-badge">Crítico</span> : null}
-                  </label>
-                  <input
-                    aria-label={`Observação de ${item.nome}`}
-                    onChange={(event) =>
-                      setObservacoes((current) => ({ ...current, [item.id]: event.target.value }))
-                    }
-                    placeholder={item.critico ? 'Ocorrência crítica bloqueia a saída' : 'Observação opcional'}
-                    type="text"
-                    value={observacoes[item.id] || ''}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {submitState.error ? (
-              <div className="admin-dashboard__error">
-                <Icon name="alert" />
-                <div>
-                  <strong>Trajeto não iniciado</strong>
-                  <p>{submitState.error}</p>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="driver-checklist-actions">
-              <span className="driver-submit-hint">
-                {!hasMileage
-                  ? 'Informe a quilometragem para liberar o início.'
-                  : !respectsLastMileage
-                    ? 'A quilometragem deve respeitar o último registro.'
-                    : criticalObservationItems.length > 0
-                      ? 'Resolva a ocorrência crítica antes de iniciar.'
-                      : !allChecked
-                        ? 'Marque todos os itens obrigatórios.'
-                        : 'Tudo pronto para iniciar.'}
-              </span>
-              <Link className="action-button action-button--secondary" to={`/motorista/${motoristaId}`}>
-                Voltar
-              </Link>
-              <ActionButton disabled={!canSubmit} icon="check" type="submit">
-                Iniciar trajeto
+              {kmState.error ? <p className="admin-dashboard__error">{kmState.error}</p> : null}
+              <ActionButton disabled={kmState.saving} icon="check" onClick={salvarQuilometragem}>
+                {kmState.saving ? 'Salvando...' : 'Salvar quilometragem'}
               </ActionButton>
             </div>
-          </form>
-        )}
-      </SectionCard>
+          </SectionCard>
 
-      <Modal
-        footer={
-          <>
-            <ActionButton disabled={submitState.loading} onClick={() => setConfirmStartOpen(false)} variant="secondary">
-              Revisar checklist
-            </ActionButton>
-            <ActionButton disabled={submitState.loading} icon="check" onClick={confirmStartTrip}>
-              {submitState.loading ? 'Iniciando...' : 'Confirmar saída'}
-            </ActionButton>
-          </>
-        }
-        onClose={() => {
-          if (!submitState.loading) setConfirmStartOpen(false);
-        }}
-        open={confirmStartOpen}
-        subtitle="Após confirmar, a reserva e o veículo serão marcados como em uso."
-        title="Confirmar início do trajeto"
-      >
-        <div className="reservation-decision-modal">
-          <dl className="admin-modal-list">
-            <div>
-              <dt>Reserva</dt>
-              <dd>#{reservaId}</dd>
+          <SectionCard title="Escolha o tipo para preencher">
+            {tipos.length === 0 ? (
+              <div className="admin-dashboard__error">
+                <Icon name="alert" />
+                <p>Nenhum tipo de checklist disponível. Atualize a página ou contate o suporte.</p>
+              </div>
+            ) : null}
+            <div className="checklist-tipo-grid">
+              {tipos.map((tipo) => (
+                <ChecklistTipoCard
+                  key={tipo.idTipoInspecao}
+                  reserva={reserva}
+                  tipo={tipo}
+                  to={`${basePath}/checklist-saida/tipos/${tipo.idTipoInspecao}`}
+                />
+              ))}
             </div>
-            <div>
-              <dt>Motorista</dt>
-              <dd>#{motoristaId}</dd>
+          </SectionCard>
+
+          {checklistRegistrado ? (
+            <div className="motorista-viagem-card__alert motorista-viagem-card__alert--ok">
+              <Icon name="check" />
+              <span>Checklist registrado. Volte ao detalhe da viagem para iniciar a corrida.</span>
             </div>
-            <div>
-              <dt>Quilometragem de saída</dt>
-              <dd>{Number(quilometragemSaida).toLocaleString('pt-BR')} km</dd>
+          ) : preenchimentoCompleto ? (
+            <div className="motorista-viagem-card__alert motorista-viagem-card__alert--ok">
+              <Icon name="check" />
+              <span>Todos os itens foram preenchidos. Clique em &quot;Registrar checklist&quot; para concluir.</span>
             </div>
-            <div>
-              <dt>Última KM</dt>
-              <dd>{formatKm(reserva?.ultimaQuilometragemVeiculo)}</dd>
+          ) : null}
+
+          {registerState.error ? (
+            <div className="admin-dashboard__error">
+              <p>{registerState.error}</p>
             </div>
-            <div>
-              <dt>Checklist</dt>
-              <dd>{checkedCount}/{totalChecklist} itens</dd>
-            </div>
-          </dl>
-          <p className="admin-modal-detail">
-            Confirme somente se a inspeção de saída foi realizada e todos os itens obrigatórios foram verificados.
-          </p>
-        </div>
-      </Modal>
+          ) : null}
+
+          <div className="driver-checklist-actions">
+            <Link className="action-button action-button--secondary" state={{ reserva }} to={basePath}>
+              Voltar ao detalhe
+            </Link>
+            {checklistRegistrado ? (
+              <Link className="action-button action-button--primary" state={{ reserva }} to={basePath}>
+                Ir ao detalhe da viagem
+              </Link>
+            ) : preenchimentoCompleto ? (
+              <ActionButton
+                disabled={registerState.loading}
+                icon="check"
+                onClick={registrarChecklist}
+              >
+                {registerState.loading ? 'Registrando...' : 'Registrar checklist'}
+              </ActionButton>
+            ) : (
+              <ActionButton disabled icon="check">
+                Conclua todos os tipos e a quilometragem
+              </ActionButton>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

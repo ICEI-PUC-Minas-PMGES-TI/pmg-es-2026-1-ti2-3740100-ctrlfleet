@@ -1,437 +1,160 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ActionButton } from '../../../components/common/ActionButton';
+import { useLocation } from 'react-router-dom';
+import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { Icon } from '../../../components/common/Icon';
-import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
-import { SectionCard } from '../../../components/common/SectionCard';
-import { StatCard } from '../../../components/common/StatCard';
-import { StatusBadge } from '../../../components/common/StatusBadge';
+import { MotoristaReservationCardGrid } from '../../../components/motorista/MotoristaReservationCardGrid';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
+import { listarHistoricoMotorista, listarReservasConcluidas } from '../../../services/motoristaApi';
 import {
-  finalizarTrajeto,
-  listarReservasAprovadasMotorista,
-  listarReservasEmUsoMotorista,
-} from '../../../services/motoristaApi';
+  DATE_RANGE_FILTERS,
+  MOTORISTA_RESERVA_SORT_KEY,
+  RESERVA_SORT_FILTERS,
+  filterReservasByDateRange,
+  getSortOrderLabel,
+  readStoredSortOrder,
+  sortReservasByOrder,
+  writeStoredSortOrder,
+} from '../../../utils/motoristaReservaUtils';
+import {
+  buildMotoristaViagemNumbers,
+  getUserReservaNumber,
+} from '../../../utils/userReservaNumbers';
 
-const STATUS_RESERVA_LABELS = {
-  APROVADA: 'Aprovada',
-  CANCELADA: 'Cancelada',
-  CONCLUIDA: 'Concluída',
-  EM_USO: 'Em uso',
-  REPROVADA: 'Reprovada',
-  SOLICITADA: 'Solicitada',
-};
-
-function formatDateTime(value) {
-  if (!value) return '-';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
-
-function formatKm(value) {
-  if (value == null) return 'Sem registro';
-  return `${Number(value).toLocaleString('pt-BR')} km`;
-}
-
-function formatStatusReserva(status) {
-  return STATUS_RESERVA_LABELS[status] || status || '-';
-}
-
-function getReservationStartBlock(reserva) {
-  if (!reserva?.dataHoraInicioPrevista) return null;
-
-  const now = new Date();
-  const startsAt = new Date(reserva.dataHoraInicioPrevista);
-  const endsAt = reserva.dataHoraFimEstimada ? new Date(reserva.dataHoraFimEstimada) : null;
-
-  if (now < startsAt) {
-    return `Disponível a partir de ${formatDateTime(reserva.dataHoraInicioPrevista)}`;
-  }
-  if (endsAt && now > endsAt) {
-    return 'Horário previsto encerrado';
-  }
-  return null;
-}
-
-function pad2(value) {
-  return String(value).padStart(2, '0');
+function normalizeReserva(reserva) {
+  return {
+    ...reserva,
+    statusReserva: reserva.statusReserva || reserva.status,
+  };
 }
 
 export function MotoristaDashboardPage() {
   const location = useLocation();
   const motoristaId = getCurrentMotoristaId();
-  const [reservasData, setReservasData] = useState({
-    loading: true,
-    error: null,
-    items: [],
-    emUso: [],
-  });
 
-  const [finishModal, setFinishModal] = useState({
-    error: '',
-    observacoes: '',
-    open: false,
-    quilometragemRetorno: '',
-    reserva: null,
-    submitting: false,
-  });
+  const [reservas, setReservas] = useState([]);
+  const [viagemCatalog, setViagemCatalog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [selectedDateRange, setSelectedDateRange] = useState('90d');
+  const [sortOrder, setSortOrder] = useState(() =>
+    readStoredSortOrder(MOTORISTA_RESERVA_SORT_KEY, RESERVA_SORT_FILTERS, 'newest'),
+  );
 
-  const carregarReservas = useCallback((signal) => {
-    const controller = new AbortController();
-    const requestSignal = signal || controller.signal;
-    setReservasData((current) => ({ ...current, loading: true, error: null }));
+  const handleSortOrderChange = useCallback((order) => {
+    setSortOrder(order);
+    writeStoredSortOrder(MOTORISTA_RESERVA_SORT_KEY, order);
+  }, []);
 
-    Promise.all([
-      listarReservasAprovadasMotorista(motoristaId, { signal: requestSignal }),
-      listarReservasEmUsoMotorista(motoristaId, { signal: requestSignal }),
-    ])
-      .then(([items, emUso]) => {
-        setReservasData({ loading: false, error: null, items: items || [], emUso: emUso || [] });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setReservasData({
-          loading: false,
-          error: error.message || 'Não foi possível carregar as reservas.',
-          items: [],
-          emUso: [],
-        });
-      });
+  const loadReservas = useCallback(async () => {
+    if (!motoristaId) return;
 
-    return controller;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const [concluidas, historico] = await Promise.all([
+        listarReservasConcluidas(motoristaId),
+        listarHistoricoMotorista(motoristaId),
+      ]);
+      setReservas((concluidas || []).map(normalizeReserva));
+      setViagemCatalog(historico || []);
+    } catch (err) {
+      setError(err.message || 'Não foi possível carregar as viagens.');
+    } finally {
+      setLoading(false);
+    }
   }, [motoristaId]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    Promise.resolve().then(() => {
-      if (!controller.signal.aborted) carregarReservas(controller.signal);
-    });
-    return () => controller.abort();
-  }, [carregarReservas]);
+    loadReservas();
+  }, [loadReservas, location.key]);
 
-  function openFinishModal(reserva) {
-    setFinishModal({
-      error: '',
-      observacoes: '',
-      open: true,
-      quilometragemRetorno: '',
-      reserva,
-      submitting: false,
-    });
-  }
+  const viagemNumbers = useMemo(
+    () => buildMotoristaViagemNumbers(viagemCatalog),
+    [viagemCatalog],
+  );
 
-  function closeFinishModal() {
-    setFinishModal((current) =>
-      current.submitting
-        ? current
-        : {
-            error: '',
-            observacoes: '',
-            open: false,
-            quilometragemRetorno: '',
-            reserva: null,
-            submitting: false,
-          },
+  const filteredReservas = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    const byDate = filterReservasByDateRange(reservas, selectedDateRange);
+
+    const filtered = !term
+      ? byDate
+      : byDate.filter((reserva) => {
+          const viagemNumber = getUserReservaNumber(viagemNumbers, reserva.idReserva);
+          const haystack = [
+            viagemNumber,
+            reserva.destino,
+            reserva.origem,
+            reserva.placaVeiculo,
+            reserva.modeloVeiculo,
+            reserva.nomeSolicitante,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
+          return haystack.includes(term);
+        });
+
+    return sortReservasByOrder(filtered, sortOrder).map((reserva) => ({
+      ...reserva,
+      viagemNumber: getUserReservaNumber(viagemNumbers, reserva.idReserva),
+    }));
+  }, [reservas, search, selectedDateRange, sortOrder, viagemNumbers]);
+
+  if (!motoristaId) {
+    return (
+      <div className="page-stack motorista-page">
+        <p className="motorista-dashboard__invalid">Sessão inválida para o perfil de motorista.</p>
+      </div>
     );
   }
 
-  async function confirmFinalizarTrajeto() {
-    const reserva = finishModal.reserva;
-    if (!reserva) return;
-
-    const quilometragemRetorno = Number(finishModal.quilometragemRetorno.replace(',', '.'));
-    if (!Number.isFinite(quilometragemRetorno) || quilometragemRetorno < 0) {
-      setFinishModal((current) => ({ ...current, error: 'Informe uma quilometragem de retorno válida.' }));
-      return;
-    }
-
-    try {
-      setFinishModal((current) => ({ ...current, error: '', submitting: true }));
-      await finalizarTrajeto(reserva.idReserva, {
-        idMotorista: motoristaId,
-        observacoesVeiculo: finishModal.observacoes,
-        quilometragemRetorno,
-      });
-      setFinishModal({
-        error: '',
-        observacoes: '',
-        open: false,
-        quilometragemRetorno: '',
-        reserva: null,
-        submitting: false,
-      });
-      await carregarReservas();
-    } catch (error) {
-      setFinishModal((current) => ({
-        ...current,
-        error: error.message || 'Não foi possível finalizar o trajeto.',
-        submitting: false,
-      }));
-    }
-  }
-
-  const stats = useMemo(
-    () => [
-      {
-        caption: 'Liberadas para iniciar',
-        icon: 'reservations',
-        title: 'Aprovadas',
-        value: pad2(reservasData.items.length),
-      },
-      {
-        caption: 'Trajetos abertos',
-        icon: 'fleet',
-        title: 'Em uso',
-        value: pad2(reservasData.emUso.length),
-      },
-      {
-        caption: 'Antes da retirada',
-        icon: 'check',
-        title: 'Checklist',
-        value: 'Obrig.',
-      },
-      {
-        caption: 'Motorista selecionado',
-        icon: 'users',
-        title: 'Perfil',
-        value: `#${motoristaId}`,
-      },
-    ],
-    [motoristaId, reservasData.emUso.length, reservasData.items.length],
-  );
-
   return (
-    <div className="page-stack motorista-page">
-      <PageHeader
-        eyebrow="Jornada do Motorista"
-        subtitle="Tela individual com viagens aprovadas, trajetos em uso e pendências obrigatórias."
-        title={`Motorista #${motoristaId}`}
+    <div className="page-stack motorista-page motorista-dashboard">
+      <PageHeader title="Minhas viagens" />
+
+      <FleetFilters
+        className="fleet-filters--motorista"
+        dateRangeTabs={DATE_RANGE_FILTERS}
+        onDateRangeChange={setSelectedDateRange}
+        onSearchChange={setSearch}
+        onSortOrderChange={handleSortOrderChange}
+        search={search}
+        searchPlaceholder="Buscar por viagem, destino, placa ou solicitante..."
+        selectedDateRange={selectedDateRange}
+        selectedSortOrder={sortOrder}
+        sortOrderTabs={RESERVA_SORT_FILTERS}
       />
 
-      {location.state?.flashMessage ? <div className="flash-banner">{location.state.flashMessage}</div> : null}
-
-      <section className="stats-grid stats-grid--compact">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </section>
-
-      <SectionCard title="Pendências obrigatórias">
-        <div className="driver-required-grid">
-          <div className="driver-required-item">
-            <Icon name="check" />
-            <div>
-              <strong>Checklist de saída</strong>
-              <span>Todos os itens devem ser marcados antes de iniciar o trajeto.</span>
-            </div>
-          </div>
-          <div className="driver-required-item">
-            <Icon name="reports" />
-            <div>
-              <strong>Quilometragem</strong>
-              <span>A quilometragem de saída e de retorno é obrigatória no registro de uso.</span>
-            </div>
+      {loading ? (
+        <div className="admin-dashboard__loading">
+          <span aria-hidden="true" className="admin-dashboard__spinner" />
+          <p>Carregando viagens...</p>
+        </div>
+      ) : error ? (
+        <div className="admin-dashboard__error">
+          <Icon name="alert" />
+          <div>
+            <strong>Falha ao carregar viagens</strong>
+            <p>{error}</p>
           </div>
         </div>
-      </SectionCard>
-
-      {reservasData.emUso.length > 0 ? (
-        <SectionCard title="Trajetos em uso">
-          <div className="driver-reservation-list">
-            {reservasData.emUso.map((reserva) => (
-              <article className="driver-reservation-card" key={reserva.idReserva}>
-                <div className="driver-reservation-card__main">
-                  <div>
-                    <span className="driver-reservation-card__kicker">Reserva #{reserva.idReserva}</span>
-                    <h2>{reserva.destino}</h2>
-                    <p>
-                      {reserva.placaVeiculo} - {reserva.modeloVeiculo}
-                    </p>
-                  </div>
-                  <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
-                </div>
-                <ActionButton icon="check" onClick={() => openFinishModal(reserva)}>
-                  Finalizar trajeto
-                </ActionButton>
-              </article>
-            ))}
+      ) : (
+        <>
+          <div className="motorista-dashboard__summary">
+            <span>
+              Mostrando {filteredReservas.length} de {reservas.length} viagens concluídas
+            </span>
+            <span>Ordenado por: {getSortOrderLabel(sortOrder, RESERVA_SORT_FILTERS)}</span>
           </div>
-        </SectionCard>
-      ) : null}
 
-      <SectionCard title="Reservas aprovadas">
-        {reservasData.loading ? (
-          <div className="admin-dashboard__loading">
-            <span className="admin-dashboard__spinner" aria-hidden="true" />
-            <p>Carregando reservas...</p>
-          </div>
-        ) : reservasData.error ? (
-          <div className="admin-dashboard__error">
-            <Icon name="alert" />
-            <div>
-              <strong>Falha ao carregar reservas</strong>
-              <p>{reservasData.error}</p>
-            </div>
-          </div>
-        ) : reservasData.items.length === 0 ? (
-          <div className="admin-empty">
-            <Icon name="reservations" />
-            <p>Nenhuma reserva aprovada para este motorista.</p>
-          </div>
-        ) : (
-          <div className="driver-reservation-list">
-            {reservasData.items.map((reserva) => (
-              (() => {
-                const startBlock = getReservationStartBlock(reserva);
-                return (
-                  <article className="driver-reservation-card" key={reserva.idReserva}>
-                    <div className="driver-reservation-card__main">
-                      <div>
-                        <span className="driver-reservation-card__kicker">Reserva #{reserva.idReserva}</span>
-                        <h2>{reserva.destino}</h2>
-                        <p>
-                          {reserva.origem} -&gt; {reserva.destino}
-                        </p>
-                      </div>
-                      <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
-                    </div>
-
-                    <dl className="driver-reservation-card__meta">
-                      <div>
-                        <dt>Veículo</dt>
-                        <dd>
-                          {reserva.placaVeiculo} - {reserva.modeloVeiculo}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Última KM</dt>
-                        <dd>{formatKm(reserva.ultimaQuilometragemVeiculo)}</dd>
-                      </div>
-                      <div>
-                        <dt>Início</dt>
-                        <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
-                      </div>
-                      <div>
-                        <dt>Fim previsto</dt>
-                        <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
-                      </div>
-                    </dl>
-
-                    {startBlock ? (
-                      <div className="driver-required-banner driver-required-banner--warning">
-                        <Icon name="alert" />
-                        <div>
-                          <strong>Checklist bloqueado</strong>
-                          <span>{startBlock}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <Link
-                        className="action-button action-button--primary action-button--with-icon"
-                        state={{ motoristaId, reserva }}
-                        to={`/motorista/${motoristaId}/reservas/${reserva.idReserva}/checklist-saida`}
-                      >
-                        <Icon className="action-button__icon" name="check" />
-                        <span>Fazer checklist</span>
-                      </Link>
-                    )}
-                  </article>
-                );
-              })()
-            ))}
-          </div>
-        )}
-      </SectionCard>
-
-      <Modal
-        footer={
-          <>
-            <ActionButton disabled={finishModal.submitting} onClick={closeFinishModal} variant="secondary">
-              Cancelar
-            </ActionButton>
-            <ActionButton
-              disabled={finishModal.submitting || finishModal.quilometragemRetorno.trim().length === 0}
-              icon="check"
-              onClick={confirmFinalizarTrajeto}
-            >
-              {finishModal.submitting ? 'Finalizando...' : 'Confirmar retorno'}
-            </ActionButton>
-          </>
-        }
-        onClose={closeFinishModal}
-        open={finishModal.open}
-        subtitle="Informe os dados de retorno para encerrar o registro de uso."
-        title="Finalizar trajeto"
-      >
-        {finishModal.reserva ? (
-          <div className="reservation-decision-modal">
-            <dl className="admin-modal-list">
-              <div>
-                <dt>Reserva</dt>
-                <dd>#{finishModal.reserva.idReserva}</dd>
-              </div>
-              <div>
-                <dt>Veículo</dt>
-                <dd>{finishModal.reserva.placaVeiculo}</dd>
-              </div>
-              <div>
-                <dt>Destino</dt>
-                <dd>{finishModal.reserva.destino}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>{formatStatusReserva(finishModal.reserva.statusReserva)}</dd>
-              </div>
-            </dl>
-
-            {finishModal.error ? (
-              <div className="admin-dashboard__error">
-                <Icon name="alert" />
-                <div>
-                  <strong>Retorno não registrado</strong>
-                  <p>{finishModal.error}</p>
-                </div>
-              </div>
-            ) : null}
-
-            <label className="admin-form-field admin-form-field--full">
-              <span className="admin-form-field__label">
-                Quilometragem de retorno
-                <span className="admin-form-field__req">*</span>
-              </span>
-              <input
-                className="admin-form-field__input"
-                inputMode="decimal"
-                onChange={(event) =>
-                  setFinishModal((current) => ({ ...current, quilometragemRetorno: event.target.value }))
-                }
-                placeholder="Ex.: 28450"
-                value={finishModal.quilometragemRetorno}
-              />
-            </label>
-
-            <label className="admin-form-field admin-form-field--full">
-              <span className="admin-form-field__label">Observações do veículo</span>
-              <textarea
-                className="admin-form-field__textarea"
-                maxLength={240}
-                onChange={(event) =>
-                  setFinishModal((current) => ({ ...current, observacoes: event.target.value }))
-                }
-                placeholder="Ex.: veículo entregue limpo e sem ocorrências."
-                rows={4}
-                value={finishModal.observacoes}
-              />
-            </label>
-          </div>
-        ) : null}
-      </Modal>
+          <MotoristaReservationCardGrid motoristaId={motoristaId} reservas={filteredReservas} />
+        </>
+      )}
     </div>
   );
 }
