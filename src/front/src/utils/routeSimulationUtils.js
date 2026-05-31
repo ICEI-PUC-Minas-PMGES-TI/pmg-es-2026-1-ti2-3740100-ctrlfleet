@@ -81,9 +81,20 @@ export function formatDurationMs(ms) {
   return `${min} min ${sec}s`;
 }
 
+/** Duração legível em horas (ex.: viagem de 9 h 15 min). */
+export function formatDurationHours(ms) {
+  if (ms == null || !Number.isFinite(ms)) return '—';
+  const totalMin = Math.max(0, Math.round(ms / 60000));
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  if (hours === 0) return `${mins} min`;
+  if (mins === 0) return `${hours} h`;
+  return `${hours} h ${mins} min`;
+}
+
 export function formatDurationMinutes(minutes) {
   if (minutes == null || !Number.isFinite(minutes)) return '—';
-  return formatDurationMs(minutes * 60 * 1000);
+  return formatDurationHours(minutes * 60 * 1000);
 }
 
 /** Tempo previsto da reserva (chegada − saída) em minutos. */

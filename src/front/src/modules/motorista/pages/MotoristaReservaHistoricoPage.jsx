@@ -1,34 +1,35 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Icon } from '../../../components/common/Icon';
-import { PageHeader } from '../../../components/common/PageHeader';
-import { SectionCard } from '../../../components/common/SectionCard';
+import { StatusBadge } from '../../../components/common/StatusBadge';
 import { ReservationRouteMapPanel } from '../../../components/motorista/ReservationRouteMapPanel';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { buscarReservaMotorista, obterHistoricoViagemReserva } from '../../../services/motoristaApi';
+import { useMotoristaViagemNumber } from '../../../hooks/useMotoristaViagemNumbers';
 import {
   formatDateTime,
   formatKm,
   parseReservaDateTime,
 } from '../../../utils/motoristaReservaUtils';
 import {
-  formatDurationMinutes,
-  formatDurationMs,
+  formatDurationHours,
   reservationPlannedDurationMin,
 } from '../../../utils/routeSimulationUtils';
 import { loadTripSummary } from '../../../utils/tripSummaryStorage';
+import { formatViagemLabel } from '../../../utils/userReservaNumbers';
 
 function formatTripDuration(dataSaida, dataRetorno) {
   const start = parseReservaDateTime(dataSaida)?.getTime();
   const end = parseReservaDateTime(dataRetorno)?.getTime();
   if (start == null || end == null || end <= start) return '—';
-  return formatDurationMs(end - start);
+  return formatDurationHours(end - start);
 }
 
 export function MotoristaReservaHistoricoPage() {
   const { reservaId } = useParams();
   const location = useLocation();
   const motoristaId = getCurrentMotoristaId();
+  const viagemNumber = useMotoristaViagemNumber(motoristaId, reservaId);
 
   const [reserva, setReserva] = useState(location.state?.reserva ?? null);
   const [historico, setHistorico] = useState(null);
@@ -94,15 +95,9 @@ export function MotoristaReservaHistoricoPage() {
   });
 
   return (
-    <div className="page-stack motorista-page motorista-viagem-historico-page">
-      <PageHeader
-        eyebrow="Histórico da viagem"
-        subtitle="Resumo da corrida concluída — rota, quilometragem e tempos."
-        title={`Reserva #${reservaId}`}
-      />
-
+    <div className="page-stack motorista-page motorista-historico-viagem">
       <Link className="motorista-viagem-detail__back" to={`/motorista/${motoristaId}`}>
-        <Icon name="fleet" />
+        <Icon name="chevronLeft" />
         <span>Voltar às minhas viagens</span>
       </Link>
 
@@ -128,68 +123,115 @@ export function MotoristaReservaHistoricoPage() {
         </div>
       ) : (
         <>
-          <div className="motorista-viagem-detail__layout">
-            <article className="motorista-viagem-detail__main">
-              <SectionCard title="Trajeto">
-                <dl className="motorista-viagem-detail__facts">
-                  <div>
-                    <dt>Origem</dt>
-                    <dd>{historico?.origem || '—'}</dd>
-                  </div>
-                  <div>
-                    <dt>Destino</dt>
-                    <dd>{historico?.destino || '—'}</dd>
-                  </div>
-                  <div>
-                    <dt>Veículo</dt>
-                    <dd>
-                      {historico?.modeloVeiculo || '—'} · {historico?.placaVeiculo || '—'}
-                    </dd>
-                  </div>
-                </dl>
-              </SectionCard>
+          <article className="motorista-historico-viagem__hero">
+            <div className="motorista-historico-viagem__hero-top">
+              <span className="motorista-historico-viagem__chip">{formatViagemLabel(viagemNumber)} · Concluída</span>
+              <StatusBadge label="Concluída" />
+            </div>
 
-              <SectionCard title="Quilometragem">
-                <div className="motorista-corrida-page__meta motorista-viagem-historico-page__km">
-                  <div>
-                    <span>Saída</span>
-                    <strong>{formatKm(historico?.quilometragemSaida)}</strong>
-                  </div>
-                  <div>
-                    <span>Retorno</span>
-                    <strong>{formatKm(historico?.quilometragemRetorno)}</strong>
-                  </div>
-                  <div>
-                    <span>Percorrida</span>
-                    <strong>{formatKm(historico?.quilometragemPercorrida)}</strong>
-                  </div>
+            <h1>Histórico da {formatViagemLabel(viagemNumber).toLowerCase()}</h1>
+
+            <div className="motorista-historico-viagem__route">
+              <div className="motorista-historico-viagem__route-point">
+                <span aria-hidden="true" className="motorista-viagem-card__route-badge motorista-viagem-card__route-badge--origem">
+                  A
+                </span>
+                <div>
+                  <span className="motorista-viagem-card__route-label">Origem</span>
+                  <strong>{historico?.origem || '—'}</strong>
                 </div>
-              </SectionCard>
+              </div>
+              <div aria-hidden="true" className="motorista-historico-viagem__route-arrow">
+                <Icon name="chevronRight" />
+              </div>
+              <div className="motorista-historico-viagem__route-point">
+                <span aria-hidden="true" className="motorista-viagem-card__route-badge motorista-viagem-card__route-badge--destino">
+                  B
+                </span>
+                <div>
+                  <span className="motorista-viagem-card__route-label">Destino</span>
+                  <strong>{historico?.destino || '—'}</strong>
+                </div>
+              </div>
+            </div>
 
-              <SectionCard title="Tempos">
-                <dl className="trip-summary-modal motorista-viagem-historico-page__times">
+            <p className="motorista-historico-viagem__vehicle">
+              <Icon name="fleet" />
+              <span>
+                {historico?.modeloVeiculo || 'Veículo'} ·{' '}
+                <span className="driver-placa-pill">{historico?.placaVeiculo || '—'}</span>
+              </span>
+            </p>
+          </article>
+
+          <section aria-label="Quilometragem" className="motorista-historico-viagem__kpi">
+            <div className="motorista-historico-viagem__kpi-card motorista-historico-viagem__kpi-card--start">
+              <Icon name="fleet" />
+              <span>KM saída</span>
+              <strong>{formatKm(historico?.quilometragemSaida)}</strong>
+            </div>
+            <div className="motorista-historico-viagem__kpi-card motorista-historico-viagem__kpi-card--distance">
+              <Icon name="dashboard" />
+              <span>Percorrida</span>
+              <strong>{formatKm(historico?.quilometragemPercorrida)}</strong>
+            </div>
+            <div className="motorista-historico-viagem__kpi-card motorista-historico-viagem__kpi-card--end">
+              <Icon name="check" />
+              <span>KM retorno</span>
+              <strong>{formatKm(historico?.quilometragemRetorno)}</strong>
+            </div>
+          </section>
+
+          <div className="motorista-historico-viagem__layout">
+            <div className="motorista-historico-viagem__main">
+              <section className="motorista-historico-viagem__panel">
+                <header className="motorista-veiculo-detail__section-head">
                   <div>
-                    <dt>Saída real</dt>
-                    <dd>{formatDateTime(historico?.dataSaida)}</dd>
+                    <span className="motorista-veiculo-detail__eyebrow">Cronologia</span>
+                    <h2>Tempos da viagem</h2>
                   </div>
+                </header>
+
+                <ol className="motorista-historico-viagem__timeline">
+                  <li>
+                    <span className="motorista-historico-viagem__timeline-dot motorista-historico-viagem__timeline-dot--start" />
+                    <div>
+                      <strong>Saída real</strong>
+                      <span>{formatDateTime(historico?.dataSaida)}</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="motorista-historico-viagem__timeline-dot motorista-historico-viagem__timeline-dot--mid" />
+                    <div>
+                      <strong>Duração total</strong>
+                      <span>{formatTripDuration(historico?.dataSaida, historico?.dataRetorno)}</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="motorista-historico-viagem__timeline-dot motorista-historico-viagem__timeline-dot--end" />
+                    <div>
+                      <strong>Retorno real</strong>
+                      <span>{formatDateTime(historico?.dataRetorno)}</span>
+                    </div>
+                  </li>
+                </ol>
+
+                <div className="motorista-historico-viagem__planned">
+                  <Icon name="calendar" />
                   <div>
-                    <dt>Retorno real</dt>
-                    <dd>{formatDateTime(historico?.dataRetorno)}</dd>
-                  </div>
-                  <div>
-                    <dt>Duração da viagem</dt>
-                    <dd>{formatTripDuration(historico?.dataSaida, historico?.dataRetorno)}</dd>
-                  </div>
-                  <div>
-                    <dt>Janela prevista (reserva)</dt>
-                    <dd>
+                    <strong>Janela prevista na reserva</strong>
+                    <span>
                       {formatDateTime(historico?.dataHoraInicioPrevista)} →{' '}
                       {formatDateTime(historico?.dataHoraFimEstimada)}
-                      {plannedMin != null ? ` (${plannedMin} min)` : ''}
-                    </dd>
+                      {plannedMin != null ? ` · ${formatDurationHours(plannedMin * 60 * 1000)} previstos` : ''}
+                    </span>
                   </div>
-                  {tripSummary ? (
-                    <>
+                </div>
+
+                {tripSummary ? (
+                  <div className="motorista-historico-viagem__simulation">
+                    <h3>Simulação da corrida</h3>
+                    <dl className="motorista-historico-viagem__simulation-grid">
                       <div>
                         <dt>Tempo estimado (rota)</dt>
                         <dd>{tripSummary.tempoEstimadoLabel}</dd>
@@ -204,25 +246,36 @@ export function MotoristaReservaHistoricoPage() {
                       </div>
                       {tripSummary.distanceKm != null ? (
                         <div>
-                          <dt>Distância (mapa)</dt>
+                          <dt>Distância no mapa</dt>
                           <dd>{formatKm(tripSummary.distanceKm)}</dd>
                         </div>
                       ) : null}
-                    </>
-                  ) : null}
-                </dl>
-              </SectionCard>
+                    </dl>
+                  </div>
+                ) : null}
+              </section>
 
               {historico?.observacoesVeiculo ? (
-                <SectionCard title="Observações">
+                <section className="motorista-historico-viagem__panel motorista-historico-viagem__panel--notes">
+                  <header className="motorista-veiculo-detail__section-head">
+                    <div>
+                      <span className="motorista-veiculo-detail__eyebrow">Registro</span>
+                      <h2>Observações</h2>
+                    </div>
+                  </header>
                   <p>{historico.observacoesVeiculo}</p>
-                </SectionCard>
+                </section>
               ) : null}
-            </article>
+            </div>
 
-            <aside className="motorista-viagem-detail__aside">
-              <div className="motorista-viagem-detail__map-card">
-                <h2>Rota percorrida</h2>
+            <aside className="motorista-historico-viagem__aside">
+              <div className="motorista-viagem-detail__map-card motorista-historico-viagem__map">
+                <header className="motorista-veiculo-detail__section-head">
+                  <div>
+                    <span className="motorista-veiculo-detail__eyebrow">Mapa</span>
+                    <h2>Rota percorrida</h2>
+                  </div>
+                </header>
                 <ReservationRouteMapPanel reserva={mapReserva} />
               </div>
             </aside>

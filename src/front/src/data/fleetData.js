@@ -154,6 +154,7 @@ export const fleetVehicles = [
 
 export const driverNavigationItems = [
   { end: true, icon: 'check', label: 'Minhas viagens', to: '/motorista/:motoristaId' },
+  { icon: 'fleet', label: 'Meus veículos', to: '/motorista/:motoristaId/veiculos' },
   { icon: 'reports', label: 'Historico', to: '/motorista/:motoristaId/historico' },
 ];
 

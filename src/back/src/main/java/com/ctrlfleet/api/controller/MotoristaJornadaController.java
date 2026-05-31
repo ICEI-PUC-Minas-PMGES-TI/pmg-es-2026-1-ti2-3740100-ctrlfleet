@@ -51,6 +51,12 @@ public class MotoristaJornadaController {
         return ResponseEntity.ok(motoristaFrotaService.listarVeiculosDoMotorista(motoristaId, apenasDisponiveis));
     }
 
+    @GetMapping("/{motoristaId}/veiculos/{veiculoId}")
+    public ResponseEntity<VeiculoResponseDTO> buscarVeiculoDoMotorista(
+            @PathVariable Long motoristaId, @PathVariable Long veiculoId) {
+        return ResponseEntity.ok(motoristaFrotaService.buscarVeiculoDoMotorista(motoristaId, veiculoId));
+    }
+
     @GetMapping("/{motoristaId}/reservas/aprovadas")
     public ResponseEntity<List<ReservaMotoristaResponseDTO>> listarReservasAprovadas(
             @PathVariable Long motoristaId) {

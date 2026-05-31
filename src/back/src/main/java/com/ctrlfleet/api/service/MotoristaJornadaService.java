@@ -99,7 +99,7 @@ public class MotoristaJornadaService {
 
     public List<RegistroUsoResponseDTO> listarHistorico(Long motoristaId) {
         validarMotorista(motoristaId);
-        return registroUsoRepository.findByMotoristaIdOrderByDataSaidaDesc(motoristaId).stream()
+        return registroUsoRepository.findViagensByMotoristaId(motoristaId).stream()
                 .map(this::toRegistroUsoResponseDTO)
                 .toList();
     }

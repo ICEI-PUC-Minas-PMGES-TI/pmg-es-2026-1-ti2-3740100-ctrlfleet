@@ -1367,15 +1367,91 @@ a {
   align-items: start;
 }
 
+.fleet-filters--motorista {
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+}
+
+.fleet-filters--compact {
+  padding: 0;
+  border: none;
+  background: none;
+  gap: 0;
+}
+
+.fleet-filters--compact .fleet-filters__toolbar,
+.fleet-filters--compact .fleet-filters__controls {
+  justify-content: flex-start;
+}
+
+.fleet-filters__search {
+  margin: 0;
+}
+
 .fleet-filters__toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  align-items: center;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.fleet-filters__toolbar--selects {
+  justify-content: flex-start;
+}
+
+.fleet-filters__toolbar--selects .fleet-filters__controls {
+  justify-content: flex-start;
+  flex: 1 1 auto;
 }
 
 .fleet-filters__toolbar .filter-tabs {
   flex: 1 1 280px;
+}
+
+.fleet-filters__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.fleet-filters__control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fleet-filters__control-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fleet-filters__select {
+  min-width: 180px;
+  width: auto;
+  margin: 0;
+}
+
+.fleet-filters__sort-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fleet-filters__sort-tabs .filter-tab {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.84rem;
+  white-space: nowrap;
 }
 
 .fleet-filters__type-wrap {
@@ -1852,6 +1928,25 @@ a {
   letter-spacing: -0.01em;
 }
 
+.fleet-vehicle-card__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.fleet-vehicle-card__alert svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
 .fleet-vehicle-card__meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1942,6 +2037,10 @@ a {
 .fleet-vehicle-card__action:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.fleet-vehicle-card__action--full {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 640px) {
@@ -3824,11 +3923,16 @@ a {
 
 .motorista-dashboard__summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--muted);
+}
+
+.motorista-dashboard__summary span:last-child {
+  text-align: right;
+  max-width: 320px;
 }
 
 .motorista-viagens-grid {
@@ -4140,6 +4244,709 @@ a {
 .motorista-viagem-detail__back svg {
   width: 18px;
   height: 18px;
+}
+
+.motorista-veiculo-doc-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(249, 250, 252, 0.95);
+  border: 1px solid rgba(231, 230, 235, 0.95);
+}
+
+.motorista-veiculo-doc-highlight strong {
+  font-size: 0.95rem;
+}
+
+.motorista-veiculo-doc-highlight__warning {
+  color: #b45309;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.documents-list--readonly .documents-list__item {
+  display: grid;
+  gap: 4px;
+}
+
+/* ===================================================
+   Motorista — detalhe do veículo
+   =================================================== */
+
+.motorista-veiculo-detail {
+  gap: 22px;
+}
+
+.motorista-veiculo-detail__hero {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
+}
+
+.motorista-veiculo-detail__media {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(248, 250, 252, 0.98), rgba(226, 232, 240, 0.55));
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  min-height: 220px;
+  height: 100%;
+}
+
+.motorista-veiculo-detail__photo {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.motorista-veiculo-detail__type-badge {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.motorista-veiculo-detail__hero-copy h1 {
+  margin: 12px 0 8px;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.motorista-veiculo-detail__hero-copy > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.motorista-veiculo-detail__secretaria {
+  margin-top: 8px !important;
+  font-weight: 600;
+}
+
+.motorista-veiculo-detail__odometer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px !important;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+  font-size: 0.9rem !important;
+}
+
+.motorista-veiculo-detail__odometer svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.motorista-veiculo-detail__odometer strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.motorista-veiculo-detail__hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.motorista-veiculo-detail__plate {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.07);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 0.88rem;
+}
+
+.motorista-veiculo-detail__stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.motorista-veiculo-detail__stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+}
+
+.motorista-veiculo-detail__stat svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.motorista-veiculo-detail__stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.motorista-veiculo-detail__stat strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.motorista-veiculo-detail__docs-panel,
+.motorista-historico-viagem__panel {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+}
+
+.motorista-veiculo-detail__section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.motorista-veiculo-detail__section-head h2 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+}
+
+.motorista-veiculo-detail__section-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.motorista-veiculo-detail__eyebrow {
+  display: inline-flex;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.motorista-veiculo-detail__docs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.motorista-doc-card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(249, 250, 252, 0.85);
+}
+
+.motorista-doc-card--ok {
+  border-color: rgba(45, 139, 87, 0.28);
+  background: rgba(240, 253, 244, 0.75);
+}
+
+.motorista-doc-card--warning {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: rgba(254, 249, 195, 0.45);
+}
+
+.motorista-doc-card--expired {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(254, 242, 242, 0.75);
+}
+
+.motorista-doc-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.motorista-doc-card__head strong {
+  font-size: 0.98rem;
+}
+
+.motorista-doc-card__state {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.motorista-doc-card__state--ok {
+  background: rgba(45, 139, 87, 0.14);
+  color: #166534;
+}
+
+.motorista-doc-card__state--warning {
+  background: rgba(234, 179, 8, 0.18);
+  color: #92400e;
+}
+
+.motorista-doc-card__state--expired {
+  background: rgba(239, 68, 68, 0.14);
+  color: #991b1b;
+}
+
+.motorista-doc-card__due,
+.motorista-doc-card__payment {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.motorista-doc-card__payment strong {
+  color: var(--foreground);
+}
+
+/* ===================================================
+   Motorista — histórico da viagem (detalhe)
+   =================================================== */
+
+.motorista-historico-viagem {
+  gap: 20px;
+}
+
+.motorista-historico-viagem__hero {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(45, 139, 87, 0.22);
+  background: linear-gradient(145deg, rgba(240, 253, 244, 0.92), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 18px 44px rgba(45, 139, 87, 0.08);
+}
+
+.motorista-historico-viagem__hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.motorista-historico-viagem__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(45, 139, 87, 0.14);
+  color: #166534;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.motorista-historico-viagem__hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  letter-spacing: -0.02em;
+}
+
+.motorista-historico-viagem__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.motorista-historico-viagem__route-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.motorista-historico-viagem__route-point strong {
+  display: block;
+  line-height: 1.35;
+}
+
+.motorista-historico-viagem__route-arrow {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.motorista-historico-viagem__route-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.motorista-historico-viagem__vehicle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.motorista-historico-viagem__vehicle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.motorista-historico-viagem__kpi {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.motorista-historico-viagem__kpi-card {
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: var(--card-strong);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
+}
+
+.motorista-historico-viagem__kpi-card svg {
+  width: 22px;
+  height: 22px;
+}
+
+.motorista-historico-viagem__kpi-card span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.motorista-historico-viagem__kpi-card strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.motorista-historico-viagem__kpi-card--start {
+  border-color: rgba(59, 130, 246, 0.25);
+  background: linear-gradient(160deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.motorista-historico-viagem__kpi-card--start svg {
+  color: #2563eb;
+}
+
+.motorista-historico-viagem__kpi-card--distance {
+  border-color: rgba(45, 139, 87, 0.25);
+  background: linear-gradient(160deg, rgba(240, 253, 244, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.motorista-historico-viagem__kpi-card--distance svg {
+  color: var(--accent);
+}
+
+.motorista-historico-viagem__kpi-card--end {
+  border-color: rgba(168, 85, 247, 0.22);
+  background: linear-gradient(160deg, rgba(250, 245, 255, 0.95), rgba(255, 255, 255, 0.98));
+}
+
+.motorista-historico-viagem__kpi-card--end svg {
+  color: #7c3aed;
+}
+
+.motorista-historico-viagem__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.motorista-historico-viagem__main {
+  display: grid;
+  gap: 18px;
+}
+
+.motorista-historico-viagem__panel--notes p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.motorista-historico-viagem__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 8px;
+  display: grid;
+  gap: 0;
+  position: relative;
+}
+
+.motorista-historico-viagem__timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: linear-gradient(180deg, #2563eb, var(--accent), #7c3aed);
+  border-radius: 999px;
+}
+
+.motorista-historico-viagem__timeline li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+}
+
+.motorista-historico-viagem__timeline-dot {
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
+  justify-self: center;
+}
+
+.motorista-historico-viagem__timeline-dot--start {
+  background: #2563eb;
+}
+
+.motorista-historico-viagem__timeline-dot--mid {
+  background: var(--accent);
+}
+
+.motorista-historico-viagem__timeline-dot--end {
+  background: #7c3aed;
+}
+
+.motorista-historico-viagem__timeline li strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.motorista-historico-viagem__timeline li span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.motorista-historico-viagem__planned {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-historico-viagem__planned svg {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.motorista-historico-viagem__planned strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.motorista-historico-viagem__planned span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.motorista-historico-viagem__simulation {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(231, 230, 235, 0.9);
+}
+
+.motorista-historico-viagem__simulation h3 {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.motorista-historico-viagem__simulation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.motorista-historico-viagem__simulation-grid > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(231, 230, 235, 0.85);
+}
+
+.motorista-historico-viagem__simulation-grid dt {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.motorista-historico-viagem__simulation-grid dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.motorista-historico-viagem__aside {
+  position: sticky;
+  top: 88px;
+}
+
+.motorista-historico-viagem__map {
+  padding: 20px;
+}
+
+.motorista-historico-page .driver-journey-card__banner {
+  align-items: flex-start;
+}
+
+.motorista-historico-page .driver-journey-card__banner svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.motorista-historico-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+}
+
+.motorista-historico-page__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.motorista-historico-page__hint {
+  flex: 1 1 100%;
+  margin: 0;
+  padding-top: 4px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.motorista-historico-page__timeline-panel {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+.motorista-historico-page__timeline-head h2 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+}
+
+.motorista-historico-page__timeline-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.motorista-historico-page__timeline {
+  margin-top: 20px;
+}
+
+.motorista-historico-page__timeline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.motorista-historico-page__timeline-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 960px) {
+  .motorista-veiculo-detail__hero,
+  .motorista-historico-viagem__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-veiculo-detail__stats,
+  .motorista-veiculo-detail__docs-grid,
+  .motorista-historico-viagem__kpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .motorista-historico-viagem__aside {
+    position: static;
+  }
+
+  .motorista-historico-viagem__route {
+    grid-template-columns: 1fr;
+  }
+
+  .motorista-historico-viagem__route-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .motorista-veiculo-detail__stats,
+  .motorista-veiculo-detail__docs-grid,
+  .motorista-historico-viagem__kpi,
+  .motorista-historico-viagem__simulation-grid,
+  .driver-journey-card__meta {
+    grid-template-columns: 1fr;
+  }
 }
 
 .motorista-viagem-detail__layout {

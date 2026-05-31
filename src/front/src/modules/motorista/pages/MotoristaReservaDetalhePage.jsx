@@ -4,6 +4,7 @@ import { Icon } from '../../../components/common/Icon';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { ReservationRouteMapPanel } from '../../../components/motorista/ReservationRouteMapPanel';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
+import { useMotoristaViagemNumber } from '../../../hooks/useMotoristaViagemNumbers';
 import {
   buscarReservaMotorista,
   listarReservasAprovadas,
@@ -16,6 +17,7 @@ import {
   formatStatusReserva,
   getChecklistWindowMessage,
 } from '../../../utils/motoristaReservaUtils';
+import { formatViagemLabel } from '../../../utils/userReservaNumbers';
 import { resolveVehicleImageUrl } from '../../../utils/vehicleImage';
 
 function normalizeReserva(reserva) {
@@ -29,6 +31,7 @@ export function MotoristaReservaDetalhePage() {
   const { reservaId } = useParams();
   const location = useLocation();
   const motoristaId = getCurrentMotoristaId();
+  const viagemNumber = useMotoristaViagemNumber(motoristaId, reservaId);
 
   const [reserva, setReserva] = useState(() =>
     location.state?.reserva ? normalizeReserva(location.state.reserva) : null,
@@ -145,6 +148,7 @@ export function MotoristaReservaDetalhePage() {
                 src={vehicleImageUrl}
               />
               <div>
+                <span className="motorista-veiculo-detail__eyebrow">{formatViagemLabel(viagemNumber)}</span>
                 <StatusBadge label={formatStatusReserva(reserva.statusReserva)} />
                 <h1>{reserva.modeloVeiculo || 'Veículo não informado'}</h1>
                 <p>{reserva.placaVeiculo || '—'}</p>

@@ -13,6 +13,22 @@ public interface RegistroUsoRepository extends JpaRepository<RegistroUso, Long> 
 
     List<RegistroUso> findByMotoristaIdOrderByDataSaidaDesc(Long motoristaId);
 
+    @Query("""
+            select ru
+            from RegistroUso ru
+            join Reserva r on r.id = ru.idReserva
+            where ru.motorista.id = :motoristaId
+              and ru.idReserva is not null
+              and (
+                (r.statusReserva = com.ctrlfleet.api.domain.enums.StatusReserva.CONCLUIDA
+                    and ru.dataRetorno is not null)
+                or (r.statusReserva = com.ctrlfleet.api.domain.enums.StatusReserva.EM_USO
+                    and ru.dataRetorno is null)
+              )
+            order by ru.dataSaida desc, ru.id desc
+            """)
+    List<RegistroUso> findViagensByMotoristaId(@Param("motoristaId") Long motoristaId);
+
     List<RegistroUso> findByIdReservaOrderByDataSaidaDesc(Long idReserva);
 
     Optional<RegistroUso> findFirstByIdReservaAndDataRetornoIsNull(Long idReserva);

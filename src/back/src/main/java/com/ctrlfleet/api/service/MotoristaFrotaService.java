@@ -5,7 +5,10 @@ import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.dto.motorista.MotoristaResumoDTO;
+import com.ctrlfleet.api.dto.veiculo.DocumentacaoResponseDTO;
 import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
+import com.ctrlfleet.api.repository.DocumentacaoRepository;
+import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.util.List;
@@ -17,10 +20,18 @@ public class MotoristaFrotaService {
 
     private final UsuarioRepository usuarioRepository;
     private final VeiculoRepository veiculoRepository;
+    private final DocumentacaoRepository documentacaoRepository;
+    private final RegistroUsoRepository registroUsoRepository;
 
-    public MotoristaFrotaService(UsuarioRepository usuarioRepository, VeiculoRepository veiculoRepository) {
+    public MotoristaFrotaService(
+            UsuarioRepository usuarioRepository,
+            VeiculoRepository veiculoRepository,
+            DocumentacaoRepository documentacaoRepository,
+            RegistroUsoRepository registroUsoRepository) {
         this.usuarioRepository = usuarioRepository;
         this.veiculoRepository = veiculoRepository;
+        this.documentacaoRepository = documentacaoRepository;
+        this.registroUsoRepository = registroUsoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +52,30 @@ public class MotoristaFrotaService {
                 ? veiculoRepository.findByMotorista_IdAndStatusOrderByPlacaAsc(motoristaId, StatusVeiculo.DISPONIVEL)
                 : veiculoRepository.findByMotorista_IdOrderByPlacaAsc(motoristaId);
 
-        return veiculos.stream().map(VeiculoResponseDTO::fromEntity).toList();
+        return veiculos.stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public VeiculoResponseDTO buscarVeiculoDoMotorista(Long motoristaId, Long veiculoId) {
+        validarMotoristaAtivo(motoristaId);
+
+        Veiculo veiculo = veiculoRepository
+                .findByIdAndMotorista_Id(veiculoId, motoristaId)
+                .orElseThrow(() -> new IllegalArgumentException("Veiculo nao vinculado ao motorista informado"));
+
+        return toResponse(veiculo);
+    }
+
+    private VeiculoResponseDTO toResponse(Veiculo veiculo) {
+        List<DocumentacaoResponseDTO> documentos =
+                documentacaoRepository.findByVeiculoIdOrderByIdAsc(veiculo.getId()).stream()
+                        .map(DocumentacaoResponseDTO::fromEntity)
+                        .toList();
+        VeiculoResponseDTO dto = VeiculoResponseDTO.fromEntity(veiculo, documentos);
+        registroUsoRepository
+                .buscarUltimaQuilometragemVeiculo(veiculo.getId())
+                .ifPresent(dto::setQuilometragemAtual);
+        return dto;
     }
 
     private void validarMotoristaAtivo(Long motoristaId) {

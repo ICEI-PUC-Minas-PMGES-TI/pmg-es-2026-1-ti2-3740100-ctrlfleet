@@ -106,24 +106,179 @@ export const DATE_RANGE_FILTERS = [
   { id: '180d', label: 'Últimos 6 meses', days: 180 },
 ];
 
+export const MOTORISTA_RESERVA_SORT_KEY = 'motorista.reservaSortOrder';
+export const MOTORISTA_REGISTRO_SORT_KEY = 'motorista.registroSortOrder';
+export const MOTORISTA_REGISTRO_VIEW_KEY = 'motorista.registroViewMode';
+
+export const RESERVA_SORT_FILTERS = [
+  { id: 'newest', label: 'Mais recentes' },
+  { id: 'oldest', label: 'Mais antigas' },
+  { id: 'destino-asc', label: 'Destino (A–Z)' },
+  { id: 'km-desc', label: 'Maior KM percorrida' },
+];
+
+export const REGISTRO_SORT_FILTERS = [
+  { id: 'newest', label: 'Mais recentes' },
+  { id: 'oldest', label: 'Mais antigas' },
+];
+
+export const REGISTRO_VIEW_FILTERS = [
+  { id: 'registros', label: 'Por registro' },
+  { id: 'completo', label: 'Histórico completo' },
+];
+
+/** @deprecated Use RESERVA_SORT_FILTERS ou REGISTRO_SORT_FILTERS */
+export const CHRONOLOGICAL_SORT_FILTERS = REGISTRO_SORT_FILTERS;
+
+function getReservaSortTime(reserva) {
+  return (
+    parseReservaDateTime(reserva?.dataHoraInicioPrevista)?.getTime() ??
+    parseReservaDateTime(reserva?.dataHoraSolicitacao)?.getTime() ??
+    0
+  );
+}
+
+function getReservaReferenceDate(reserva) {
+  return (
+    parseReservaDateTime(reserva?.dataHoraFimEstimada) ??
+    parseReservaDateTime(reserva?.dataHoraInicioPrevista) ??
+    parseReservaDateTime(reserva?.dataHoraSolicitacao)
+  );
+}
+
+function getRegistroSortTime(registro) {
+  return (
+    parseReservaDateTime(registro?.dataSaida)?.getTime() ??
+    parseReservaDateTime(registro?.dataRetorno)?.getTime() ??
+    0
+  );
+}
+
+export function getReservaKmPercorrida(reserva) {
+  if (reserva?.quilometragemPercorridaTrajeto != null) {
+    return Number(reserva.quilometragemPercorridaTrajeto);
+  }
+  const saida = reserva?.quilometragemSaidaTrajeto;
+  const retorno = reserva?.quilometragemRetornoTrajeto;
+  if (saida != null && retorno != null) {
+    return Math.max(0, Number(retorno) - Number(saida));
+  }
+  return null;
+}
+
+export function readStoredSortOrder(storageKey, filters, fallback) {
+  try {
+    const stored = sessionStorage.getItem(storageKey);
+    if (stored && filters.some((item) => item.id === stored)) {
+      return stored;
+    }
+  } catch {
+    // sessionStorage indisponível
+  }
+  return fallback;
+}
+
+export function writeStoredSortOrder(storageKey, order) {
+  try {
+    sessionStorage.setItem(storageKey, order);
+  } catch {
+    // sessionStorage indisponível
+  }
+}
+
 export function filterReservasByDateRange(reservas, rangeId) {
   const range = DATE_RANGE_FILTERS.find((item) => item.id === rangeId);
   if (!range?.days) return reservas;
 
   const cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
   return reservas.filter((reserva) => {
-    const tripDate = parseReservaDateTime(reserva.dataHoraInicioPrevista)?.getTime();
+    const tripDate = getReservaReferenceDate(reserva)?.getTime();
     return tripDate != null && tripDate >= cutoff;
   });
 }
 
 export function sortReservasNewestFirst(reservas) {
   return [...reservas].sort((a, b) => {
-    const dateA = new Date(a.dataHoraInicioPrevista || a.dataHoraSolicitacao || 0).getTime();
-    const dateB = new Date(b.dataHoraInicioPrevista || b.dataHoraSolicitacao || 0).getTime();
+    const dateA = getReservaSortTime(a);
+    const dateB = getReservaSortTime(b);
     if (dateB !== dateA) return dateB - dateA;
     return Number(b.idReserva || 0) - Number(a.idReserva || 0);
   });
+}
+
+export function sortReservasOldestFirst(reservas) {
+  return [...reservas].sort((a, b) => {
+    const dateA = getReservaSortTime(a);
+    const dateB = getReservaSortTime(b);
+    if (dateA !== dateB) return dateA - dateB;
+    return Number(a.idReserva || 0) - Number(b.idReserva || 0);
+  });
+}
+
+function sortReservasByDestino(reservas) {
+  return [...reservas].sort((a, b) => {
+    const destA = (a.destino || '').localeCompare(b.destino || '', 'pt-BR', { sensitivity: 'base' });
+    if (destA !== 0) return destA;
+    return getReservaSortTime(b) - getReservaSortTime(a);
+  });
+}
+
+function sortReservasByKmDesc(reservas) {
+  return [...reservas].sort((a, b) => {
+    const kmA = getReservaKmPercorrida(a) ?? -1;
+    const kmB = getReservaKmPercorrida(b) ?? -1;
+    if (kmB !== kmA) return kmB - kmA;
+    return getReservaSortTime(b) - getReservaSortTime(a);
+  });
+}
+
+export function sortRegistrosOldestFirst(registros) {
+  return [...registros].sort((a, b) => {
+    const dateA = getRegistroSortTime(a);
+    const dateB = getRegistroSortTime(b);
+    if (dateA !== dateB) return dateA - dateB;
+    return Number(a.idUso || a.id || 0) - Number(b.idUso || b.id || 0);
+  });
+}
+
+export function sortRegistrosNewestFirst(registros) {
+  return [...registros].sort((a, b) => {
+    const dateA = getRegistroSortTime(a);
+    const dateB = getRegistroSortTime(b);
+    if (dateB !== dateA) return dateB - dateA;
+    return Number(b.idUso || b.id || 0) - Number(a.idUso || a.id || 0);
+  });
+}
+
+export function sortReservasByOrder(reservas, order = 'newest') {
+  switch (order) {
+    case 'oldest':
+      return sortReservasOldestFirst(reservas);
+    case 'destino-asc':
+      return sortReservasByDestino(reservas);
+    case 'km-desc':
+      return sortReservasByKmDesc(reservas);
+    case 'newest':
+    default:
+      return sortReservasNewestFirst(reservas);
+  }
+}
+
+export function sortRegistrosByOrder(registros, order = 'newest') {
+  return order === 'oldest' ? sortRegistrosOldestFirst(registros) : sortRegistrosNewestFirst(registros);
+}
+
+export function buildChronologicalNumbers(items, getKey, sortOldestFirst) {
+  return new Map(sortOldestFirst(items).map((item, index) => [getKey(item), index + 1]));
+}
+
+export function getSortOrderLabel(order, filters = RESERVA_SORT_FILTERS) {
+  return filters.find((item) => item.id === order)?.label ?? filters[0]?.label ?? '';
+}
+
+/** @deprecated Use getSortOrderLabel */
+export function getChronologicalSortLabel(order) {
+  return getSortOrderLabel(order, REGISTRO_SORT_FILTERS);
 }
 
 export function hasReservationCoords(reserva) {

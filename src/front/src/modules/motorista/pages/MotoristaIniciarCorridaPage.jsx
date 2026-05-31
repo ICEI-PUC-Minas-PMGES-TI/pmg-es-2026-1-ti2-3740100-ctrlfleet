@@ -7,12 +7,14 @@ import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { iniciarTrajeto } from '../../../services/motoristaApi';
+import { useMotoristaViagemNumber } from '../../../hooks/useMotoristaViagemNumbers';
 import {
   canStartTrip,
   formatDateTime,
   formatKm,
   getChecklistWindowMessage,
 } from '../../../utils/motoristaReservaUtils';
+import { formatViagemLabel } from '../../../utils/userReservaNumbers';
 
 export function MotoristaIniciarCorridaPage() {
   const { reservaId } = useParams();
@@ -20,6 +22,7 @@ export function MotoristaIniciarCorridaPage() {
   const navigate = useNavigate();
   const motoristaId = getCurrentMotoristaId();
   const reserva = location.state?.reserva;
+  const viagemNumber = useMotoristaViagemNumber(motoristaId, reserva?.idReserva ?? reservaId);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
@@ -74,7 +77,7 @@ export function MotoristaIniciarCorridaPage() {
         title="Iniciar corrida"
       />
 
-      <SectionCard title={`Reserva #${reserva.idReserva}`}>
+      <SectionCard title={formatViagemLabel(viagemNumber)}>
         <div className="driver-trip-summary">
           <div>
             <strong>{reserva.placaVeiculo}</strong>

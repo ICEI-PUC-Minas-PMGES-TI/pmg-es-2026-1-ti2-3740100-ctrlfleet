@@ -67,7 +67,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
                   and ru.motorista.id = :motoristaId
                   and ru.dataRetorno is not null
               )
-            order by r.dataHoraInicioPrevista desc, r.id desc
+            order by r.dataHoraInicioPrevista asc, r.id asc
             """)
     List<Reserva> listarConcluidasPorMotorista(
             @Param("motoristaId") Long motoristaId, @Param("status") StatusReserva status);

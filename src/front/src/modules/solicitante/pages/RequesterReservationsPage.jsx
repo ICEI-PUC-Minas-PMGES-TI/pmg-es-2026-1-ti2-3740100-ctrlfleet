@@ -9,6 +9,7 @@ import { getCurrentSolicitanteId } from '../../../services/currentSolicitante';
 import { cancelarReserva, excluirReservaDoHistorico, listarReservas } from '../../../services/reservaApi';
 import { coordsFromReservation } from '../../../utils/resolveReservationCoords';
 import { mapRequesterReservation } from '../../../services/requesterReservationUtils';
+import { attachSolicitanteReservaNumbers } from '../../../utils/userReservaNumbers';
 
 const STATUS_TABS = [
   { key: 'TODAS', label: 'Todas' },
@@ -56,10 +57,15 @@ export function RequesterReservationsPage() {
     return () => controller.abort();
   }, [carregarReservas]);
 
+  const numberedReservations = useMemo(
+    () => attachSolicitanteReservaNumbers(reservationsData.items),
+    [reservationsData.items],
+  );
+
   const filteredReservations = useMemo(() => {
-    if (statusFilter === 'TODAS') return reservationsData.items;
-    return reservationsData.items.filter((item) => item.statusKey === statusFilter);
-  }, [reservationsData.items, statusFilter]);
+    if (statusFilter === 'TODAS') return numberedReservations;
+    return numberedReservations.filter((item) => item.statusKey === statusFilter);
+  }, [numberedReservations, statusFilter]);
 
   const summaryCards = useMemo(() => {
     const items = reservationsData.items;

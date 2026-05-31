@@ -80,7 +80,7 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
 
   return (
     <div className="motorista-viagens-grid">
-      {reservas.map((reserva, index) => {
+      {reservas.map((reserva) => {
         const isEmUso = reserva.statusReserva === 'EM_USO';
         const isConcluida = reserva.statusReserva === 'CONCLUIDA';
         const checklistDone = Boolean(reserva.checklistSaidaConcluido);
@@ -104,7 +104,9 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
             <header
               className={`motorista-viagem-card__header motorista-viagem-card__header--${statusHeaderModifier(reserva.statusReserva)}`}
             >
-              <span className="motorista-viagem-card__trip-label">VIAGEM {index + 1}</span>
+              <span className="motorista-viagem-card__trip-label">
+                VIAGEM {reserva.viagemNumber ?? '—'}
+              </span>
               <StatusBadge label={statusLabel} />
             </header>
 

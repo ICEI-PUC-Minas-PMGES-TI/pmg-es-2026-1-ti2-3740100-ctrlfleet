@@ -208,7 +208,7 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (2,  'XYZ5B67', 'HB20',         'Hyundai',    2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (3,  'LMN9C12', 'Corsa',        'Chevrolet',  2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (4,  'VXY8D01', 'March',        'Nissan',     2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
-(5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'EM_USO',     'Garagem Central',               'SEDAN'),
+(5,  'DEF3E56', 'Prisma',       'Chevrolet',  2020, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
 (6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (7,  'JKL2G45', 'Celta',        'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central',               'HATCH'),
 (8,  'OPQ6H89', 'Fit',          'Honda',      2021, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
@@ -300,6 +300,24 @@ WHERE secretaria IS NULL OR btrim(secretaria) = '';
 ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS id_motorista bigint;
 
 UPDATE veiculos SET id_motorista = 5  WHERE id BETWEEN 1  AND 6;
+UPDATE veiculos SET status = 'DISPONIVEL' WHERE id BETWEEN 1 AND 6 AND id_motorista = 5;
+
+-- Documentação em dia nos veículos da Patrícia (ids 1–6) — status Ativo na UI
+UPDATE documentacao SET data_vencimento = '2027-06-30', status_pagamento = 'PAGO' WHERE id_documento = 1;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 2;
+UPDATE documentacao SET data_vencimento = '2027-01-15', status_pagamento = 'PAGO' WHERE id_documento = 3;
+UPDATE documentacao SET data_vencimento = '2027-03-20', status_pagamento = 'PAGO' WHERE id_documento = 4;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 5;
+UPDATE documentacao SET data_vencimento = '2027-02-10', status_pagamento = 'PAGO' WHERE id_documento = 6;
+UPDATE documentacao SET data_vencimento = '2027-04-30', status_pagamento = 'PAGO' WHERE id_documento = 7;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 8;
+UPDATE documentacao SET data_vencimento = '2027-02-10', status_pagamento = 'PAGO' WHERE id_documento = 9;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 10;
+UPDATE documentacao SET data_vencimento = '2027-04-30', status_pagamento = 'PAGO' WHERE id_documento = 11;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 12;
+UPDATE documentacao SET data_vencimento = '2027-07-22', status_pagamento = 'PAGO' WHERE id_documento = 13;
+UPDATE documentacao SET data_vencimento = '2027-05-01', status_pagamento = 'PAGO' WHERE id_documento = 14;
+UPDATE documentacao SET data_vencimento = '2027-09-15', status_pagamento = 'PAGO' WHERE id_documento = 15;
 UPDATE veiculos SET id_motorista = 6  WHERE id BETWEEN 7  AND 12;
 UPDATE veiculos SET id_motorista = 8  WHERE id BETWEEN 13 AND 18;
 UPDATE veiculos SET id_motorista = 16 WHERE id BETWEEN 19 AND 24;
@@ -372,21 +390,21 @@ DELETE FROM item_checklist WHERE nome ILIKE '%documenta%';
 -- 6. DOCUMENTACAO
 -- =====================================================================
 INSERT INTO documentacao (id_documento, id_veiculo, tipo_documento, data_vencimento, valor_pago, status_pagamento) VALUES
-(1,  1,  'IPVA',          '2024-06-30', 1450.00, 'ATRASADO'),
-(2,  1,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(3,  1,  'SEGURO',        '2024-01-15', 2380.00, 'ATRASADO'),
-(4,  2,  'IPVA',          '2024-03-20', 1620.00, 'ATRASADO'),
-(5,  2,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
+(1,  1,  'IPVA',          '2027-06-30', 1450.00, 'PAGO'),
+(2,  1,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(3,  1,  'SEGURO',        '2027-01-15', 2380.00, 'PAGO'),
+(4,  2,  'IPVA',          '2027-03-20', 1620.00, 'PAGO'),
+(5,  2,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
 (6,  2,  'SEGURO',        '2027-02-10', 2510.00, 'PAGO'),
-(7,  3,  'IPVA',          '2026-04-30', 980.00,  'PAGO'),
-(8,  3,  'LICENCIAMENTO', '2024-08-01', 165.00,  'ATRASADO'),
-(9,  4,  'IPVA',          '2024-02-10', 1740.00, 'ATRASADO'),
-(10, 4,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(11, 5,  'IPVA',          '2026-04-30', 1180.00, 'PAGO'),
-(12, 5,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(13, 5,  'SEGURO',        '2026-07-22', 2110.00, 'PAGO'),
-(14, 6,  'IPVA',          '2024-05-01', 1290.00, 'ATRASADO'),
-(15, 6,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
+(7,  3,  'IPVA',          '2027-04-30', 980.00,  'PAGO'),
+(8,  3,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(9,  4,  'IPVA',          '2027-02-10', 1740.00, 'PAGO'),
+(10, 4,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(11, 5,  'IPVA',          '2027-04-30', 1180.00, 'PAGO'),
+(12, 5,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
+(13, 5,  'SEGURO',        '2027-07-22', 2110.00, 'PAGO'),
+(14, 6,  'IPVA',          '2027-05-01', 1290.00, 'PAGO'),
+(15, 6,  'LICENCIAMENTO', '2027-09-15', 165.00,  'PAGO'),
 (16, 7,  'IPVA',          '2026-04-30', 720.00,  'PAGO'),
 (17, 7,  'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
 (18, 8,  'IPVA',          '2026-04-30', 1080.00, 'PAGO'),

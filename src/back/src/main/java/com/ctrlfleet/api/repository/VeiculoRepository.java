@@ -11,6 +11,8 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, Long> {
 
     Optional<Veiculo> findByPlaca(String placa);
 
+    Optional<Veiculo> findByIdAndMotorista_Id(Long id, Long motoristaId);
+
     List<Veiculo> findByMotorista_IdOrderByPlacaAsc(Long motoristaId);
 
     List<Veiculo> findByMotorista_IdAndStatusOrderByPlacaAsc(Long motoristaId, StatusVeiculo status);

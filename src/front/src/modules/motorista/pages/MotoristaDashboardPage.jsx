@@ -5,12 +5,21 @@ import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { MotoristaReservationCardGrid } from '../../../components/motorista/MotoristaReservationCardGrid';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
-import { listarReservasConcluidas } from '../../../services/motoristaApi';
+import { listarHistoricoMotorista, listarReservasConcluidas } from '../../../services/motoristaApi';
 import {
   DATE_RANGE_FILTERS,
+  MOTORISTA_RESERVA_SORT_KEY,
+  RESERVA_SORT_FILTERS,
   filterReservasByDateRange,
-  sortReservasNewestFirst,
+  getSortOrderLabel,
+  readStoredSortOrder,
+  sortReservasByOrder,
+  writeStoredSortOrder,
 } from '../../../utils/motoristaReservaUtils';
+import {
+  buildMotoristaViagemNumbers,
+  getUserReservaNumber,
+} from '../../../utils/userReservaNumbers';
 
 function normalizeReserva(reserva) {
   return {
@@ -24,10 +33,19 @@ export function MotoristaDashboardPage() {
   const motoristaId = getCurrentMotoristaId();
 
   const [reservas, setReservas] = useState([]);
+  const [viagemCatalog, setViagemCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [selectedDateRange, setSelectedDateRange] = useState('90d');
+  const [sortOrder, setSortOrder] = useState(() =>
+    readStoredSortOrder(MOTORISTA_RESERVA_SORT_KEY, RESERVA_SORT_FILTERS, 'newest'),
+  );
+
+  const handleSortOrderChange = useCallback((order) => {
+    setSortOrder(order);
+    writeStoredSortOrder(MOTORISTA_RESERVA_SORT_KEY, order);
+  }, []);
 
   const loadReservas = useCallback(async () => {
     if (!motoristaId) return;
@@ -36,8 +54,12 @@ export function MotoristaDashboardPage() {
     setError(null);
 
     try {
-      const concluidas = await listarReservasConcluidas(motoristaId);
-      setReservas(sortReservasNewestFirst((concluidas || []).map(normalizeReserva)));
+      const [concluidas, historico] = await Promise.all([
+        listarReservasConcluidas(motoristaId),
+        listarHistoricoMotorista(motoristaId),
+      ]);
+      setReservas((concluidas || []).map(normalizeReserva));
+      setViagemCatalog(historico || []);
     } catch (err) {
       setError(err.message || 'Não foi possível carregar as viagens.');
     } finally {
@@ -49,28 +71,39 @@ export function MotoristaDashboardPage() {
     loadReservas();
   }, [loadReservas, location.key]);
 
+  const viagemNumbers = useMemo(
+    () => buildMotoristaViagemNumbers(viagemCatalog),
+    [viagemCatalog],
+  );
+
   const filteredReservas = useMemo(() => {
     const term = search.trim().toLowerCase();
     const byDate = filterReservasByDateRange(reservas, selectedDateRange);
 
-    if (!term) return byDate;
+    const filtered = !term
+      ? byDate
+      : byDate.filter((reserva) => {
+          const viagemNumber = getUserReservaNumber(viagemNumbers, reserva.idReserva);
+          const haystack = [
+            viagemNumber,
+            reserva.destino,
+            reserva.origem,
+            reserva.placaVeiculo,
+            reserva.modeloVeiculo,
+            reserva.nomeSolicitante,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
 
-    return byDate.filter((reserva) => {
-      const haystack = [
-        reserva.idReserva,
-        reserva.destino,
-        reserva.origem,
-        reserva.placaVeiculo,
-        reserva.modeloVeiculo,
-        reserva.nomeSolicitante,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
+          return haystack.includes(term);
+        });
 
-      return haystack.includes(term);
-    });
-  }, [reservas, search, selectedDateRange]);
+    return sortReservasByOrder(filtered, sortOrder).map((reserva) => ({
+      ...reserva,
+      viagemNumber: getUserReservaNumber(viagemNumbers, reserva.idReserva),
+    }));
+  }, [reservas, search, selectedDateRange, sortOrder, viagemNumbers]);
 
   if (!motoristaId) {
     return (
@@ -85,12 +118,16 @@ export function MotoristaDashboardPage() {
       <PageHeader title="Minhas viagens" />
 
       <FleetFilters
+        className="fleet-filters--motorista"
         dateRangeTabs={DATE_RANGE_FILTERS}
         onDateRangeChange={setSelectedDateRange}
         onSearchChange={setSearch}
+        onSortOrderChange={handleSortOrderChange}
         search={search}
         searchPlaceholder="Buscar por viagem, destino, placa ou solicitante..."
         selectedDateRange={selectedDateRange}
+        selectedSortOrder={sortOrder}
+        sortOrderTabs={RESERVA_SORT_FILTERS}
       />
 
       {loading ? (
@@ -112,7 +149,7 @@ export function MotoristaDashboardPage() {
             <span>
               Mostrando {filteredReservas.length} de {reservas.length} viagens concluídas
             </span>
-            <span>Ordenadas da mais recente para a mais antiga (Viagem 1, 2, 3…)</span>
+            <span>Ordenado por: {getSortOrderLabel(sortOrder, RESERVA_SORT_FILTERS)}</span>
           </div>
 
           <MotoristaReservationCardGrid motoristaId={motoristaId} reservas={filteredReservas} />
