@@ -488,7 +488,8 @@ INSERT INTO manutencoes (id_manutencao, id_veiculo, tipo_manutencao, descricao_p
 (5, 6, 'CORRETIVA',  'Substituição da bateria após falha em partida fria.',                       '2026-03-22', 27500.00, 690.00,  'Baterias Express',      'CONCLUIDA'),
 (6, 9, 'CORRETIVA',  'Diagnóstico de falha geral no motor — viabilidade de reparo em análise.',   '2026-01-10', 141900.00,0.00,    'Mecânica Central LTDA', 'CANCELADA'),
 (7, 2, 'PREVENTIVA', 'Alinhamento, balanceamento e rodízio de pneus.',                            '2026-04-02', 8100.00,  240.00,  'Pneus & Cia',           'CONCLUIDA'),
-(8, 3, 'PREVENTIVA', 'Revisão programada dos 45.000 km.',                                         '2026-04-25', 46900.00, 560.00,  'Concessionária GM',     'AGENDADA')
+(8, 3, 'PREVENTIVA', 'Revisão programada dos 45.000 km.',                                         '2026-04-25', 46900.00, 560.00,  'Concessionária GM',     'AGENDADA'),
+(9, 1, 'PREVENTIVA', 'Revisão programada dos 60.000 km — fluido de freio e filtros.',            '2026-06-15', 60000.00, null,    null,                    'AGENDADA')
 ON CONFLICT DO NOTHING;
 
 

@@ -27,6 +27,8 @@ import { MotoristaIniciarCorridaPage } from './modules/motorista/pages/Motorista
 import { MotoristaReservaDetalhePage } from './modules/motorista/pages/MotoristaReservaDetalhePage';
 import { MotoristaReservaHistoricoPage } from './modules/motorista/pages/MotoristaReservaHistoricoPage';
 import { MotoristaVeiculoDetalhePage } from './modules/motorista/pages/MotoristaVeiculoDetalhePage';
+import { MotoristaManutencaoPage } from './modules/motorista/pages/MotoristaManutencaoPage';
+import { MotoristaSolicitarManutencaoPage } from './modules/motorista/pages/MotoristaSolicitarManutencaoPage';
 import { MotoristaVeiculosPage } from './modules/motorista/pages/MotoristaVeiculosPage';
 import { HomePage } from './modules/public/pages/HomePage';
 import { LoginPage } from './modules/public/pages/LoginPage';
@@ -111,6 +113,8 @@ function App() {
               <Route path=":motoristaId/veiculos" element={<MotoristaVeiculosPage />} />
               <Route path=":motoristaId/veiculos/:vehicleId" element={<MotoristaVeiculoDetalhePage />} />
               <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
+              <Route path=":motoristaId/manutencao" element={<MotoristaManutencaoPage />} />
+              <Route path=":motoristaId/manutencao/solicitar" element={<MotoristaSolicitarManutencaoPage />} />
               <Route path=":motoristaId/reservas/:reservaId" element={<MotoristaReservaDetalhePage />} />
               <Route path=":motoristaId/reservas/:reservaId/checklist-saida" element={<ChecklistSaidaPage />} />
               <Route
