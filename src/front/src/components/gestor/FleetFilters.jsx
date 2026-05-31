@@ -4,12 +4,15 @@ export function FleetFilters({
   onSearchChange,
   onStatusChange,
   onTypeChange,
+  onDateRangeChange,
   search,
   searchPlaceholder = 'Buscar por placa, modelo ou tipo...',
   selectedStatus,
   selectedType = 'Todos',
+  selectedDateRange,
   statusTabs,
   vehicleTypeTabs,
+  dateRangeTabs,
 }) {
   return (
     <div className="fleet-filters">
@@ -25,19 +28,21 @@ export function FleetFilters({
       </label>
 
       <div className="fleet-filters__toolbar">
-        <div aria-label="Filtrar por status" className="filter-tabs" role="tablist">
-          {statusTabs.map((tab) => (
-            <button
-              aria-pressed={selectedStatus === tab}
-              className={`filter-tab ${selectedStatus === tab ? 'is-active' : ''}`}
-              key={tab}
-              onClick={() => onStatusChange(tab)}
-              type="button"
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        {statusTabs?.length ? (
+          <div aria-label="Filtrar por status" className="filter-tabs" role="tablist">
+            {statusTabs.map((tab) => (
+              <button
+                aria-pressed={selectedStatus === tab}
+                className={`filter-tab ${selectedStatus === tab ? 'is-active' : ''}`}
+                key={tab}
+                onClick={() => onStatusChange(tab)}
+                type="button"
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         {vehicleTypeTabs?.length ? (
           <div className="fleet-filters__type-wrap">
@@ -54,6 +59,28 @@ export function FleetFilters({
                 {vehicleTypeTabs.map((option) => (
                   <option key={option} value={option}>
                     {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ) : null}
+
+        {dateRangeTabs?.length ? (
+          <div className="fleet-filters__type-wrap">
+            <span className="fleet-filters__type-label" id="fleet-date-range-label">
+              Período
+            </span>
+            <label className="select-field fleet-filters__type" htmlFor="fleet-date-range">
+              <select
+                aria-labelledby="fleet-date-range-label"
+                id="fleet-date-range"
+                onChange={(event) => onDateRangeChange?.(event.target.value)}
+                value={selectedDateRange}
+              >
+                {dateRangeTabs.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
                   </option>
                 ))}
               </select>

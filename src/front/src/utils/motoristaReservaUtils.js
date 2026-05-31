@@ -78,6 +78,9 @@ export function canStartTrip(reserva) {
 
 export function getChecklistWindowMessage(reserva) {
   if (!reserva?.dataHoraInicioPrevista) return null;
+  if (reserva.statusReserva === 'CONCLUIDA' || reserva.statusReserva === 'EM_USO') {
+    return null;
+  }
   const now = new Date();
   const windowStart = getChecklistStartWindow(reserva.dataHoraInicioPrevista);
 
@@ -93,6 +96,25 @@ export function getChecklistWindowMessage(reserva) {
     return `Checklist liberado a partir de ${formatDateTime(windowStart)} (15 min antes da saída prevista).`;
   }
   return null;
+}
+
+export const DATE_RANGE_FILTERS = [
+  { id: 'all', label: 'Todas as datas' },
+  { id: '7d', label: 'Última semana', days: 7 },
+  { id: '30d', label: 'Último mês', days: 30 },
+  { id: '90d', label: 'Últimos 3 meses', days: 90 },
+  { id: '180d', label: 'Últimos 6 meses', days: 180 },
+];
+
+export function filterReservasByDateRange(reservas, rangeId) {
+  const range = DATE_RANGE_FILTERS.find((item) => item.id === rangeId);
+  if (!range?.days) return reservas;
+
+  const cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
+  return reservas.filter((reserva) => {
+    const tripDate = parseReservaDateTime(reserva.dataHoraInicioPrevista)?.getTime();
+    return tripDate != null && tripDate >= cutoff;
+  });
 }
 
 export function sortReservasNewestFirst(reservas) {

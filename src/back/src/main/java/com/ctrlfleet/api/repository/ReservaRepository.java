@@ -24,6 +24,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
             select r
             from Reserva r
             where r.statusReserva = :status
+              and r.veiculo.motorista.id = :motoristaId
               and (
                 not exists (
                   select 1 from RegistroUso ru

@@ -2,16 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { Icon } from '../../../components/common/Icon';
+import { PageHeader } from '../../../components/common/PageHeader';
 import { MotoristaReservationCardGrid } from '../../../components/motorista/MotoristaReservationCardGrid';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
+import { listarReservasConcluidas } from '../../../services/motoristaApi';
 import {
-  listarReservasAprovadas,
-  listarReservasConcluidas,
-  listarReservasEmUso,
-} from '../../../services/motoristaApi';
-import { formatStatusReserva, sortReservasNewestFirst } from '../../../utils/motoristaReservaUtils';
-
-const STATUS_TABS = ['Todas', 'Aprovadas', 'Em uso', 'Finalizadas'];
+  DATE_RANGE_FILTERS,
+  filterReservasByDateRange,
+  sortReservasNewestFirst,
+} from '../../../utils/motoristaReservaUtils';
 
 function normalizeReserva(reserva) {
   return {
@@ -24,41 +23,25 @@ export function MotoristaDashboardPage() {
   const location = useLocation();
   const motoristaId = getCurrentMotoristaId();
 
-  const [state, setState] = useState({
-    aprovadas: [],
-    emUso: [],
-    concluidas: [],
-    loading: true,
-    error: null,
-  });
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('Todas');
+  const [selectedDateRange, setSelectedDateRange] = useState('90d');
 
   const loadReservas = useCallback(async () => {
     if (!motoristaId) return;
 
-    setState((current) => ({ ...current, loading: true, error: null }));
+    setLoading(true);
+    setError(null);
 
     try {
-      const [aprovadas, emUso, concluidas] = await Promise.all([
-        listarReservasAprovadas(motoristaId),
-        listarReservasEmUso(motoristaId),
-        listarReservasConcluidas(motoristaId),
-      ]);
-
-      setState({
-        aprovadas: (aprovadas || []).map(normalizeReserva),
-        emUso: (emUso || []).map(normalizeReserva),
-        concluidas: (concluidas || []).map(normalizeReserva),
-        loading: false,
-        error: null,
-      });
-    } catch (error) {
-      setState((current) => ({
-        ...current,
-        loading: false,
-        error: error.message || 'Não foi possível carregar as viagens.',
-      }));
+      const concluidas = await listarReservasConcluidas(motoristaId);
+      setReservas(sortReservasNewestFirst((concluidas || []).map(normalizeReserva)));
+    } catch (err) {
+      setError(err.message || 'Não foi possível carregar as viagens.');
+    } finally {
+      setLoading(false);
     }
   }, [motoristaId]);
 
@@ -66,28 +49,13 @@ export function MotoristaDashboardPage() {
     loadReservas();
   }, [loadReservas, location.key]);
 
-  const allReservas = useMemo(() => {
-    const byId = new Map();
-    [...state.emUso, ...state.aprovadas, ...state.concluidas].forEach((reserva) => {
-      byId.set(reserva.idReserva, reserva);
-    });
-    return sortReservasNewestFirst(Array.from(byId.values()));
-  }, [state.aprovadas, state.concluidas, state.emUso]);
-
   const filteredReservas = useMemo(() => {
     const term = search.trim().toLowerCase();
+    const byDate = filterReservasByDateRange(reservas, selectedDateRange);
 
-    return allReservas.filter((reserva) => {
-      const statusLabel = formatStatusReserva(reserva.statusReserva);
-      const matchesStatus =
-        selectedStatus === 'Todas' ||
-        (selectedStatus === 'Aprovadas' && reserva.statusReserva === 'APROVADA') ||
-        (selectedStatus === 'Em uso' && reserva.statusReserva === 'EM_USO') ||
-        (selectedStatus === 'Finalizadas' && reserva.statusReserva === 'CONCLUIDA');
+    if (!term) return byDate;
 
-      if (!matchesStatus) return false;
-      if (!term) return true;
-
+    return byDate.filter((reserva) => {
       const haystack = [
         reserva.idReserva,
         reserva.destino,
@@ -95,7 +63,6 @@ export function MotoristaDashboardPage() {
         reserva.placaVeiculo,
         reserva.modeloVeiculo,
         reserva.nomeSolicitante,
-        statusLabel,
       ]
         .filter(Boolean)
         .join(' ')
@@ -103,7 +70,7 @@ export function MotoristaDashboardPage() {
 
       return haystack.includes(term);
     });
-  }, [allReservas, search, selectedStatus]);
+  }, [reservas, search, selectedDateRange]);
 
   if (!motoristaId) {
     return (
@@ -115,33 +82,35 @@ export function MotoristaDashboardPage() {
 
   return (
     <div className="page-stack motorista-page motorista-dashboard">
+      <PageHeader title="Minhas viagens" />
+
       <FleetFilters
+        dateRangeTabs={DATE_RANGE_FILTERS}
+        onDateRangeChange={setSelectedDateRange}
         onSearchChange={setSearch}
-        onStatusChange={setSelectedStatus}
         search={search}
         searchPlaceholder="Buscar por viagem, destino, placa ou solicitante..."
-        selectedStatus={selectedStatus}
-        statusTabs={STATUS_TABS}
+        selectedDateRange={selectedDateRange}
       />
 
-      {state.loading ? (
+      {loading ? (
         <div className="admin-dashboard__loading">
           <span aria-hidden="true" className="admin-dashboard__spinner" />
           <p>Carregando viagens...</p>
         </div>
-      ) : state.error ? (
+      ) : error ? (
         <div className="admin-dashboard__error">
           <Icon name="alert" />
           <div>
             <strong>Falha ao carregar viagens</strong>
-            <p>{state.error}</p>
+            <p>{error}</p>
           </div>
         </div>
       ) : (
         <>
           <div className="motorista-dashboard__summary">
             <span>
-              Mostrando {filteredReservas.length} de {allReservas.length} viagens
+              Mostrando {filteredReservas.length} de {reservas.length} viagens concluídas
             </span>
             <span>Ordenadas da mais recente para a mais antiga (Viagem 1, 2, 3…)</span>
           </div>

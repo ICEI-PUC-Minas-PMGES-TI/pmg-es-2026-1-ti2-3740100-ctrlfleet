@@ -85,7 +85,12 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
         const isConcluida = reserva.statusReserva === 'CONCLUIDA';
         const checklistDone = Boolean(reserva.checklistSaidaConcluido);
         const canFillChecklist = canOpenChecklistSaida(reserva);
-        const windowMessage = getChecklistWindowMessage(reserva);
+        const windowMessage = isConcluida ? null : getChecklistWindowMessage(reserva);
+        const kmSaida = reserva.quilometragemSaidaTrajeto;
+        const kmRetorno = reserva.quilometragemRetornoTrajeto;
+        const kmPercorrida =
+          reserva.quilometragemPercorridaTrajeto ??
+          (kmSaida != null && kmRetorno != null ? kmRetorno - kmSaida : null);
         const statusLabel = formatStatusReserva(reserva.statusReserva);
         const secondaryAction = getSecondaryAction({
           reserva,
@@ -155,6 +160,10 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
 
               <dl className="motorista-viagem-card__meta">
                 <div>
+                  <dt>Solicitante</dt>
+                  <dd>{reserva.nomeSolicitante || '—'}</dd>
+                </div>
+                <div>
                   <dt>Saída prevista</dt>
                   <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
                 </div>
@@ -163,16 +172,20 @@ export function MotoristaReservationCardGrid({ motoristaId, reservas }) {
                   <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
                 </div>
                 <div>
-                  <dt>Última KM</dt>
-                  <dd>{formatKm(reserva.ultimaQuilometragemVeiculo)}</dd>
+                  <dt>KM inicial (saída)</dt>
+                  <dd>{formatKm(kmSaida)}</dd>
                 </div>
                 <div>
                   <dt>KM no checklist</dt>
-                  <dd>
-                    {checklistDone || isEmUso || isConcluida
-                      ? formatKm(reserva.quilometragemSaidaTrajeto)
-                      : 'Sem registro'}
-                  </dd>
+                  <dd>{formatKm(kmSaida)}</dd>
+                </div>
+                <div>
+                  <dt>KM final (retorno)</dt>
+                  <dd>{formatKm(kmRetorno)}</dd>
+                </div>
+                <div>
+                  <dt>KM percorrida</dt>
+                  <dd>{formatKm(kmPercorrida)}</dd>
                 </div>
               </dl>
             </div>

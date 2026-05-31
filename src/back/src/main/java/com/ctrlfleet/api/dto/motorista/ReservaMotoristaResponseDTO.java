@@ -27,6 +27,10 @@ public class ReservaMotoristaResponseDTO {
     private List<ChecklistItemResponseDTO> checklistRetorno;
     /** Quilometragem registrada na saída do trajeto atual; nulo se não há registro de uso aberto. */
     private Double quilometragemSaidaTrajeto;
+    /** Quilometragem de retorno (viagem concluída). */
+    private Double quilometragemRetornoTrajeto;
+    /** KM percorrida na viagem concluída (retorno − saída). */
+    private Double quilometragemPercorridaTrajeto;
     /** Checklist de saída já salvo para esta reserva/motorista (antes de iniciar a corrida). */
     private boolean checklistSaidaConcluido;
 
@@ -52,6 +56,8 @@ public class ReservaMotoristaResponseDTO {
             List<ChecklistItemResponseDTO> checklistSaida,
             List<ChecklistItemResponseDTO> checklistRetorno,
             Double quilometragemSaidaTrajeto,
+            Double quilometragemRetornoTrajeto,
+            Double quilometragemPercorridaTrajeto,
             boolean checklistSaidaConcluido) {
         this.idReserva = idReserva;
         this.idSolicitante = idSolicitante;
@@ -74,6 +80,8 @@ public class ReservaMotoristaResponseDTO {
         this.checklistSaida = checklistSaida;
         this.checklistRetorno = checklistRetorno;
         this.quilometragemSaidaTrajeto = quilometragemSaidaTrajeto;
+        this.quilometragemRetornoTrajeto = quilometragemRetornoTrajeto;
+        this.quilometragemPercorridaTrajeto = quilometragemPercorridaTrajeto;
         this.checklistSaidaConcluido = checklistSaidaConcluido;
     }
 
@@ -107,5 +115,13 @@ public class ReservaMotoristaResponseDTO {
 
     public boolean isChecklistSaidaConcluido() {
         return checklistSaidaConcluido;
+    }
+
+    public Double getQuilometragemRetornoTrajeto() {
+        return quilometragemRetornoTrajeto;
+    }
+
+    public Double getQuilometragemPercorridaTrajeto() {
+        return quilometragemPercorridaTrajeto;
     }
 }

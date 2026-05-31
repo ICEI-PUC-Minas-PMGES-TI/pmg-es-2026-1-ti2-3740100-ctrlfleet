@@ -75,14 +75,7 @@ public class MotoristaJornadaService {
         return reservaRepository
                 .listarAprovadasDisponiveisParaMotorista(motoristaId, StatusReserva.APROVADA)
                 .stream()
-                .map(reserva -> {
-                    Double kmChecklist = registroUsoRepository
-                            .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reserva.getId(), motoristaId)
-                            .map(RegistroUso::getQuilometragemSaida)
-                            .orElse(null);
-                    return toReservaResponseDTO(
-                            motoristaId, reserva, Collections.emptyList(), Collections.emptyList(), kmChecklist);
-                })
+                .map(reserva -> toReservaResponseDTO(motoristaId, reserva, Collections.emptyList(), Collections.emptyList()))
                 .toList();
     }
 
@@ -91,14 +84,7 @@ public class MotoristaJornadaService {
         return reservaRepository
                 .listarEmUsoPorMotorista(motoristaId, StatusReserva.EM_USO)
                 .stream()
-                .map(reserva -> {
-                    Double kmSaidaAberto = registroUsoRepository
-                            .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reserva.getId(), motoristaId)
-                            .map(RegistroUso::getQuilometragemSaida)
-                            .orElse(null);
-                    return toReservaResponseDTO(
-                            motoristaId, reserva, Collections.emptyList(), Collections.emptyList(), kmSaidaAberto);
-                })
+                .map(reserva -> toReservaResponseDTO(motoristaId, reserva, Collections.emptyList(), Collections.emptyList()))
                 .toList();
     }
 
@@ -107,7 +93,7 @@ public class MotoristaJornadaService {
         return reservaRepository
                 .listarConcluidasPorMotorista(motoristaId, StatusReserva.CONCLUIDA)
                 .stream()
-                .map(reserva -> toReservaResponseDTO(motoristaId, reserva, Collections.emptyList(), Collections.emptyList(), null))
+                .map(reserva -> toReservaResponseDTO(motoristaId, reserva, Collections.emptyList(), Collections.emptyList()))
                 .toList();
     }
 
@@ -801,8 +787,14 @@ public class MotoristaJornadaService {
     }
 
     private boolean checklistSaidaConcluido(Long reservaId, Long motoristaId) {
+        Optional<RegistroUso> aberto = registroUsoRepository.findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(
+                reservaId, motoristaId);
+        if (aberto.isPresent()) {
+            return aberto.get().isChecklistSaidaRegistrado();
+        }
         return registroUsoRepository
-                .findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(reservaId, motoristaId)
+                .findFirstByIdReservaAndMotoristaIdOrderByDataRetornoDesc(reservaId, motoristaId)
+                .filter(ru -> ru.getDataRetorno() != null)
                 .map(RegistroUso::isChecklistSaidaRegistrado)
                 .orElse(false);
     }
@@ -811,9 +803,30 @@ public class MotoristaJornadaService {
             Long motoristaId,
             Reserva reserva,
             List<ChecklistItemResponseDTO> checklistSaida,
-            List<ChecklistItemResponseDTO> checklistRetorno,
-            Double quilometragemSaidaTrajeto) {
+            List<ChecklistItemResponseDTO> checklistRetorno) {
         boolean checklistConcluido = checklistSaidaConcluido(reserva.getId(), motoristaId);
+
+        Double quilometragemSaidaTrajeto = null;
+        Double quilometragemRetornoTrajeto = null;
+        Double quilometragemPercorridaTrajeto = null;
+
+        Optional<RegistroUso> aberto = registroUsoRepository.findFirstByIdReservaAndMotoristaIdAndDataRetornoIsNull(
+                reserva.getId(), motoristaId);
+        if (aberto.isPresent()) {
+            quilometragemSaidaTrajeto = aberto.get().getQuilometragemSaida();
+        } else {
+            Optional<RegistroUso> fechado = registroUsoRepository.findFirstByIdReservaAndMotoristaIdOrderByDataRetornoDesc(
+                    reserva.getId(), motoristaId);
+            if (fechado.isPresent() && fechado.get().getDataRetorno() != null) {
+                RegistroUso registro = fechado.get();
+                quilometragemSaidaTrajeto = registro.getQuilometragemSaida();
+                quilometragemRetornoTrajeto = registro.getQuilometragemRetorno();
+                if (quilometragemSaidaTrajeto != null && quilometragemRetornoTrajeto != null) {
+                    quilometragemPercorridaTrajeto = quilometragemRetornoTrajeto - quilometragemSaidaTrajeto;
+                }
+            }
+        }
+
         return new ReservaMotoristaResponseDTO(
                 reserva.getId(),
                 reserva.getUsuario().getId(),
@@ -838,6 +851,8 @@ public class MotoristaJornadaService {
                 checklistSaida,
                 checklistRetorno,
                 quilometragemSaidaTrajeto,
+                quilometragemRetornoTrajeto,
+                quilometragemPercorridaTrajeto,
                 checklistConcluido);
     }
 
