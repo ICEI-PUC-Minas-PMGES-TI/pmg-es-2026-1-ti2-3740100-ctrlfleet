@@ -53,6 +53,18 @@ public class Manutencao {
     @Column(name = "oficina_executor")
     private String oficinaExecutor;
 
+    @Column(name = "servicos_realizados", columnDefinition = "TEXT")
+    private String servicosRealizados;
+
+    @Column(name = "data_conclusao")
+    private LocalDate dataConclusao;
+
+    @Column(name = "garantia")
+    private String garantia;
+
+    @Column(name = "comprovante_nf", nullable = true)
+    private String comprovanteNf;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusManutencao status = StatusManutencao.PENDENTE;
@@ -139,6 +151,38 @@ public class Manutencao {
 
     public void setOficinaExecutor(String oficinaExecutor) {
         this.oficinaExecutor = oficinaExecutor;
+    }
+
+    public String getServicosRealizados() {
+        return servicosRealizados;
+    }
+
+    public void setServicosRealizados(String servicosRealizados) {
+        this.servicosRealizados = servicosRealizados;
+    }
+
+    public LocalDate getDataConclusao() {
+        return dataConclusao;
+    }
+
+    public void setDataConclusao(LocalDate dataConclusao) {
+        this.dataConclusao = dataConclusao;
+    }
+
+    public String getGarantia() {
+        return garantia;
+    }
+
+    public void setGarantia(String garantia) {
+        this.garantia = garantia;
+    }
+
+    public String getComprovanteNf() {
+        return comprovanteNf;
+    }
+
+    public void setComprovanteNf(String comprovanteNf) {
+        this.comprovanteNf = comprovanteNf;
     }
 
     public StatusManutencao getStatus() {

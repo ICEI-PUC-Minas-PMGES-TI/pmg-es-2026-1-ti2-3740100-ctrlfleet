@@ -41,6 +41,8 @@ public interface RegistroUsoRepository extends JpaRepository<RegistroUso, Long> 
 
     boolean existsByIdReserva(Long idReserva);
 
+    boolean existsByVeiculoIdAndDataRetornoIsNull(Long veiculoId);
+
     @Query("""
             select max(coalesce(ru.quilometragemRetorno, ru.quilometragemSaida))
             from RegistroUso ru

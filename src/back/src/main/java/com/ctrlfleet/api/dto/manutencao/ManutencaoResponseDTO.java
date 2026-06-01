@@ -24,6 +24,10 @@ public class ManutencaoResponseDTO {
     private Integer diasRestantes;
     private Double custoTotal;
     private String oficinaExecutor;
+    private String servicosRealizados;
+    private LocalDate dataConclusao;
+    private String garantia;
+    private String comprovanteNf;
     private StatusManutencao status;
     private boolean emergencia;
     private PrioridadeAlerta prioridade;
@@ -44,6 +48,10 @@ public class ManutencaoResponseDTO {
         dto.quilometragemAtual = quilometragemAtual;
         dto.custoTotal = manutencao.getCustoTotal();
         dto.oficinaExecutor = manutencao.getOficinaExecutor();
+        dto.servicosRealizados = manutencao.getServicosRealizados();
+        dto.dataConclusao = manutencao.getDataConclusao();
+        dto.garantia = manutencao.getGarantia();
+        dto.comprovanteNf = manutencao.getComprovanteNf();
         dto.status = manutencao.getStatus();
         dto.emergencia = manutencao.isEmergencia();
         dto.prioridade = manutencao.getPrioridade();
@@ -168,6 +176,38 @@ public class ManutencaoResponseDTO {
 
     public void setOficinaExecutor(String oficinaExecutor) {
         this.oficinaExecutor = oficinaExecutor;
+    }
+
+    public String getServicosRealizados() {
+        return servicosRealizados;
+    }
+
+    public void setServicosRealizados(String servicosRealizados) {
+        this.servicosRealizados = servicosRealizados;
+    }
+
+    public LocalDate getDataConclusao() {
+        return dataConclusao;
+    }
+
+    public void setDataConclusao(LocalDate dataConclusao) {
+        this.dataConclusao = dataConclusao;
+    }
+
+    public String getGarantia() {
+        return garantia;
+    }
+
+    public void setGarantia(String garantia) {
+        this.garantia = garantia;
+    }
+
+    public String getComprovanteNf() {
+        return comprovanteNf;
+    }
+
+    public void setComprovanteNf(String comprovanteNf) {
+        this.comprovanteNf = comprovanteNf;
     }
 
     public StatusManutencao getStatus() {
