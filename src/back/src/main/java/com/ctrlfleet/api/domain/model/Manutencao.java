@@ -53,6 +53,9 @@ public class Manutencao {
     @Column(name = "oficina_executor")
     private String oficinaExecutor;
 
+    @Column(name = "prazo_previsto_dias")
+    private Integer prazoPrevistoDias;
+
     @Column(name = "servicos_realizados", columnDefinition = "TEXT")
     private String servicosRealizados;
 
@@ -79,7 +82,8 @@ public class Manutencao {
     @Column(length = 20)
     private PrioridadeAlerta prioridade;
 
-    public Manutencao() {}
+    public Manutencao() {
+    }
 
     public Long getId() {
         return id;
@@ -215,5 +219,13 @@ public class Manutencao {
 
     public void setPrioridade(PrioridadeAlerta prioridade) {
         this.prioridade = prioridade;
+    }
+
+    public Integer getPrazoPrevistoDias() {
+        return prazoPrevistoDias;
+    }
+
+    public void setPrazoPrevistoDias(Integer prazoPrevistoDias) {
+        this.prazoPrevistoDias = prazoPrevistoDias;
     }
 }

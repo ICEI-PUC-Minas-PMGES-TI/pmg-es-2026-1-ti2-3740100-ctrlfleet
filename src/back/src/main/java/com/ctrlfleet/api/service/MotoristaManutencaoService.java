@@ -11,6 +11,7 @@ import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.dto.manutencao.AlertaResponseDTO;
 import com.ctrlfleet.api.dto.manutencao.ConcluirManutencaoRequestDTO;
+import com.ctrlfleet.api.dto.manutencao.EncaminharOficinaRequestDTO;
 import com.ctrlfleet.api.dto.manutencao.ManutencaoResponseDTO;
 import com.ctrlfleet.api.dto.manutencao.MotoristaManutencaoPainelDTO;
 import com.ctrlfleet.api.dto.manutencao.SolicitarManutencaoRequestDTO;
@@ -19,6 +20,9 @@ import com.ctrlfleet.api.repository.ManutencaoRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -30,16 +34,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MotoristaManutencaoService {
 
     private static final int PREVENTIVE_DAYS_THRESHOLD = 45;
     private static final double PREVENTIVE_KM_THRESHOLD = 2000d;
-    private static final List<StatusManutencao> STATUS_MANUTENCAO_ABERTA =
-            List.of(StatusManutencao.PENDENTE, StatusManutencao.EM_ANDAMENTO);
+    private static final List<StatusManutencao> STATUS_MANUTENCAO_ABERTA = List.of(StatusManutencao.PENDENTE,
+            StatusManutencao.EM_ANDAMENTO);
 
     private final ManutencaoRepository manutencaoRepository;
     private final AlertaRepository alertaRepository;
@@ -67,8 +69,8 @@ public class MotoristaManutencaoService {
     public MotoristaManutencaoPainelDTO montarPainel(Long motoristaId) {
         validarMotoristaAtivo(motoristaId);
 
-        List<Manutencao> registros =
-                manutencaoRepository.findByVeiculo_Motorista_IdOrderByDataIdentificacaoDescIdDesc(motoristaId);
+        List<Manutencao> registros = manutencaoRepository
+                .findByVeiculo_Motorista_IdOrderByDataIdentificacaoDescIdDesc(motoristaId);
         Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
 
         MotoristaManutencaoPainelDTO painel = new MotoristaManutencaoPainelDTO();
@@ -82,8 +84,8 @@ public class MotoristaManutencaoService {
                                 || item.getStatus() == StatusManutencao.CANCELADA
                                 || item.getStatus() == StatusManutencao.REPROVADA)
                         .sorted(Comparator.comparing(
-                                        Manutencao::getDataIdentificacao,
-                                        Comparator.nullsLast(Comparator.reverseOrder()))
+                                Manutencao::getDataIdentificacao,
+                                Comparator.nullsLast(Comparator.reverseOrder()))
                                 .thenComparing(Manutencao::getId, Comparator.reverseOrder()))
                         .limit(12)
                         .map(item -> enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId())))
@@ -205,16 +207,21 @@ public class MotoristaManutencaoService {
         registros.stream()
                 .filter(item -> item.getTipoManutencao() == TipoManutencao.PREVENTIVA
                         && item.getStatus() == StatusManutencao.AGENDADA)
-                .sorted(Comparator.comparing(Manutencao::getDataRealizada, Comparator.nullsLast(Comparator.naturalOrder())))
+                .sorted(Comparator.comparing(Manutencao::getDataRealizada,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
                 .forEach(item -> {
                     ManutencaoResponseDTO dto = enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId()));
-                    if (!isPreventivaProxima(dto, hoje)) return;
+                    if (!isPreventivaProxima(dto, hoje))
+                        return;
                     deduplicado.putIfAbsent(item.getVeiculo().getId(), dto);
                 });
 
         return deduplicado.values().stream()
-                .sorted(Comparator.comparing(ManutencaoResponseDTO::getDiasRestantes, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(ManutencaoResponseDTO::getKmRestantes, Comparator.nullsLast(Comparator.naturalOrder())))
+                .sorted(Comparator
+                        .comparing(ManutencaoResponseDTO::getDiasRestantes,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(ManutencaoResponseDTO::getKmRestantes,
+                                Comparator.nullsLast(Comparator.naturalOrder())))
                 .toList();
     }
 
@@ -230,8 +237,8 @@ public class MotoristaManutencaoService {
         return registros.stream()
                 .filter(item -> item.getStatus() == status)
                 .sorted(Comparator.comparing(
-                                Manutencao::getDataIdentificacao,
-                                Comparator.nullsLast(Comparator.reverseOrder()))
+                        Manutencao::getDataIdentificacao,
+                        Comparator.nullsLast(Comparator.reverseOrder()))
                         .thenComparing(Manutencao::getId, Comparator.reverseOrder()))
                 .map(item -> enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId())))
                 .toList();
@@ -345,5 +352,46 @@ public class MotoristaManutencaoService {
     private String resumir(String descricao) {
         String texto = descricao.trim();
         return texto.length() <= 120 ? texto : texto.substring(0, 117) + "...";
+    }
+
+    @Transactional
+    public ManutencaoResponseDTO encaminharParaOficina(Long id, EncaminharOficinaRequestDTO request) {
+        Manutencao manutencao = manutencaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Manutenção não encontrada com ID: " + id));
+
+        if (manutencao.getStatus() != StatusManutencao.PENDENTE) {
+            throw new IllegalStateException("Apenas manutenções PENDENTES podem ser encaminhadas para a oficina.");
+        }
+
+        Usuario gestor = usuarioRepository.findById(request.getIdGestor())
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Gestor não encontrado com ID: " + request.getIdGestor()));
+
+        // Atualiza os dados da manutenção conforme os requisitos exatos da issue
+        manutencao.setStatus(StatusManutencao.EM_ANDAMENTO);
+        manutencao.setOficinaExecutor(request.getOficinaExecutor().trim());
+        manutencao.setPrazoPrevistoDias(request.getPrazoPrevistoDias()); // Registra o prazo pedido na OS
+
+        // Atualiza o status do veículo usando o Enum correto do projeto
+        Veiculo veiculo = manutencao.getVeiculo();
+        if (veiculo.getStatus() != StatusVeiculo.DESATIVADO) {
+            veiculo.setStatus(StatusVeiculo.MANUTENCAO); // Corrigido de EM_MANUTENCAO para MANUTENCAO
+            veiculoRepository.save(veiculo);
+        }
+
+        Manutencao salva = manutencaoRepository.save(manutencao);
+
+        auditoriaService.registrar(
+                "ENCAMINHAR_MANUTENCAO",
+                gestor.getNome(),
+                veiculo.getPlaca(),
+                "EM_ANDAMENTO",
+                "INFO",
+                null,
+                "Manutenção #" + id + " encaminhada para oficina: " + request.getOficinaExecutor() + " com prazo de "
+                        + request.getPrazoPrevistoDias() + " dias.");
+
+        Double kmAtual = registroUsoRepository.buscarUltimaQuilometragemVeiculo(veiculo.getId()).orElse(null);
+        return enriquecerDto(salva, kmAtual);
     }
 }

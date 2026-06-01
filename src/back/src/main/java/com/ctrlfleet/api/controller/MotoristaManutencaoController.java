@@ -1,5 +1,6 @@
 package com.ctrlfleet.api.controller;
 
+import com.ctrlfleet.api.dto.manutencao.EncaminharOficinaRequestDTO;
 import com.ctrlfleet.api.dto.manutencao.ManutencaoResponseDTO;
 import com.ctrlfleet.api.dto.manutencao.MotoristaManutencaoPainelDTO;
 import com.ctrlfleet.api.dto.manutencao.SolicitarManutencaoRequestDTO;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,5 +36,12 @@ public class MotoristaManutencaoController {
             @PathVariable Long motoristaId, @Valid @RequestBody SolicitarManutencaoRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(motoristaManutencaoService.solicitarManutencao(motoristaId, request));
+    }
+
+    @PutMapping("/triagem/{id}/encaminhar")
+    public ResponseEntity<ManutencaoResponseDTO> encaminharParaOficina(
+            @PathVariable Long id,
+            @Valid @RequestBody EncaminharOficinaRequestDTO request) {
+        return ResponseEntity.ok(motoristaManutencaoService.encaminharParaOficina(id, request));
     }
 }
