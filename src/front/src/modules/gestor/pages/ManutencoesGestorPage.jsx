@@ -9,7 +9,8 @@ import { listarManutencoesPendentes, encaminharParaOficina } from '../../../serv
 export function ManutencoesGestorPage() {
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [uiState, setUiState] = useState({ loading: true, error: null });
-  const [modal, setModal] = useState({ open: false, item: null, oficina: '', submitting: false });
+  // Adicionado 'prazo' ao estado inicial do modal
+  const [modal, setModal] = useState({ open: false, item: null, oficina: '', prazo: '', submitting: false });
 
   const carregarTriagem = useCallback(async () => {
     setUiState({ loading: true, error: null });
@@ -27,31 +28,39 @@ export function ManutencoesGestorPage() {
   }, [carregarTriagem]);
 
   const abrirEncaminhamento = (item) => {
-    setModal({ open: true, item, oficina: '', submitting: false });
+    // Resetando os campos de oficina e prazo ao abrir
+    setModal({ open: true, item, oficina: '', prazo: '', submitting: false });
   };
 
   const fecharModal = () => {
     if (modal.submitting) return;
-    setModal({ open: false, item: null, oficina: '', submitting: false });
+    setModal({ open: false, item: null, oficina: '', prazo: '', submitting: false });
   };
 
   const handleConfirmarOficina = async (e) => {
     e.preventDefault();
-    if (!modal.oficina.trim() || modal.submitting) return;
+    const prazoNumerico = parseInt(modal.prazo, 10);
+    
+    // Validação básica de segurança antes de disparar a API
+    if (!modal.oficina.trim() || !modal.prazo || prazoNumerico <= 0 || modal.submitting) return;
 
     setModal(curr => ({ ...curr, submitting: true }));
     try {
       await encaminharParaOficina(modal.item.id, {
         idGestor: 2, // ID simulado do Gestor autenticado
-        oficinaExecutor: modal.oficina.trim()
+        oficinaExecutor: modal.oficina.trim(),
+        prazoPrevistoDias: prazoNumerico // Enviando o novo campo esperado pelo DTO do Java
       });
-      setModal({ open: false, item: null, oficina: '', submitting: false });
+      setModal({ open: false, item: null, oficina: '', prazo: '', submitting: false });
       carregarTriagem();
     } catch (err) {
       alert(err.message);
       setModal(curr => ({ ...curr, submitting: false }));
     }
   };
+
+  // Validador auxiliar para simplificar o disabled dos botões
+  const isFormInvalido = !modal.oficina.trim() || !modal.prazo || parseInt(modal.prazo, 10) <= 0;
 
   return (
     <div className="page-stack">
@@ -132,7 +141,7 @@ export function ManutencoesGestorPage() {
       <Modal
         open={modal.open}
         title="Encaminhar para Oficina"
-        subtitle="Informe o estabelecimento responsável pelo reparo mecânico do veículo."
+        subtitle="Informe o estabelecimento responsável e o prazo estimado para o reparo mecânico do veículo."
         onClose={fecharModal}
         footer={
           <>
@@ -141,7 +150,7 @@ export function ManutencoesGestorPage() {
             </ActionButton>
             <ActionButton 
               variant="primary" 
-              disabled={!modal.oficina.trim() || modal.submitting} 
+              disabled={isFormInvalido || modal.submitting} 
               onClick={handleConfirmarOficina}
             >
               {modal.submitting ? 'Salvando...' : 'Confirmar Envio'}
@@ -162,7 +171,9 @@ export function ManutencoesGestorPage() {
               </div>
             </dl>
 
-            <form onSubmit={handleConfirmarOficina} style={{ marginTop: '1.5rem' }}>
+            <form onSubmit={handleConfirmarOficina} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              {/* Campo: Oficina */}
               <label className="admin-form-field admin-form-field--full">
                 <span className="admin-form-field__label">
                   Nome do Estabelecimento / Oficina <span className="admin-form-field__req">*</span>
@@ -170,7 +181,7 @@ export function ManutencoesGestorPage() {
                 <input 
                   type="text"
                   className="admin-form-field__input"
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', marginTop: '0.25rem' }}
                   value={modal.oficina}
                   onChange={(e) => setModal(curr => ({ ...curr, oficina: e.target.value }))}
                   placeholder="Ex: Auto Center e Oficina mecânica Silva"
@@ -179,6 +190,26 @@ export function ManutencoesGestorPage() {
                   disabled={modal.submitting}
                 />
               </label>
+
+              {/* Novo Campo Adicionado: Prazo em Dias */}
+              <label className="admin-form-field admin-form-field--full">
+                <span className="admin-form-field__label">
+                  Prazo Previsto (em dias) <span className="admin-form-field__req">*</span>
+                </span>
+                <input 
+                  type="number"
+                  className="admin-form-field__input"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', marginTop: '0.25rem' }}
+                  value={modal.prazo}
+                  min="1"
+                  step="1"
+                  onChange={(e) => setModal(curr => ({ ...curr, prazo: e.target.value }))}
+                  placeholder="Ex: 5"
+                  required
+                  disabled={modal.submitting}
+                />
+              </label>
+              
             </form>
           </div>
         )}
