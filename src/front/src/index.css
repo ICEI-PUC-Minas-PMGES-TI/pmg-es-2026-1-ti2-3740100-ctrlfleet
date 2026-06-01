@@ -1375,6 +1375,16 @@ a {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
 }
 
+.fleet-filters--gestor {
+  margin-bottom: 16px;
+}
+
+.section-card .fleet-filters--gestor {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 .fleet-filters--compact {
   padding: 0;
   border: none;

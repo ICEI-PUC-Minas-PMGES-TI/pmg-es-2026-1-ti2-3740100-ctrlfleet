@@ -7,10 +7,15 @@ import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { statusTabs, vehicleTypeTabs } from '../../../data/fleetData';
 import { desativarVeiculo, listarVeiculos } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView, pad2 } from '../../../services/veiculoMappers';
-import { filterFleetVehicles } from '../../../utils/fleetVehicleFilters';
+import {
+  buildFleetStatusTabs,
+  buildFleetTypeTabs,
+  filterFleetVehicles,
+  hasActiveFleetFilters,
+  resolveFleetFilterSelection,
+} from '../../../utils/fleetVehicleFilters';
 
 export function FleetPage() {
   const location = useLocation();
@@ -48,10 +53,53 @@ export function FleetPage() {
   useEffect(() => {
     const controller = new AbortController();
 
+    setSearch('');
+    setSelectedStatus('Todos');
+    setSelectedType('Todos');
     carregarVeiculos(controller.signal);
 
     return () => controller.abort();
   }, []);
+
+  const statusTabOptions = useMemo(
+    () => buildFleetStatusTabs(vehiclesData.items),
+    [vehiclesData.items],
+  );
+
+  const typeTabOptions = useMemo(
+    () => buildFleetTypeTabs(vehiclesData.items),
+    [vehiclesData.items],
+  );
+
+  const activeFilters = useMemo(
+    () =>
+      resolveFleetFilterSelection({
+        status: selectedStatus,
+        type: selectedType,
+        statusTabs: statusTabOptions,
+        typeTabs: typeTabOptions,
+      }),
+    [selectedStatus, selectedType, statusTabOptions, typeTabOptions],
+  );
+
+  useEffect(() => {
+    setSelectedStatus((current) => (current === activeFilters.status ? current : activeFilters.status));
+    setSelectedType((current) => (current === activeFilters.type ? current : activeFilters.type));
+  }, [activeFilters.status, activeFilters.type]);
+
+  const filteredVehicles = useMemo(
+    () =>
+      filterFleetVehicles(vehiclesData.items, {
+        search,
+        status: activeFilters.status,
+        type: activeFilters.type,
+      }),
+    [search, activeFilters.status, activeFilters.type, vehiclesData.items],
+  );
+
+  const showStatusFilter = statusTabOptions.length > 1;
+  const showTypeFilter = typeTabOptions.length > 1;
+  const filtersReady = !vehiclesData.loading && !vehiclesData.error && vehiclesData.items.length > 0;
 
   async function handleDeactivateVehicle(vehicle) {
     const confirmed = window.confirm(`Desativar o veiculo ${vehicle.plate}?`);
@@ -67,16 +115,6 @@ export function FleetPage() {
       }));
     }
   }
-
-  const filteredVehicles = useMemo(
-    () =>
-      filterFleetVehicles(vehiclesData.items, {
-        search,
-        status: selectedStatus,
-        type: selectedType,
-      }),
-    [search, selectedStatus, selectedType, vehiclesData.items],
-  );
 
   const summaryCards = useMemo(() => {
     const items = vehiclesData.items;
@@ -142,16 +180,21 @@ export function FleetPage() {
       </section>
 
       <SectionCard>
-        <FleetFilters
-          onSearchChange={setSearch}
-          onStatusChange={setSelectedStatus}
-          onTypeChange={setSelectedType}
-          search={search}
-          selectedStatus={selectedStatus}
-          selectedType={selectedType}
-          statusTabs={statusTabs}
-          vehicleTypeTabs={vehicleTypeTabs}
-        />
+        {filtersReady ? (
+          <FleetFilters
+            className="fleet-filters--gestor"
+            controlIdPrefix="gestor-frota"
+            onSearchChange={setSearch}
+            onStatusChange={setSelectedStatus}
+            onTypeChange={setSelectedType}
+            search={search}
+            selectedStatus={activeFilters.status}
+            selectedType={activeFilters.type}
+            statusSelectMode
+            statusTabs={showStatusFilter ? statusTabOptions : null}
+            vehicleTypeTabs={showTypeFilter ? typeTabOptions : null}
+          />
+        ) : null}
 
         {vehiclesData.loading ? (
           <div className="admin-dashboard__loading">
@@ -176,6 +219,13 @@ export function FleetPage() {
             <div className="table-summary">
               <span>
                 Mostrando {filteredVehicles.length} de {vehiclesData.items.length} veículos
+                {hasActiveFleetFilters({
+                  search,
+                  status: activeFilters.status,
+                  type: activeFilters.type,
+                })
+                  ? ` · Status: ${activeFilters.status} · Tipo: ${activeFilters.type}`
+                  : ''}
               </span>
               <span>Clique em um card para visualizar, editar ou desativar o veículo.</span>
             </div>
