@@ -29,3 +29,11 @@ export async function reprovarManutencao(manutencaoId, payload = {}) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function definirPrioridadeManutencao(manutencaoId, payload = {}) {
+  return request(`/gestor/manutencoes/${manutencaoId}/prioridade`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}

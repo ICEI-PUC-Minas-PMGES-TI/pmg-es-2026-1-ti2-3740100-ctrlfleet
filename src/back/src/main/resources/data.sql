@@ -557,16 +557,19 @@ END $$;
 -- =====================================================================
 -- 8. MANUTENCOES
 -- =====================================================================
-INSERT INTO manutencoes (id_manutencao, id_veiculo, tipo_manutencao, descricao_problema, data_realizada, quilometragem_registro, custo_total, oficina_executor, status) VALUES
-(1, 7, 'CORRETIVA',  'Troca da correia dentada e tensores após ruído anormal no motor.',          '2026-04-12', 87850.00, 1840.00, 'Mecânica Central LTDA', 'EM_ANDAMENTO'),
-(2, 8, 'CORRETIVA',  'Reparo no sistema de injeção eletrônica.',                                  '2026-04-20', 51120.00, 920.00,  'Auto Center Brasil',    'EM_ANDAMENTO'),
-(3, 1, 'PREVENTIVA', 'Revisão de 15.000 km — troca de óleo, filtros e checagem geral.',           '2026-03-04', 14980.00, 480.00,  'Concessionária GM',     'CONCLUIDA'),
-(4, 5, 'PREVENTIVA', 'Revisão dos 60.000 km e troca de pastilhas de freio.',                      '2026-02-18', 60050.00, 1320.00, 'Concessionária GM',     'CONCLUIDA'),
-(5, 6, 'CORRETIVA',  'Substituição da bateria após falha em partida fria.',                       '2026-03-22', 27500.00, 690.00,  'Baterias Express',      'CONCLUIDA'),
-(6, 9, 'CORRETIVA',  'Diagnóstico de falha geral no motor — viabilidade de reparo em análise.',   '2026-01-10', 141900.00,0.00,    'Mecânica Central LTDA', 'CANCELADA'),
-(7, 2, 'PREVENTIVA', 'Alinhamento, balanceamento e rodízio de pneus.',                            '2026-04-02', 8100.00,  240.00,  'Pneus & Cia',           'CONCLUIDA'),
-(8, 3, 'PREVENTIVA', 'Revisão programada dos 45.000 km.',                                         '2026-04-25', 46900.00, 560.00,  'Concessionária GM',     'AGENDADA'),
-(9, 1, 'PREVENTIVA', 'Revisão programada dos 60.000 km — fluido de freio e filtros.',            '2026-06-15', 60000.00, null,    null,                    'AGENDADA')
+INSERT INTO manutencoes (
+  id_manutencao, id_veiculo, tipo_manutencao, descricao_problema, data_realizada,
+  quilometragem_registro, custo_total, oficina_executor, status, data_identificacao, emergencia, prioridade
+) VALUES
+(1, 7, 'CORRETIVA',  'Troca da correia dentada e tensores após ruído anormal no motor.',          '2026-04-12', 87850.00, 1840.00, 'Mecânica Central LTDA', 'EM_ANDAMENTO', '2026-04-08 09:00:00', false, 'ALTA'),
+(2, 8, 'CORRETIVA',  'Reparo no sistema de injeção eletrônica.',                                  '2026-04-20', 51120.00, 920.00,  'Auto Center Brasil',    'EM_ANDAMENTO', '2026-04-15 11:30:00', false, 'ALTA'),
+(3, 1, 'PREVENTIVA', 'Revisão de 15.000 km — troca de óleo, filtros e checagem geral.',           '2026-03-04', 14980.00, 480.00,  'Concessionária GM',     'CONCLUIDA',    '2026-02-11 08:00:00', false, 'BAIXA'),
+(4, 5, 'PREVENTIVA', 'Revisão dos 60.000 km e troca de pastilhas de freio.',                      '2026-02-18', 60050.00, 1320.00, 'Concessionária GM',     'CONCLUIDA',    '2026-01-28 14:00:00', false, 'BAIXA'),
+(5, 6, 'CORRETIVA',  'Substituição da bateria após falha em partida fria.',                       '2026-03-22', 27500.00, 690.00,  'Baterias Express',      'CONCLUIDA',    '2026-03-18 07:45:00', false, 'MEDIA'),
+(6, 9, 'CORRETIVA',  'Diagnóstico de falha geral no motor — viabilidade de reparo em análise.',   '2026-01-10', 141900.00,0.00,    'Mecânica Central LTDA', 'CANCELADA',    '2026-01-05 10:20:00', false, 'ALTA'),
+(7, 2, 'PREVENTIVA', 'Alinhamento, balanceamento e rodízio de pneus.',                            '2026-04-02', 8100.00,  240.00,  'Pneus & Cia',           'CONCLUIDA',    '2026-03-12 09:15:00', false, 'BAIXA'),
+(8, 3, 'PREVENTIVA', 'Revisão programada dos 45.000 km.',                                         '2026-04-25', 46900.00, 560.00,  'Concessionária GM',     'AGENDADA',     '2026-04-04 08:30:00', false, 'BAIXA'),
+(9, 1, 'PREVENTIVA', 'Revisão programada dos 60.000 km — fluido de freio e filtros.',            '2026-06-15', 60000.00, null,    null,                    'AGENDADA',     '2026-05-25 09:00:00', false, 'BAIXA')
 ON CONFLICT DO NOTHING;
 
 -- Solicitações pendentes para triagem do gestor (issue 8.2)
@@ -581,6 +584,16 @@ INSERT INTO manutencoes (
 (13, 11, 4, 'CORRETIVA', 'Vazamento de óleo identificado no retorno da última viagem institucional.',   NULL, 44120.00, NULL, NULL, 'PENDENTE', '2026-05-31 11:20:00', false, 'ALTA'),
 (14, 12, 2, 'CORRETIVA', 'Luz de injeção acesa intermitentemente durante aceleração em subidas.',       NULL, 28700.00, NULL, NULL, 'PENDENTE', '2026-06-01 07:50:00', false, 'BAIXA')
 ON CONFLICT (id_manutencao) DO NOTHING;
+
+UPDATE manutencoes SET data_identificacao = '2026-04-08 09:00:00' WHERE id_manutencao = 1  AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-04-15 11:30:00' WHERE id_manutencao = 2  AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-02-11 08:00:00' WHERE id_manutencao = 3  AND tipo_manutencao = 'PREVENTIVA' AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-01-28 14:00:00' WHERE id_manutencao = 4  AND tipo_manutencao = 'PREVENTIVA' AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-03-18 07:45:00' WHERE id_manutencao = 5  AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-01-05 10:20:00' WHERE id_manutencao = 6  AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-03-12 09:15:00' WHERE id_manutencao = 7  AND tipo_manutencao = 'PREVENTIVA' AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-04-04 08:30:00' WHERE id_manutencao = 8  AND tipo_manutencao = 'PREVENTIVA' AND (data_identificacao IS NULL);
+UPDATE manutencoes SET data_identificacao = '2026-05-25 09:00:00' WHERE id_manutencao = 9  AND tipo_manutencao = 'PREVENTIVA' AND (data_identificacao IS NULL);
 
 
 -- =====================================================================

@@ -6,6 +6,11 @@ import com.ctrlfleet.api.domain.enums.TipoManutencao;
 import com.ctrlfleet.api.domain.model.Manutencao;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class ManutencaoResponseDTO {
 
@@ -28,6 +33,7 @@ public class ManutencaoResponseDTO {
     private boolean emergencia;
     private PrioridadeAlerta prioridade;
     private String proximidadeLabel;
+    private boolean atrasada;
     private String nomeMotorista;
 
     public static ManutencaoResponseDTO fromEntity(Manutencao manutencao, Double quilometragemAtual) {
@@ -45,7 +51,7 @@ public class ManutencaoResponseDTO {
         dto.tipoManutencao = manutencao.getTipoManutencao();
         dto.descricaoProblema = manutencao.getDescricaoProblema();
         dto.dataAgendada = manutencao.getDataRealizada();
-        dto.dataIdentificacao = manutencao.getDataIdentificacao();
+        dto.dataIdentificacao = resolverDataAbertura(manutencao);
         dto.quilometragemRegistro = manutencao.getQuilometragemRegistro();
         dto.quilometragemAtual = quilometragemAtual;
         dto.custoTotal = manutencao.getCustoTotal();
@@ -54,6 +60,69 @@ public class ManutencaoResponseDTO {
         dto.emergencia = manutencao.isEmergencia();
         dto.prioridade = manutencao.getPrioridade();
         return dto;
+    }
+
+    /**
+     * Data de abertura da solicitação. Preventivas sem registro usam data anterior ao agendamento.
+     */
+    public static LocalDateTime resolverDataAbertura(Manutencao manutencao) {
+        if (manutencao.getDataIdentificacao() != null) {
+            return manutencao.getDataIdentificacao();
+        }
+        if (manutencao.getDataRealizada() == null) {
+            return null;
+        }
+        if (manutencao.getTipoManutencao() == TipoManutencao.PREVENTIVA) {
+            return LocalDateTime.of(manutencao.getDataRealizada().minusDays(21), LocalTime.of(9, 0));
+        }
+        if (manutencao.getTipoManutencao() == TipoManutencao.CORRETIVA) {
+            return LocalDateTime.of(manutencao.getDataRealizada(), LocalTime.of(8, 0));
+        }
+        return null;
+    }
+
+    /** Indicadores de calendário (dias restantes, atraso, proximidade). */
+    public static void aplicarIndicadoresCalendario(ManutencaoResponseDTO dto) {
+        LocalDate hoje = LocalDate.now();
+        if (dto.getDataAgendada() != null) {
+            dto.setDiasRestantes((int) ChronoUnit.DAYS.between(hoje, dto.getDataAgendada()));
+        }
+        dto.setAtrasada(calcularPreventivaAtrasada(dto));
+        dto.setProximidadeLabel(montarProximidadeLabel(dto));
+    }
+
+    public static boolean calcularPreventivaAtrasada(ManutencaoResponseDTO dto) {
+        if (dto.getTipoManutencao() != TipoManutencao.PREVENTIVA || dto.getDataAgendada() == null) {
+            return false;
+        }
+        StatusManutencao status = dto.getStatus();
+        if (status == StatusManutencao.CONCLUIDA
+                || status == StatusManutencao.CANCELADA
+                || status == StatusManutencao.REPROVADA) {
+            return false;
+        }
+        return dto.getDataAgendada().isBefore(LocalDate.now());
+    }
+
+    private static String montarProximidadeLabel(ManutencaoResponseDTO dto) {
+        List<String> partes = new ArrayList<>();
+        if (dto.getDiasRestantes() != null) {
+            if (dto.isAtrasada()) {
+                partes.add("Atrasada há " + Math.abs(dto.getDiasRestantes()) + " dia(s)");
+            } else if (dto.getDiasRestantes() == 0) {
+                partes.add("Prevista para hoje");
+            } else {
+                partes.add("Em " + dto.getDiasRestantes() + " dia(s)");
+            }
+        }
+        if (dto.getKmRestantes() != null) {
+            if (dto.getKmRestantes() <= 0) {
+                partes.add("Quilometragem atingida");
+            } else {
+                partes.add(String.format(Locale.forLanguageTag("pt-BR"), "%.0f km restantes", dto.getKmRestantes()));
+            }
+        }
+        return partes.isEmpty() ? "Próxima da data prevista" : String.join(" · ", partes);
     }
 
     public Long getId() {
@@ -206,6 +275,14 @@ public class ManutencaoResponseDTO {
 
     public void setProximidadeLabel(String proximidadeLabel) {
         this.proximidadeLabel = proximidadeLabel;
+    }
+
+    public boolean isAtrasada() {
+        return atrasada;
+    }
+
+    public void setAtrasada(boolean atrasada) {
+        this.atrasada = atrasada;
     }
 
     public String getNomeMotorista() {

@@ -40,9 +40,10 @@ public class GestorManutencaoService {
         this.auditoriaService = auditoriaService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public GestorManutencaoPainelDTO montarPainel() {
         List<Manutencao> registros = manutencaoRepository.findAllByOrderByDataIdentificacaoDescIdDesc();
+        registros.forEach(this::garantirDataAberturaPersistida);
         Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
 
         GestorManutencaoPainelDTO painel = new GestorManutencaoPainelDTO();
@@ -86,6 +87,23 @@ public class GestorManutencaoService {
 
         registrarDecisao("MANUTENCAO_APROVADA", manutencao, dto, "Agendada", "success");
         return enriquecerDto(manutencao, manutencao.getQuilometragemRegistro());
+    }
+
+    @Transactional
+    public ManutencaoResponseDTO definirPrioridade(Long manutencaoId, DecisaoManutencaoRequestDTO dto) {
+        Manutencao manutencao = buscarPendente(manutencaoId);
+
+        if (dto == null || dto.getPrioridade() == null) {
+            throw new IllegalArgumentException("A prioridade é obrigatória.");
+        }
+
+        manutencao.setPrioridade(dto.getPrioridade());
+        registrarDecisao("MANUTENCAO_PRIORIDADE", manutencao, dto, "Prioridade atualizada", "info");
+        return enriquecerDto(
+                manutencao,
+                registroUsoRepository
+                        .buscarUltimaQuilometragemVeiculo(manutencao.getVeiculo().getId())
+                        .orElse(manutencao.getQuilometragemRegistro()));
     }
 
     @Transactional
@@ -135,8 +153,24 @@ public class GestorManutencaoService {
         return kmPorVeiculo;
     }
 
+    private void garantirDataAberturaPersistida(Manutencao manutencao) {
+        if (manutencao.getDataIdentificacao() != null) {
+            return;
+        }
+        var abertura = ManutencaoResponseDTO.resolverDataAbertura(manutencao);
+        if (abertura != null) {
+            manutencao.setDataIdentificacao(abertura);
+            manutencaoRepository.save(manutencao);
+        }
+    }
+
     private ManutencaoResponseDTO enriquecerDto(Manutencao manutencao, Double quilometragemAtual) {
-        return ManutencaoResponseDTO.fromEntity(manutencao, quilometragemAtual);
+        ManutencaoResponseDTO dto = ManutencaoResponseDTO.fromEntity(manutencao, quilometragemAtual);
+        if (manutencao.getQuilometragemRegistro() != null && quilometragemAtual != null) {
+            dto.setKmRestantes(manutencao.getQuilometragemRegistro() - quilometragemAtual);
+        }
+        ManutencaoResponseDTO.aplicarIndicadoresCalendario(dto);
+        return dto;
     }
 
     private void registrarDecisao(

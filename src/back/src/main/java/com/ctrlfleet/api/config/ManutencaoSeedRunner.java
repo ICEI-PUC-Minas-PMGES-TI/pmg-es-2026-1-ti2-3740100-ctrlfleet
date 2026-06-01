@@ -8,6 +8,8 @@ import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.repository.ManutencaoRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -60,7 +62,18 @@ public class ManutencaoSeedRunner implements ApplicationRunner {
         manutencao.setOficinaExecutor(seed.oficina);
         manutencao.setEmergencia(seed.emergencia);
         manutencao.setPrioridade(seed.prioridade);
+        manutencao.setDataIdentificacao(resolverDataAberturaSeed(seed));
         return manutencao;
+    }
+
+    private LocalDateTime resolverDataAberturaSeed(SeedRecord seed) {
+        if (seed.tipo == TipoManutencao.PREVENTIVA && seed.data != null) {
+            return LocalDateTime.of(seed.data.minusDays(21), LocalTime.of(9, 0));
+        }
+        if (seed.tipo == TipoManutencao.CORRETIVA && seed.data != null) {
+            return LocalDateTime.of(seed.data, LocalTime.of(8, 0));
+        }
+        return LocalDateTime.now();
     }
 
     private record SeedRecord(

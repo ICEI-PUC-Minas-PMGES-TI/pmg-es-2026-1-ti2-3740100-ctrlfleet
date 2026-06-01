@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '../common/Icon';
-import { StatusBadge } from '../common/StatusBadge';
+import { MaintenanceDateMeta } from '../maintenance/MaintenanceDateMeta';
+import { MaintenanceStatusBadges } from '../maintenance/MaintenanceStatusBadges';
 import { resolveManutencaoStatusVariant } from '../../utils/manutencaoMappers';
 
 function MaintenanceCard({ badge, children, highlight = false, title }) {
@@ -26,24 +27,21 @@ export function PreventiveMaintenanceList({ items }) {
         <div>
           <span className="maintenance-section__eyebrow">Programação</span>
           <h2>Preventivas próximas</h2>
-          <p>Revisões agendadas ou com quilometragem prevista quase atingida.</p>
+          <p>Revisões agendadas, atrasadas ou com quilometragem prevista quase atingida.</p>
         </div>
         <span className="maintenance-section__count">{items.length}</span>
       </div>
       <div className="maintenance-card-grid">
         {items.map((item) => (
           <MaintenanceCard
-            badge={item.tipoLabel}
+            badge={item.atrasada ? 'Preventiva atrasada' : item.tipoLabel}
             highlight
             key={`preventiva-${item.id}`}
             title={`${item.placa} · ${item.vehicleLabel}`}
           >
             <p className="maintenance-card__description">{item.descricao}</p>
             <dl className="maintenance-card__meta">
-              <div>
-                <dt>Previsão</dt>
-                <dd>{item.dataAgendadaLabel}</dd>
-              </div>
+              <MaintenanceDateMeta item={item} />
               <div>
                 <dt>Quilometragem alvo</dt>
                 <dd>{item.quilometragemRegistroLabel}</dd>
@@ -53,11 +51,11 @@ export function PreventiveMaintenanceList({ items }) {
                 <dd>{item.quilometragemAtualLabel}</dd>
               </div>
             </dl>
-            <p className="maintenance-card__proximity">
+            <p className={`maintenance-card__proximity${item.atrasada ? ' maintenance-card__proximity--overdue' : ''}`}>
               <Icon name="preventive" />
               <span>{item.proximidadeLabel}</span>
             </p>
-            <StatusBadge label={item.statusLabel} />
+            <MaintenanceStatusBadges item={item} />
           </MaintenanceCard>
         ))}
       </div>
@@ -115,10 +113,7 @@ export function MaintenanceRequestList({ emptyMessage, items, title, variant = '
             >
               <p className="maintenance-card__description">{item.descricao}</p>
               <dl className="maintenance-card__meta">
-                <div>
-                  <dt>Registrado em</dt>
-                  <dd>{item.dataIdentificacaoLabel}</dd>
-                </div>
+                <MaintenanceDateMeta item={item} />
                 <div>
                   <dt>Quilometragem</dt>
                   <dd>{item.quilometragemRegistroLabel}</dd>
@@ -131,7 +126,7 @@ export function MaintenanceRequestList({ emptyMessage, items, title, variant = '
                 ) : null}
               </dl>
               <div className="maintenance-card__footer">
-                <StatusBadge label={item.statusLabel} />
+                <MaintenanceStatusBadges item={item} />
                 {item.prioridadeLabel ? (
                   <span className={`maintenance-card__priority maintenance-card__priority--${item.prioridade?.toLowerCase()}`}>
                     Prioridade {item.prioridadeLabel}

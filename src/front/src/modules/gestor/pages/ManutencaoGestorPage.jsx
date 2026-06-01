@@ -5,22 +5,26 @@ import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
-import { FleetFilters } from '../../../components/gestor/FleetFilters';
+import { MaintenanceGestorFilters } from '../../../components/gestor/MaintenanceGestorFilters';
 import { MaintenanceRequestCardGrid } from '../../../components/gestor/MaintenanceRequestCardGrid';
 import { getAuthSession } from '../../../services/authSession';
 import {
   aprovarManutencao,
+  definirPrioridadeManutencao,
   listarPainelManutencaoGestor,
   reprovarManutencao,
 } from '../../../services/gestorManutencaoApi';
 import { pad2 } from '../../../services/veiculoMappers';
 import { mapPainelGestorManutencaoToView } from '../../../utils/manutencaoMappers';
 import {
+  buildManutencaoPrioridadeOptions,
   buildManutencaoStatusTabs,
+  buildManutencaoTipoOptions,
+  buildManutencaoVeiculoOptions,
+  coerceSelectValue,
   filterManutencoes,
   flattenPainelGestor,
-  hasActiveManutencaoFilters,
-  resolveManutencaoFilterSelection,
+  formatManutencaoFilterSummary,
 } from '../../../utils/manutencaoGestorFilters';
 
 const STATUS_TABS = ['Todas', 'Pendente', 'Agendada', 'Em andamento', 'Concluída', 'Reprovada', 'Cancelada'];
@@ -41,6 +45,9 @@ export function ManutencaoGestorPage() {
   const [state, setState] = useState({ loading: true, error: null, painel: null });
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Pendente');
+  const [selectedPrioridade, setSelectedPrioridade] = useState('Todas');
+  const [selectedTipo, setSelectedTipo] = useState('Todos');
+  const [selectedVeiculoId, setSelectedVeiculoId] = useState('todos');
   const [decisionModal, setDecisionModal] = useState({
     action: null,
     item: null,
@@ -85,30 +92,60 @@ export function ManutencaoGestorPage() {
     [allItems],
   );
 
-  const activeFilters = useMemo(
-    () =>
-      resolveManutencaoFilterSelection({
-        status: selectedStatus,
-        statusTabs: statusTabOptions,
-      }),
+  const prioridadeOptions = useMemo(
+    () => buildManutencaoPrioridadeOptions(allItems),
+    [allItems],
+  );
+  const tipoOptions = useMemo(() => buildManutencaoTipoOptions(allItems), [allItems]);
+  const veiculoOptions = useMemo(() => buildManutencaoVeiculoOptions(allItems), [allItems]);
+
+  const safeStatus = useMemo(
+    () => coerceSelectValue(selectedStatus, statusTabOptions, 'Todas'),
     [selectedStatus, statusTabOptions],
   );
-
-  useEffect(() => {
-    setSelectedStatus((current) => (current === activeFilters.status ? current : activeFilters.status));
-  }, [activeFilters.status]);
+  const safePrioridade = useMemo(
+    () => coerceSelectValue(selectedPrioridade, prioridadeOptions, 'Todas'),
+    [selectedPrioridade, prioridadeOptions],
+  );
+  const safeTipo = useMemo(
+    () => coerceSelectValue(selectedTipo, tipoOptions, 'Todos'),
+    [selectedTipo, tipoOptions],
+  );
+  const safeVeiculoId = useMemo(() => {
+    const values = veiculoOptions.map((option) => option.value);
+    return values.includes(selectedVeiculoId) ? selectedVeiculoId : 'todos';
+  }, [selectedVeiculoId, veiculoOptions]);
 
   const filteredItems = useMemo(
     () =>
       filterManutencoes(allItems, {
         search,
-        status: activeFilters.status,
+        status: safeStatus,
+        prioridade: safePrioridade,
+        tipo: safeTipo,
+        veiculoId: safeVeiculoId,
       }),
-    [allItems, search, activeFilters.status],
+    [allItems, search, safeStatus, safePrioridade, safeTipo, safeVeiculoId],
   );
 
-  const showStatusFilter = statusTabOptions.length > 1;
-  const filtersReady = !state.loading && allItems.length > 0;
+  const showStatusFilter = statusTabOptions.length > 0;
+  const filtersReady = !state.loading && Boolean(state.painel);
+
+  const selectedVeiculoLabel = useMemo(
+    () => veiculoOptions.find((option) => option.value === safeVeiculoId)?.label,
+    [veiculoOptions, safeVeiculoId],
+  );
+
+  const filterSummary = useMemo(
+    () =>
+      formatManutencaoFilterSummary({
+        status: safeStatus,
+        prioridade: safePrioridade,
+        tipo: safeTipo,
+        veiculoLabel: safeVeiculoId !== 'todos' ? selectedVeiculoLabel?.split(' · ')[0] : null,
+      }),
+    [safeStatus, safePrioridade, safeTipo, safeVeiculoId, selectedVeiculoLabel],
+  );
 
   const summaryCards = useMemo(() => {
     const count = (predicate) => allItems.filter(predicate).length;
@@ -181,11 +218,14 @@ export function ManutencaoGestorPage() {
     const { action, item, motivo, prioridade } = decisionModal;
     if (!action || !item) return;
     if (action === 'reprovar' && motivo.trim().length === 0) return;
+    if (action === 'prioridade' && !prioridade) return;
 
     setDecisionModal((current) => ({ ...current, submitting: true }));
     try {
       const payload = { idGestor: getGestorId(), motivo };
-      if (action === 'aprovar') {
+      if (action === 'prioridade') {
+        await definirPrioridadeManutencao(item.id, { idGestor: payload.idGestor, prioridade });
+      } else if (action === 'aprovar') {
         payload.prioridade = prioridade;
         await aprovarManutencao(item.id, payload);
       } else {
@@ -203,14 +243,23 @@ export function ManutencaoGestorPage() {
   }
 
   const isRejection = decisionModal.action === 'reprovar';
-  const decisionTitle = isRejection ? 'Reprovar solicitação' : 'Aprovar solicitação';
-  const decisionSubtitle = isRejection
-    ? 'Informe a justificativa para indeferir a manutenção.'
-    : 'Confirme a prioridade e libere o encaminhamento para oficina.';
+  const isPriorityOnly = decisionModal.action === 'prioridade';
+  const decisionTitle = isPriorityOnly
+    ? 'Definir prioridade'
+    : isRejection
+      ? 'Reprovar solicitação'
+      : 'Aprovar solicitação';
+  const decisionSubtitle = isPriorityOnly
+    ? 'Classifique a urgência da solicitação antes de aprovar ou reprovar.'
+    : isRejection
+      ? 'Informe a justificativa para indeferir a manutenção.'
+      : 'Confirme a prioridade e libere o encaminhamento para oficina.';
   const canConfirmDecision =
     Boolean(decisionModal.action && decisionModal.item) &&
     !decisionModal.submitting &&
-    (!isRejection || decisionModal.motivo.trim().length > 0);
+    (isPriorityOnly
+      ? Boolean(decisionModal.prioridade)
+      : !isRejection || decisionModal.motivo.trim().length > 0);
 
   return (
     <div className="page-stack">
@@ -227,16 +276,24 @@ export function ManutencaoGestorPage() {
 
       <SectionCard>
         {filtersReady ? (
-          <FleetFilters
-            className="fleet-filters--gestor"
+          <MaintenanceGestorFilters
             controlIdPrefix="gestor-manutencao"
+            onPrioridadeChange={setSelectedPrioridade}
             onSearchChange={setSearch}
             onStatusChange={setSelectedStatus}
+            onTipoChange={setSelectedTipo}
+            onVeiculoChange={setSelectedVeiculoId}
+            prioridadeOptions={prioridadeOptions}
             search={search}
             searchPlaceholder="Buscar por placa, motorista, descrição ou nº..."
-            selectedStatus={activeFilters.status}
-            statusSelectMode
-            statusTabs={showStatusFilter ? statusTabOptions : null}
+            selectedPrioridade={safePrioridade}
+            selectedStatus={safeStatus}
+            selectedTipo={safeTipo}
+            selectedVeiculoId={safeVeiculoId}
+            showStatusFilter={showStatusFilter}
+            statusTabs={statusTabOptions}
+            tipoOptions={tipoOptions}
+            veiculoOptions={veiculoOptions}
           />
         ) : null}
 
@@ -264,17 +321,16 @@ export function ManutencaoGestorPage() {
             <div className="table-summary">
               <span>
                 Mostrando {filteredItems.length} de {allItems.length} solicitações
-                {hasActiveManutencaoFilters({ search, status: activeFilters.status })
-                  ? ` · Status: ${activeFilters.status}`
-                  : ''}
+                {filterSummary ? ` · ${filterSummary}` : ''}
               </span>
-              <span>Analise, aprove ou reprove solicitações pendentes.</span>
+              <span>Analise, defina prioridade, aprove ou reprove solicitações.</span>
             </div>
 
             <MaintenanceRequestCardGrid
               items={filteredItems}
               onApprove={(item) => openDecisionModal(item, 'aprovar')}
               onReject={(item) => openDecisionModal(item, 'reprovar')}
+              onSetPriority={(item) => openDecisionModal(item, 'prioridade')}
             />
           </>
         )}
@@ -288,15 +344,17 @@ export function ManutencaoGestorPage() {
             </ActionButton>
             <ActionButton
               disabled={!canConfirmDecision}
-              icon={isRejection ? 'close' : 'check'}
+              icon={isRejection ? 'close' : isPriorityOnly ? 'alert' : 'check'}
               onClick={confirmarDecisao}
               variant={isRejection ? 'danger' : 'primary'}
             >
               {decisionModal.submitting
                 ? 'Salvando...'
-                : isRejection
-                  ? 'Confirmar reprovação'
-                  : 'Confirmar aprovação'}
+                : isPriorityOnly
+                  ? 'Salvar prioridade'
+                  : isRejection
+                    ? 'Confirmar reprovação'
+                    : 'Confirmar aprovação'}
             </ActionButton>
           </>
         }
@@ -314,14 +372,34 @@ export function ManutencaoGestorPage() {
                 <dd>#{decisionModal.item.id}</dd>
               </div>
               <div>
-                <dt>Veículo</dt>
-                <dd>
-                  {decisionModal.item.placa} · {decisionModal.item.vehicleLabel}
-                </dd>
+                <dt>Placa</dt>
+                <dd>{decisionModal.item.placa}</dd>
+              </div>
+              <div>
+                <dt>Modelo</dt>
+                <dd>{decisionModal.item.vehicleLabel}</dd>
               </div>
               <div>
                 <dt>Motorista</dt>
                 <dd>{decisionModal.item.nomeMotorista || '—'}</dd>
+              </div>
+              <div>
+                <dt>Quilometragem</dt>
+                <dd>{decisionModal.item.quilometragemRegistroLabel}</dd>
+              </div>
+              <div>
+                <dt>Abertura</dt>
+                <dd>{decisionModal.item.dataAberturaLabel}</dd>
+              </div>
+              {decisionModal.item.tipo === 'PREVENTIVA' ? (
+                <div>
+                  <dt>Agendamento</dt>
+                  <dd>{decisionModal.item.dataAgendamentoLabel}</dd>
+                </div>
+              ) : null}
+              <div>
+                <dt>Status</dt>
+                <dd>{decisionModal.item.statusLabel}</dd>
               </div>
               <div>
                 <dt>Descrição</dt>
@@ -331,12 +409,15 @@ export function ManutencaoGestorPage() {
 
             {!isRejection ? (
               <label className="admin-form-field admin-form-field--full">
-                <span className="admin-form-field__label">Prioridade</span>
+                <span className="admin-form-field__label">
+                  Prioridade <span className="admin-form-field__req">*</span>
+                </span>
                 <select
                   className="admin-form-field__input"
                   onChange={(event) =>
                     setDecisionModal((current) => ({ ...current, prioridade: event.target.value }))
                   }
+                  required
                   value={decisionModal.prioridade}
                 >
                   {PRIORIDADE_OPTIONS.map((option) => (
@@ -348,30 +429,32 @@ export function ManutencaoGestorPage() {
               </label>
             ) : null}
 
-            <label className="admin-form-field admin-form-field--full">
-              <span className="admin-form-field__label">
-                {isRejection ? 'Justificativa da reprovação' : 'Observação da aprovação'}
-                {isRejection ? <span className="admin-form-field__req">*</span> : null}
-              </span>
-              <textarea
-                className="admin-form-field__textarea"
-                maxLength={240}
-                onChange={(event) =>
-                  setDecisionModal((current) => ({ ...current, motivo: event.target.value }))
-                }
-                placeholder={
-                  isRejection
-                    ? 'Ex.: falha não compromete a segurança — agendar revisão preventiva.'
-                    : 'Observação opcional para auditoria.'
-                }
-                required={isRejection}
-                rows={4}
-                value={decisionModal.motivo}
-              />
-              <span className="reservation-decision-modal__hint">
-                {decisionModal.motivo.length}/240 caracteres
-              </span>
-            </label>
+            {!isPriorityOnly ? (
+              <label className="admin-form-field admin-form-field--full">
+                <span className="admin-form-field__label">
+                  {isRejection ? 'Justificativa da reprovação' : 'Observação da aprovação'}
+                  {isRejection ? <span className="admin-form-field__req">*</span> : null}
+                </span>
+                <textarea
+                  className="admin-form-field__textarea"
+                  maxLength={240}
+                  onChange={(event) =>
+                    setDecisionModal((current) => ({ ...current, motivo: event.target.value }))
+                  }
+                  placeholder={
+                    isRejection
+                      ? 'Ex.: falha não compromete a segurança — agendar revisão preventiva.'
+                      : 'Observação opcional para auditoria.'
+                  }
+                  required={isRejection}
+                  rows={4}
+                  value={decisionModal.motivo}
+                />
+                <span className="reservation-decision-modal__hint">
+                  {decisionModal.motivo.length}/240 caracteres
+                </span>
+              </label>
+            ) : null}
           </div>
         ) : null}
       </Modal>

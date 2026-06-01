@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '../common/Icon';
-import { StatusBadge } from '../common/StatusBadge';
+import { MaintenanceDateMeta } from '../maintenance/MaintenanceDateMeta';
+import { MaintenanceStatusBadges } from '../maintenance/MaintenanceStatusBadges';
 import { resolveManutencaoStatusVariant } from '../../utils/manutencaoMappers';
 
-export function MaintenanceRequestCardGrid({ items, onApprove, onReject }) {
+export function MaintenanceRequestCardGrid({ items, onApprove, onReject, onSetPriority }) {
   if (!items.length) {
     return (
       <div className="gestor-maintenance-grid-empty">
@@ -21,7 +22,7 @@ export function MaintenanceRequestCardGrid({ items, onApprove, onReject }) {
 
         return (
           <article
-            className={`gestor-maintenance-card gestor-maintenance-card--${variant}${item.emergencia ? ' gestor-maintenance-card--emergency' : ''}`}
+            className={`gestor-maintenance-card gestor-maintenance-card--${variant}${item.emergencia ? ' gestor-maintenance-card--emergency' : ''}${item.atrasada ? ' gestor-maintenance-card--overdue' : ''}`}
             key={item.id}
           >
             <header className="gestor-maintenance-card__header">
@@ -33,20 +34,21 @@ export function MaintenanceRequestCardGrid({ items, onApprove, onReject }) {
                   {item.placa} · {item.vehicleLabel}
                 </h3>
               </div>
-              <StatusBadge label={item.statusLabel} />
+              <MaintenanceStatusBadges item={item} />
             </header>
 
             <p className="gestor-maintenance-card__description">{item.descricao}</p>
 
             <dl className="gestor-maintenance-card__meta">
               <div>
+                <dt>Modelo</dt>
+                <dd>{item.vehicleLabel}</dd>
+              </div>
+              <div>
                 <dt>Motorista</dt>
                 <dd>{item.nomeMotorista || '—'}</dd>
               </div>
-              <div>
-                <dt>Registrado em</dt>
-                <dd>{item.dataIdentificacaoLabel}</dd>
-              </div>
+              <MaintenanceDateMeta item={item} />
               <div>
                 <dt>Quilometragem</dt>
                 <dd>{item.quilometragemRegistroLabel}</dd>
@@ -85,6 +87,14 @@ export function MaintenanceRequestCardGrid({ items, onApprove, onReject }) {
 
               {isPending ? (
                 <>
+                  <button
+                    className="gestor-maintenance-card__action gestor-maintenance-card__action--primary"
+                    onClick={() => onSetPriority?.(item)}
+                    type="button"
+                  >
+                    <Icon name="alert" />
+                    <span>Prioridade</span>
+                  </button>
                   <button
                     className="gestor-maintenance-card__action gestor-maintenance-card__action--success"
                     onClick={() => onApprove?.(item)}

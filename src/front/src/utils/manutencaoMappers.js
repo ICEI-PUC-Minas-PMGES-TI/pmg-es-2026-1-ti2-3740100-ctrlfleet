@@ -44,7 +44,21 @@ function formatKm(value) {
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(Number(value))} km`;
 }
 
+const FINALIZED_STATUSES = new Set(['CONCLUIDA', 'CANCELADA', 'REPROVADA']);
+
+function computePreventivaAtrasada(dto) {
+  if (dto.atrasada) return true;
+  if (dto.tipoManutencao !== 'PREVENTIVA' || !dto.dataAgendada) return false;
+  if (FINALIZED_STATUSES.has(dto.status)) return false;
+  const scheduled = new Date(`${dto.dataAgendada}T12:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  scheduled.setHours(0, 0, 0, 0);
+  return scheduled < today;
+}
+
 export function mapManutencaoToView(dto) {
+  const atrasada = computePreventivaAtrasada(dto);
   return {
     id: dto.id,
     idVeiculo: dto.idVeiculo,
@@ -57,8 +71,10 @@ export function mapManutencaoToView(dto) {
     descricao: dto.descricaoProblema || '',
     dataAgendada: dto.dataAgendada,
     dataAgendadaLabel: formatDateBr(dto.dataAgendada),
+    dataAgendamentoLabel: formatDateBr(dto.dataAgendada),
     dataIdentificacao: dto.dataIdentificacao,
     dataIdentificacaoLabel: formatDateTimeBr(dto.dataIdentificacao),
+    dataAberturaLabel: formatDateTimeBr(dto.dataIdentificacao),
     quilometragemRegistro: dto.quilometragemRegistro,
     quilometragemRegistroLabel: formatKm(dto.quilometragemRegistro),
     quilometragemAtual: dto.quilometragemAtual,
@@ -66,7 +82,8 @@ export function mapManutencaoToView(dto) {
     kmRestantes: dto.kmRestantes,
     kmRestantesLabel: dto.kmRestantes == null ? null : formatKm(Math.max(0, dto.kmRestantes)),
     diasRestantes: dto.diasRestantes,
-    proximidadeLabel: dto.proximidadeLabel || 'Próxima da data prevista',
+    proximidadeLabel: dto.proximidadeLabel || (atrasada ? 'Atrasada' : 'Próxima da data prevista'),
+    atrasada,
     custoTotal: dto.custoTotal,
     oficinaExecutor: dto.oficinaExecutor,
     status: dto.status,

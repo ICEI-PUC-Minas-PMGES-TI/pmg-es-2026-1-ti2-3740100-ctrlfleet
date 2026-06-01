@@ -91,6 +91,8 @@ public class SecurityConfiguration {
                     .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
                 .requestMatchers("/gestor/manutencoes/*/aprovar", "/gestor/manutencoes/*/reprovar")
                     .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
+                .requestMatchers(HttpMethod.PATCH, "/gestor/manutencoes/*/prioridade")
+                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
 
                 .anyRequest().authenticated()
             )

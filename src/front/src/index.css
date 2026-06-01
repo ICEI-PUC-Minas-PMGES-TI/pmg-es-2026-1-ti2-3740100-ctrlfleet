@@ -1697,6 +1697,11 @@ a {
   color: var(--danger);
 }
 
+.status-badge--atrasada {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .document-pills,
 .table-actions {
   display: flex;
@@ -9770,6 +9775,36 @@ a {
   font-weight: 700;
 }
 
+.maintenance-status-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.maintenance-date-meta__overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.maintenance-date-meta__tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+
+.maintenance-card__proximity--overdue {
+  color: var(--danger);
+}
+
 .maintenance-card__proximity {
   display: inline-flex;
   align-items: center;
@@ -9925,6 +9960,13 @@ a {
 }
 
 /* —— Gestor: painel de manutenção —— */
+.fleet-filters--maintenance .fleet-filters__controls--maintenance {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
 .gestor-maintenance-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -9955,6 +9997,10 @@ a {
 .gestor-maintenance-card--emergency {
   border-color: color-mix(in srgb, var(--danger) 45%, var(--border-subtle));
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.gestor-maintenance-card--overdue {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border-subtle));
 }
 
 .gestor-maintenance-card__header {

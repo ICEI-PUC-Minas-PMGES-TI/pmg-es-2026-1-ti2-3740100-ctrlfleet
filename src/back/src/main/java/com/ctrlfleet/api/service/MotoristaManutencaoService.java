@@ -19,12 +19,9 @@ import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,12 +56,13 @@ public class MotoristaManutencaoService {
         this.auditoriaService = auditoriaService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public MotoristaManutencaoPainelDTO montarPainel(Long motoristaId) {
         validarMotoristaAtivo(motoristaId);
 
         List<Manutencao> registros =
                 manutencaoRepository.findByVeiculo_Motorista_IdOrderByDataIdentificacaoDescIdDesc(motoristaId);
+        registros.forEach(this::garantirDataAberturaPersistida);
         Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
 
         MotoristaManutencaoPainelDTO painel = new MotoristaManutencaoPainelDTO();
@@ -189,22 +187,17 @@ public class MotoristaManutencaoService {
 
     private ManutencaoResponseDTO enriquecerDto(Manutencao manutencao, Double quilometragemAtual) {
         ManutencaoResponseDTO dto = ManutencaoResponseDTO.fromEntity(manutencao, quilometragemAtual);
-        LocalDate hoje = LocalDate.now();
-
-        if (manutencao.getDataRealizada() != null) {
-            long dias = ChronoUnit.DAYS.between(hoje, manutencao.getDataRealizada());
-            dto.setDiasRestantes((int) dias);
-        }
-
         if (manutencao.getQuilometragemRegistro() != null && quilometragemAtual != null) {
             dto.setKmRestantes(manutencao.getQuilometragemRegistro() - quilometragemAtual);
         }
-
-        dto.setProximidadeLabel(montarProximidadeLabel(dto));
+        ManutencaoResponseDTO.aplicarIndicadoresCalendario(dto);
         return dto;
     }
 
     private boolean isPreventivaProxima(ManutencaoResponseDTO dto, LocalDate hoje) {
+        if (ManutencaoResponseDTO.calcularPreventivaAtrasada(dto)) {
+            return true;
+        }
         boolean porData = dto.getDataAgendada() != null
                 && !dto.getDataAgendada().isBefore(hoje.minusDays(7))
                 && !dto.getDataAgendada().isAfter(hoje.plusDays(PREVENTIVE_DAYS_THRESHOLD));
@@ -212,25 +205,15 @@ public class MotoristaManutencaoService {
         return porData || porKm;
     }
 
-    private String montarProximidadeLabel(ManutencaoResponseDTO dto) {
-        List<String> partes = new ArrayList<>();
-        if (dto.getDiasRestantes() != null) {
-            if (dto.getDiasRestantes() < 0) {
-                partes.add("Agendada há " + Math.abs(dto.getDiasRestantes()) + " dia(s)");
-            } else if (dto.getDiasRestantes() == 0) {
-                partes.add("Prevista para hoje");
-            } else {
-                partes.add("Em " + dto.getDiasRestantes() + " dia(s)");
-            }
+    private void garantirDataAberturaPersistida(Manutencao manutencao) {
+        if (manutencao.getDataIdentificacao() != null) {
+            return;
         }
-        if (dto.getKmRestantes() != null) {
-            if (dto.getKmRestantes() <= 0) {
-                partes.add("Quilometragem atingida");
-            } else {
-                partes.add(String.format(Locale.forLanguageTag("pt-BR"), "%.0f km restantes", dto.getKmRestantes()));
-            }
+        var abertura = ManutencaoResponseDTO.resolverDataAbertura(manutencao);
+        if (abertura != null) {
+            manutencao.setDataIdentificacao(abertura);
+            manutencaoRepository.save(manutencao);
         }
-        return partes.isEmpty() ? "Próxima da data prevista" : String.join(" · ", partes);
     }
 
     private Usuario validarMotoristaAtivo(Long motoristaId) {
