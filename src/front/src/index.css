@@ -3785,9 +3785,37 @@ a {
 
 .registro-uso-resumo {
   margin-bottom: 14px;
+  display: grid;
+  gap: 12px;
   font-size: 0.88rem;
   color: var(--muted);
   font-weight: 600;
+}
+
+.registro-uso-resumo__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.registro-uso-stat {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(249, 250, 252, 0.85);
+  display: grid;
+  gap: 4px;
+}
+
+.registro-uso-stat span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.registro-uso-stat strong {
+  color: var(--foreground);
+  font-size: 0.9rem;
 }
 
 /* Tabela desktop */
@@ -3834,12 +3862,41 @@ a {
 }
 
 .registro-uso-obs {
-  max-width: 220px;
+  max-width: 320px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   color: var(--muted);
   font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.registro-uso-datetime {
+  font-weight: 600;
+}
+
+.registro-uso-motorista {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 200px;
+}
+
+.registro-uso-motorista__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(207, 78, 54, 0.12);
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  flex: 0 0 24px;
 }
 
 .registro-uso-km-badge {
@@ -4396,7 +4453,7 @@ a {
 
 .motorista-veiculo-detail__stats {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
 }
 
@@ -6118,16 +6175,81 @@ a {
 
 .history-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
 
-.history-metrics .section-card__header {
-  margin-bottom: 0;
+.vehicle-history-page {
+  gap: 20px;
 }
 
-.history-metrics .section-card__header h2 {
-  font-size: clamp(1.2rem, 2vw, 1.7rem);
+.vehicle-history-hero {
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+}
+
+.history-metric-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+}
+
+.history-metric-card__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(207, 78, 54, 0.12);
+  color: var(--accent);
+  flex: 0 0 34px;
+}
+
+.history-metric-card__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.history-metric-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.history-metric-card strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.operational-timeline__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.operational-timeline__chips span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .operational-timeline {
@@ -6229,11 +6351,26 @@ a {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(231, 230, 235, 0.9);
   }
 
-  .registro-uso-card__header strong {
-    font-size: 0.94rem;
+  .registro-uso-card__trip {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .registro-uso-card__trip strong {
+    font-size: 0.9rem;
+  }
+
+  .registro-uso-card__trip span {
+    font-size: 0.74rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .registro-uso-card__meta {
@@ -6264,11 +6401,20 @@ a {
   .registro-uso-card__obs dd {
     font-weight: 500;
     color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .registro-uso-resumo__stats {
+    grid-template-columns: 1fr;
   }
 
   .reservation-lookup,
   .history-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .history-metric-card strong {
+    font-size: 0.94rem;
   }
 }
 

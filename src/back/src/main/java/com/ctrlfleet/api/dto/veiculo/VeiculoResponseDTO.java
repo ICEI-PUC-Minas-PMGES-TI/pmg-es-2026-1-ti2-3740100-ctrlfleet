@@ -2,6 +2,7 @@ package com.ctrlfleet.api.dto.veiculo;
 
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.domain.enums.TipoVeiculo;
+import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +10,44 @@ import java.util.List;
 /**
  * Representação de um Veículo para consumo do frontend (painel do gestor de
  * frota). Mantém apenas os campos atualmente persistidos pela entidade
- * {@link Veiculo}; campos como documentos, motorista vinculado e categoria de
- * CNH ainda não existem no domínio e por isso não são expostos aqui — o front
- * deve usar valores neutros quando precisar exibi-los.
+ * {@link Veiculo}.
  */
 public class VeiculoResponseDTO {
+
+    public static class MotoristaResponsavelDTO {
+        private Long id;
+        private String nome;
+        private String email;
+        private String matricula;
+
+        public MotoristaResponsavelDTO() {}
+
+        public static MotoristaResponsavelDTO fromEntity(Usuario usuario) {
+            if (usuario == null) return null;
+            MotoristaResponsavelDTO dto = new MotoristaResponsavelDTO();
+            dto.id = usuario.getId();
+            dto.nome = usuario.getNome();
+            dto.email = usuario.getEmail();
+            dto.matricula = usuario.getMatricula();
+            return dto;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getNome() {
+            return nome;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getMatricula() {
+            return matricula;
+        }
+    }
 
     private Long id;
     private String placa;
@@ -23,6 +57,7 @@ public class VeiculoResponseDTO {
     private int ano;
     private StatusVeiculo status;
     private TipoVeiculo tipoVeiculo;
+    private MotoristaResponsavelDTO motorista;
     private List<DocumentacaoResponseDTO> documentos = new ArrayList<>();
     /** Hodômetro mais recente (registros de uso / abastecimentos). */
     private Double quilometragemAtual;
@@ -39,6 +74,7 @@ public class VeiculoResponseDTO {
         dto.ano = veiculo.getAno();
         dto.status = veiculo.getStatus();
         dto.tipoVeiculo = veiculo.getTipoVeiculo();
+        dto.motorista = MotoristaResponsavelDTO.fromEntity(veiculo.getMotorista());
         return dto;
     }
 
@@ -78,6 +114,10 @@ public class VeiculoResponseDTO {
 
     public TipoVeiculo getTipoVeiculo() {
         return tipoVeiculo;
+    }
+
+    public MotoristaResponsavelDTO getMotorista() {
+        return motorista;
     }
 
     public List<DocumentacaoResponseDTO> getDocumentos() {

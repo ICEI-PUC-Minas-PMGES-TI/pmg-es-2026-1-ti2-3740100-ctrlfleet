@@ -40,6 +40,19 @@ UPDATE usuarios
 SET senha = '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS'
 WHERE senha = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
 
+-- Contas de acesso rápido na tela de login (senha mock: 123456).
+-- Idempotente: sobrescreve hashes alterados manualmente ou via cadastro.
+UPDATE usuarios
+SET
+  senha = '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS',
+  status = 'ATIVO'
+WHERE email IN (
+  'ana.costa@ctrlfleet.gov.br',
+  'joao.duarte@ctrlfleet.gov.br',
+  'patricia.melo@ctrlfleet.gov.br',
+  'fernando.tavares@ctrlfleet.gov.br'
+);
+
 INSERT INTO usuarios (id, nome, email, senha, matricula, cargo, data_admissao, tipo_cadastro, perfil_acesso, role, data_desligamento, status) VALUES
 (1,  'Ana Costa',         'ana.costa@ctrlfleet.gov.br',         '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0001', 'Coordenadora Administrativa', '2018-03-12', 'usuario',         'Administrador',   'ROLE_ADMINISTRADOR', NULL,         'ATIVO'),
 (2,  'João Duarte',       'joao.duarte@ctrlfleet.gov.br',       '$2a$10$mZeEwcIuS.uTYWHG95418OjTf7NU3CbAuzRNczbten/HjJ6BmF1SS', 'MAT-0002', 'Gestor de Frota',             '2019-06-20', 'usuario',         'Gestor de Frota', 'ROLE_GESTOR_FROTA',  NULL,         'ATIVO'),
@@ -212,12 +225,12 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (6,  'GHI7F90', 'Gol',          'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (7,  'JKL2G45', 'Celta',        'Chevrolet',  2019, 'MANUTENCAO', 'Garagem Central',               'HATCH'),
 (8,  'OPQ6H89', 'Fit',          'Honda',      2021, 'DISPONIVEL', 'Secretaria de Saude',         'HATCH'),
-(9,  'RST0I23', 'Palio',        'Fiat',       2015, 'DESATIVADO', 'Garagem Central',               'HATCH'),
+(9,  'RST0I23', 'Palio',        'Fiat',       2015, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (10, 'UVW4J56', 'Strada',       'Fiat',       2024, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
 (11, 'RKM1A11', 'Polo',         'Volkswagen', 2023, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (12, 'TBN2B22', 'Argo',         'Fiat',       2022, 'DISPONIVEL', 'Secretaria de Educacao',      'HATCH'),
 (13, 'FCH3C33', 'Mobi',         'Fiat',       2021, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
-(14, 'JLP4D44', 'Kwid',         'Renault',    2023, 'EM_USO',     'Secretaria de Obras',         'HATCH'),
+(14, 'JLP4D44', 'Kwid',         'Renault',    2023, 'DISPONIVEL', 'Secretaria de Obras',         'HATCH'),
 (15, 'MNR5E55', 'Sandero',      'Renault',    2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (16, 'QST6F66', 'Ka',           'Ford',       2020, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'HATCH'),
 (17, 'VWX7G77', 'Yaris',        'Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
@@ -226,7 +239,7 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (20, 'EFG0J00', 'Picanto',      'Kia',        2022, 'DISPONIVEL', 'Garagem Central',               'HATCH'),
 (21, 'HIJ1K11', 'Compass',      'Jeep',       2024, 'DISPONIVEL', 'Garagem Central',               'SUV'),
 (22, 'KLM2L22', 'Creta',        'Hyundai',    2023, 'DISPONIVEL', 'Secretaria de Educacao',      'SUV'),
-(23, 'NOP3M33', 'Tracker',      'Chevrolet',  2022, 'EM_USO',     'Garagem Central',               'SUV'),
+(23, 'NOP3M33', 'Tracker',      'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central',               'SUV'),
 (24, 'QRS4N44', 'T-Cross',      'Volkswagen', 2023, 'DISPONIVEL', 'Garagem Central',               'SUV'),
 (25, 'TUV5O55', 'Duster',       'Renault',    2021, 'DISPONIVEL', 'Secretaria de Obras',         'SUV'),
 (26, 'WXY6P66', 'Corolla Cross','Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'SUV'),
@@ -235,7 +248,7 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (29, 'FGH9S99', 'Nivus',        'Volkswagen', 2022, 'DISPONIVEL', 'Garagem Central',               'SUV'),
 (30, 'IJK0T10', 'Sprinter',     'Mercedes-Benz',2022,'DISPONIVEL','Garagem Central',               'VAN'),
 (31, 'LMN1U21', 'Ducato',       'Fiat',       2021, 'DISPONIVEL', 'Secretaria de Educacao',      'VAN'),
-(32, 'OPQ2V32', 'Master',       'Renault',    2023, 'EM_USO',     'Secretaria de Obras',         'VAN'),
+(32, 'OPQ2V32', 'Master',       'Renault',    2023, 'DISPONIVEL', 'Secretaria de Obras',         'VAN'),
 (33, 'RST3W43', 'Daily',        'Iveco',      2020, 'DISPONIVEL', 'Garagem Central',               'VAN'),
 (34, 'UVW4X54', 'Kombi',        'Volkswagen', 2014, 'MANUTENCAO', 'Garagem Central',               'VAN'),
 (35, 'XYZ5Y65', 'Fiorino',      'Fiat',       2022, 'DISPONIVEL', 'Secretaria de Saude',         'VAN'),
@@ -243,14 +256,14 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (37, 'DEF7A87', 'Expert',       'Peugeot',    2023, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'VAN'),
 (38, 'GHI8B98', 'OF-1519',      'Mercedes-Benz',2019,'DISPONIVEL','Secretaria de Educacao',      'ONIBUS'),
 (39, 'JKL9C09', 'Volare W9',    'Marcopolo',  2020, 'DISPONIVEL', 'Garagem Central',               'ONIBUS'),
-(40, 'MNO0D10', 'Apache U',     'Volkswagen', 2018, 'EM_USO',     'Secretaria de Obras',         'ONIBUS'),
+(40, 'MNO0D10', 'Apache U',     'Volkswagen', 2018, 'DISPONIVEL', 'Secretaria de Obras',         'ONIBUS'),
 (41, 'PQR1E21', 'Paradiso',     'Marcopolo',  2021, 'DISPONIVEL', 'Garagem Central',               'ONIBUS'),
 (42, 'STU2F32', 'Torino',       'Caio',       2022, 'MANUTENCAO', 'Garagem Central',               'ONIBUS'),
 (43, 'VWX3G43', 'Millennium',   'Busscar',    2017, 'DESATIVADO', 'Garagem Central',               'ONIBUS'),
 (44, 'YZA4H54', 'Corolla',      'Toyota',     2023, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
 (45, 'BCD5I65', 'Civic',        'Honda',      2022, 'DISPONIVEL', 'Secretaria de Saude',         'SEDAN'),
 (46, 'EFG6J76', 'Virtus',       'Volkswagen', 2024, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
-(47, 'HIJ7K87', 'Cronos',       'Fiat',       2021, 'EM_USO',     'Secretaria de Educacao',      'SEDAN'),
+(47, 'HIJ7K87', 'Cronos',       'Fiat',       2021, 'DISPONIVEL', 'Secretaria de Educacao',      'SEDAN'),
 (48, 'KLM8L98', 'Sentra',       'Nissan',     2022, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
 (49, 'NOP9M09', 'Jetta',        'Volkswagen', 2020, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
 (50, 'QRS0N10', 'Cruze',        'Chevrolet',  2023, 'DISPONIVEL', 'Secretaria de Obras',         'SEDAN'),
@@ -258,7 +271,7 @@ INSERT INTO veiculos (id, placa, modelo, marca, ano, status, secretaria, tipo_ve
 (52, 'WXY2P32', 'Voyage',       'Volkswagen', 2021, 'DISPONIVEL', 'Garagem Central',               'SEDAN'),
 (53, 'ZAB3Q43', 'Hilux',        'Toyota',     2024, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
 (54, 'CDE4R54', 'Ranger',       'Ford',       2023, 'DISPONIVEL', 'Secretaria de Meio Ambiente', 'CAMINHONETE'),
-(55, 'FGH5S65', 'S10',          'Chevrolet',  2022, 'EM_USO',     'Garagem Central',               'CAMINHONETE'),
+(55, 'FGH5S65', 'S10',          'Chevrolet',  2022, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
 (56, 'IJK6T76', 'Amarok',       'Volkswagen', 2021, 'DISPONIVEL', 'Secretaria de Obras',         'CAMINHONETE'),
 (57, 'LMN7U87', 'Toro',         'Fiat',       2023, 'DISPONIVEL', 'Garagem Central',               'CAMINHONETE'),
 (58, 'OPQ8V98', 'Frontier',     'Nissan',     2022, 'DISPONIVEL', 'Secretaria de Educacao',      'CAMINHONETE'),
@@ -412,14 +425,78 @@ INSERT INTO documentacao (id_documento, id_veiculo, tipo_documento, data_vencime
 (20, 9,  'IPVA',          '2026-04-30', 540.00,  'PAGO'),
 (21, 10, 'IPVA',          '2026-04-30', 1980.00, 'PAGO'),
 (22, 10, 'LICENCIAMENTO', '2026-09-15', 165.00,  'PAGO'),
-(23, 10, 'SEGURO',        '2027-04-01', 2890.00, 'PAGO'),
-(24, 10, 'DPVAT',         '2026-12-31', 50.00,   'PAGO')
+(23, 10, 'SEGURO',        '2027-04-01', 2890.00, 'PAGO')
 ON CONFLICT (id_documento) DO UPDATE SET
   id_veiculo = EXCLUDED.id_veiculo,
   tipo_documento = EXCLUDED.tipo_documento,
   data_vencimento = EXCLUDED.data_vencimento,
   valor_pago = EXCLUDED.valor_pago,
   status_pagamento = EXCLUDED.status_pagamento;
+
+-- Garante cobertura mínima de documentação para TODA a frota:
+-- cada veículo deve ter IPVA, LICENCIAMENTO e SEGURO.
+-- Mantém parte dos documentos vencidos/pendentes para cenários de demonstração.
+WITH tipos_documento AS (
+  SELECT 'IPVA'::varchar AS tipo_documento
+  UNION ALL SELECT 'LICENCIAMENTO'::varchar
+  UNION ALL SELECT 'SEGURO'::varchar
+),
+faltantes AS (
+  SELECT
+    v.id AS id_veiculo,
+    t.tipo_documento
+  FROM veiculos v
+  CROSS JOIN tipos_documento t
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM documentacao d
+    WHERE d.id_veiculo = v.id
+      AND UPPER(d.tipo_documento) = t.tipo_documento
+  )
+),
+base AS (
+  SELECT COALESCE(MAX(id_documento), 0) AS max_id
+  FROM documentacao
+),
+novos AS (
+  SELECT
+    (base.max_id + ROW_NUMBER() OVER (ORDER BY f.id_veiculo, f.tipo_documento))::bigint AS id_documento,
+    f.id_veiculo,
+    f.tipo_documento,
+    CASE
+      WHEN MOD(f.id_veiculo, 7) = 0 THEN CURRENT_DATE - INTERVAL '45 days'
+      WHEN MOD(f.id_veiculo, 4) = 0 THEN CURRENT_DATE + INTERVAL '10 days'
+      ELSE CURRENT_DATE + INTERVAL '180 days'
+    END::date AS data_vencimento,
+    CASE f.tipo_documento
+      WHEN 'IPVA' THEN 900 + (f.id_veiculo * 31)
+      WHEN 'LICENCIAMENTO' THEN 165
+      ELSE 1800 + (f.id_veiculo * 22)
+    END::numeric(12, 2) AS valor_pago,
+    CASE
+      WHEN MOD(f.id_veiculo, 7) = 0 THEN 'ATRASADO'
+      WHEN MOD(f.id_veiculo, 4) = 0 THEN 'PENDENTE'
+      ELSE 'PAGO'
+    END::varchar AS status_pagamento
+  FROM faltantes f
+  CROSS JOIN base
+)
+INSERT INTO documentacao (
+  id_documento,
+  id_veiculo,
+  tipo_documento,
+  data_vencimento,
+  valor_pago,
+  status_pagamento
+)
+SELECT
+  n.id_documento,
+  n.id_veiculo,
+  n.tipo_documento,
+  n.data_vencimento,
+  n.valor_pago,
+  n.status_pagamento
+FROM novos n;
 
 
 -- =====================================================================
@@ -696,6 +773,42 @@ SET id_motorista = ru.id_motorista
 FROM registros_uso ru
 WHERE r.id_reserva = ru.id_reserva
   AND r.id_motorista IS NULL;
+
+-- Status operacional da frota: EM_USO somente quando existir uso em aberto.
+UPDATE veiculos v
+SET status = 'EM_USO'
+WHERE EXISTS (
+  SELECT 1
+  FROM registros_uso ru
+  WHERE ru.id_veiculo = v.id
+    AND ru.data_retorno IS NULL
+);
+
+UPDATE veiculos v
+SET status = 'DISPONIVEL'
+WHERE v.status = 'EM_USO'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM registros_uso ru
+    WHERE ru.id_veiculo = v.id
+      AND ru.data_retorno IS NULL
+  );
+
+-- Regra de negócio do mock: o motorista do registro/reserva precisa ser o
+-- motorista dono do veículo (veiculos.id_motorista), evitando divergências.
+UPDATE registros_uso ru
+SET id_motorista = v.id_motorista
+FROM veiculos v
+WHERE v.id = ru.id_veiculo
+  AND v.id_motorista IS NOT NULL
+  AND ru.id_motorista IS DISTINCT FROM v.id_motorista;
+
+UPDATE reservas r
+SET id_motorista = v.id_motorista
+FROM veiculos v
+WHERE v.id = r.id_veiculo
+  AND v.id_motorista IS NOT NULL
+  AND r.id_motorista IS DISTINCT FROM v.id_motorista;
 
 
 -- =====================================================================
