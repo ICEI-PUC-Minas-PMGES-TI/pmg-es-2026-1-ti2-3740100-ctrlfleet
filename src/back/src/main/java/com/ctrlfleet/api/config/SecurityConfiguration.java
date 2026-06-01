@@ -87,6 +87,11 @@ public class SecurityConfiguration {
                 .requestMatchers("/registros-uso/**")
                     .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA", "MOTORISTA")
 
+                .requestMatchers(HttpMethod.GET, "/gestor/manutencoes/**")
+                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
+                .requestMatchers("/gestor/manutencoes/*/aprovar", "/gestor/manutencoes/*/reprovar")
+                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
+
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

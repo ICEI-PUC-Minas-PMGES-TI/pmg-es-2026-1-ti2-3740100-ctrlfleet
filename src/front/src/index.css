@@ -9923,3 +9923,153 @@ a {
   color: var(--text-muted);
   font-size: 0.92rem;
 }
+
+/* —— Gestor: painel de manutenção —— */
+.gestor-maintenance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.gestor-maintenance-grid-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 16px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.gestor-maintenance-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-sm);
+}
+
+.gestor-maintenance-card--emergency {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border-subtle));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.gestor-maintenance-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gestor-maintenance-card__eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gestor-maintenance-card__header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.gestor-maintenance-card__description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.gestor-maintenance-card__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.gestor-maintenance-card__meta dt {
+  margin: 0 0 2px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.gestor-maintenance-card__meta dd {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.gestor-maintenance-card__priority {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.gestor-maintenance-card__priority--critica {
+  color: var(--danger);
+}
+
+.gestor-maintenance-card__priority--alta {
+  color: #c2410c;
+}
+
+.gestor-maintenance-card__priority--media {
+  color: #a16207;
+}
+
+.gestor-maintenance-card__priority--baixa {
+  color: var(--text-muted);
+}
+
+.gestor-maintenance-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.gestor-maintenance-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.gestor-maintenance-card__action--primary {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+  color: var(--accent);
+}
+
+.gestor-maintenance-card__action--success {
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border-subtle));
+  color: var(--success);
+}
+
+.gestor-maintenance-card__action--danger {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border-subtle));
+  color: var(--danger);
+}
+
+.admin-dashboard__error--inline {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}

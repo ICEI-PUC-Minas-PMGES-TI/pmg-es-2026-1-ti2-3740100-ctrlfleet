@@ -74,6 +74,16 @@ export function mapManutencaoToView(dto) {
     emergencia: Boolean(dto.emergencia),
     prioridade: dto.prioridade,
     prioridadeLabel: PRIORIDADE_LABELS[dto.prioridade] || dto.prioridade,
+    nomeMotorista: dto.nomeMotorista || '',
+  };
+}
+
+export function mapPainelGestorManutencaoToView(dto) {
+  return {
+    pendentes: (dto.pendentes || []).map(mapManutencaoToView),
+    agendadas: (dto.agendadas || []).map(mapManutencaoToView),
+    emAndamento: (dto.emAndamento || []).map(mapManutencaoToView),
+    historico: (dto.historico || []).map(mapManutencaoToView),
   };
 }
 

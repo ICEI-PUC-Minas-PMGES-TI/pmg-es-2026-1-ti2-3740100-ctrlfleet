@@ -569,6 +569,19 @@ INSERT INTO manutencoes (id_manutencao, id_veiculo, tipo_manutencao, descricao_p
 (9, 1, 'PREVENTIVA', 'Revisão programada dos 60.000 km — fluido de freio e filtros.',            '2026-06-15', 60000.00, null,    null,                    'AGENDADA')
 ON CONFLICT DO NOTHING;
 
+-- Solicitações pendentes para triagem do gestor (issue 8.2)
+INSERT INTO manutencoes (
+  id_manutencao, id_veiculo, id_motorista, tipo_manutencao, descricao_problema,
+  data_realizada, quilometragem_registro, custo_total, oficina_executor, status,
+  data_identificacao, emergencia, prioridade
+) VALUES
+(10, 4,  1, 'CORRETIVA', 'Barulho metálico na suspensão dianteira ao passar em lombadas.',              NULL, 32450.00, NULL, NULL, 'PENDENTE', '2026-05-28 08:15:00', false, 'ALTA'),
+(11, 10, 3, 'CORRETIVA', 'Superaquecimento em viagem — veículo perdeu potência e acendeu luz de temperatura.', NULL, 61200.00, NULL, NULL, 'PENDENTE', '2026-05-29 14:42:00', true,  'CRITICA'),
+(12, 2,  1, 'CORRETIVA', 'Ar-condicionado sem refrigeração adequada para transporte de medicamentos.',    NULL, 19800.00, NULL, NULL, 'PENDENTE', '2026-05-30 09:05:00', false, 'MEDIA'),
+(13, 11, 4, 'CORRETIVA', 'Vazamento de óleo identificado no retorno da última viagem institucional.',   NULL, 44120.00, NULL, NULL, 'PENDENTE', '2026-05-31 11:20:00', false, 'ALTA'),
+(14, 12, 2, 'CORRETIVA', 'Luz de injeção acesa intermitentemente durante aceleração em subidas.',       NULL, 28700.00, NULL, NULL, 'PENDENTE', '2026-06-01 07:50:00', false, 'BAIXA')
+ON CONFLICT (id_manutencao) DO NOTHING;
+
 
 -- =====================================================================
 -- 8. ALERTAS

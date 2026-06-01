@@ -9,6 +9,7 @@ import { AdminUsersPage } from './modules/admin/pages/AdminUsersPage';
 import { VehicleFormProvider } from './modules/gestor/context/VehicleFormContext';
 import { FleetDashboardPage } from './modules/gestor/pages/FleetDashboardPage';
 import { FleetPage } from './modules/gestor/pages/FleetPage';
+import { ManutencaoGestorPage } from './modules/gestor/pages/ManutencaoGestorPage';
 import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
 import { ReservasGestorPage } from './modules/gestor/pages/ReservasGestorPage';
 import { ReservationTimelinePage } from './modules/gestor/pages/ReservationTimelinePage';
@@ -58,17 +59,7 @@ function App() {
               <Route path="frota/:vehicleId" element={<VehicleDetailPage />} />
               <Route path="reservas" element={<ReservasGestorPage />} />
               <Route path="reservas/:reservaId/historico" element={<ReservationTimelinePage />} />
-              <Route
-                path="manutencao"
-                element={
-                  <ModulePlaceholderPage
-                    ctaLabel="Acompanhar frota"
-                    ctaTo="/gestor/frota"
-                    description="Esta área já está preparada na navegação para receber triagem, prioridades e ordens de serviço."
-                    title="Manutenção"
-                  />
-                }
-              />
+              <Route path="manutencao" element={<ManutencaoGestorPage />} />
               <Route
                 path="programacao-preventiva"
                 element={

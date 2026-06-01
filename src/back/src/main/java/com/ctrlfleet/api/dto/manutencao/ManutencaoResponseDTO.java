@@ -28,6 +28,7 @@ public class ManutencaoResponseDTO {
     private boolean emergencia;
     private PrioridadeAlerta prioridade;
     private String proximidadeLabel;
+    private String nomeMotorista;
 
     public static ManutencaoResponseDTO fromEntity(Manutencao manutencao, Double quilometragemAtual) {
         ManutencaoResponseDTO dto = new ManutencaoResponseDTO();
@@ -36,6 +37,11 @@ public class ManutencaoResponseDTO {
         dto.placa = manutencao.getVeiculo().getPlaca();
         dto.marca = manutencao.getVeiculo().getMarca();
         dto.modelo = manutencao.getVeiculo().getModelo();
+        if (manutencao.getMotorista() != null) {
+            dto.nomeMotorista = manutencao.getMotorista().getNome();
+        } else if (manutencao.getVeiculo().getMotorista() != null) {
+            dto.nomeMotorista = manutencao.getVeiculo().getMotorista().getNome();
+        }
         dto.tipoManutencao = manutencao.getTipoManutencao();
         dto.descricaoProblema = manutencao.getDescricaoProblema();
         dto.dataAgendada = manutencao.getDataRealizada();
@@ -200,5 +206,13 @@ public class ManutencaoResponseDTO {
 
     public void setProximidadeLabel(String proximidadeLabel) {
         this.proximidadeLabel = proximidadeLabel;
+    }
+
+    public String getNomeMotorista() {
+        return nomeMotorista;
+    }
+
+    public void setNomeMotorista(String nomeMotorista) {
+        this.nomeMotorista = nomeMotorista;
     }
 }
