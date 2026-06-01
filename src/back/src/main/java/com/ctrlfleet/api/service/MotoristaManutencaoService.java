@@ -3,12 +3,14 @@ package com.ctrlfleet.api.service;
 import com.ctrlfleet.api.domain.enums.PapelUsuario;
 import com.ctrlfleet.api.domain.enums.PrioridadeAlerta;
 import com.ctrlfleet.api.domain.enums.StatusManutencao;
+import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.domain.enums.TipoManutencao;
 import com.ctrlfleet.api.domain.model.Alerta;
 import com.ctrlfleet.api.domain.model.Manutencao;
 import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.dto.manutencao.AlertaResponseDTO;
+import com.ctrlfleet.api.dto.manutencao.ConcluirManutencaoRequestDTO;
 import com.ctrlfleet.api.dto.manutencao.ManutencaoResponseDTO;
 import com.ctrlfleet.api.dto.manutencao.MotoristaManutencaoPainelDTO;
 import com.ctrlfleet.api.dto.manutencao.SolicitarManutencaoRequestDTO;
@@ -36,6 +38,8 @@ public class MotoristaManutencaoService {
 
     private static final int PREVENTIVE_DAYS_THRESHOLD = 45;
     private static final double PREVENTIVE_KM_THRESHOLD = 2000d;
+    private static final List<StatusManutencao> STATUS_MANUTENCAO_ABERTA =
+            List.of(StatusManutencao.PENDENTE, StatusManutencao.EM_ANDAMENTO);
 
     private final ManutencaoRepository manutencaoRepository;
     private final AlertaRepository alertaRepository;
@@ -132,6 +136,65 @@ public class MotoristaManutencaoService {
                 descricao);
 
         return enriquecerDto(salva, request.getQuilometragemAtual());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ManutencaoResponseDTO> listarManutencoes() {
+        List<Manutencao> registros = manutencaoRepository.findAllByOrderByDataIdentificacaoDescIdDesc();
+        Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
+        return registros.stream()
+                .map(item -> enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId())))
+                .toList();
+    }
+
+    @Transactional
+    public ManutencaoResponseDTO concluirManutencao(Long manutencaoId, ConcluirManutencaoRequestDTO request) {
+        Manutencao manutencao = manutencaoRepository
+                .findById(manutencaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Manutenção não encontrada com id: " + manutencaoId));
+
+        if (manutencao.getStatus() == StatusManutencao.CONCLUIDA) {
+            throw new IllegalArgumentException("Manutenção já concluída.");
+        }
+        if (manutencao.getStatus() == StatusManutencao.CANCELADA
+                || manutencao.getStatus() == StatusManutencao.REPROVADA) {
+            throw new IllegalArgumentException("Manutenção cancelada ou reprovada não pode ser concluída.");
+        }
+
+        String servicosRealizados = trimObrigatorio(
+                request.getServicosRealizados(), "Detalhe os serviços realizados.");
+        if (request.getCustoTotal() == null || request.getCustoTotal() < 0) {
+            throw new IllegalArgumentException("Custo total não pode ser negativo.");
+        }
+        if (request.getDataConclusao() == null) {
+            throw new IllegalArgumentException("Data de conclusão é obrigatória.");
+        }
+        String comprovanteNf = trimObrigatorio(request.getComprovanteNf(), "Comprovante ou NF é obrigatório.");
+
+        manutencao.setServicosRealizados(servicosRealizados);
+        manutencao.setCustoTotal(request.getCustoTotal());
+        manutencao.setDataConclusao(request.getDataConclusao());
+        manutencao.setGarantia(trimOuNulo(request.getGarantia()));
+        manutencao.setComprovanteNf(comprovanteNf);
+        manutencao.setStatus(StatusManutencao.CONCLUIDA);
+
+        liberarVeiculoSePossivel(manutencao);
+        Manutencao salva = manutencaoRepository.save(manutencao);
+
+        auditoriaService.registrar(
+                "CONCLUIR_MANUTENCAO",
+                "Gestor",
+                "Manutenção #" + salva.getId(),
+                "CONCLUIDA",
+                "success",
+                null,
+                "Veículo " + salva.getVeiculo().getPlaca() + " concluído com custo total "
+                        + request.getCustoTotal());
+
+        Double quilometragemAtual = registroUsoRepository
+                .buscarUltimaQuilometragemVeiculo(salva.getVeiculo().getId())
+                .orElse(null);
+        return enriquecerDto(salva, quilometragemAtual);
     }
 
     private List<ManutencaoResponseDTO> extrairPreventivasProximas(
@@ -231,6 +294,38 @@ public class MotoristaManutencaoService {
             }
         }
         return partes.isEmpty() ? "Próxima da data prevista" : String.join(" · ", partes);
+    }
+
+    private void liberarVeiculoSePossivel(Manutencao manutencao) {
+        Veiculo veiculo = manutencao.getVeiculo();
+        if (veiculo.getStatus() == StatusVeiculo.DESATIVADO || veiculo.getStatus() == StatusVeiculo.EM_USO) {
+            return;
+        }
+
+        boolean temUsoAberto = registroUsoRepository.existsByVeiculoIdAndDataRetornoIsNull(veiculo.getId());
+        boolean temOutraManutencaoAberta = manutencaoRepository.existsByVeiculo_IdAndStatusInAndIdNot(
+                veiculo.getId(), STATUS_MANUTENCAO_ABERTA, manutencao.getId());
+
+        if (!temUsoAberto && !temOutraManutencaoAberta) {
+            veiculo.setStatus(StatusVeiculo.DISPONIVEL);
+            veiculoRepository.save(veiculo);
+        }
+    }
+
+    private String trimObrigatorio(String valor, String mensagem) {
+        String texto = trimOuNulo(valor);
+        if (texto == null) {
+            throw new IllegalArgumentException(mensagem);
+        }
+        return texto;
+    }
+
+    private String trimOuNulo(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String texto = valor.trim();
+        return texto.isEmpty() ? null : texto;
     }
 
     private Usuario validarMotoristaAtivo(Long motoristaId) {

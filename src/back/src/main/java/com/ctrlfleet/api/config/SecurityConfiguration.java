@@ -68,6 +68,11 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.DELETE, "/reservas/**")
                     .hasAnyRole("SOLICITANTE", "ADMINISTRADOR")
 
+                .requestMatchers(HttpMethod.GET, "/manutencoes/**")
+                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                .requestMatchers(HttpMethod.PATCH, "/manutencoes/**")
+                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/motoristas/**")
