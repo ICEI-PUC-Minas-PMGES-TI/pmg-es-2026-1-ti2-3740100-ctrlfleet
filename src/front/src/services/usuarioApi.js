@@ -65,7 +65,13 @@ export async function listarUsuarios({ signal } = {}) {
     signal,
   });
 
-  const data = await parseApiResponse(res);
+  let data;
+  try {
+    data = await parseApiResponse(res);
+  } catch (error) {
+    error.status = res.status;
+    throw error;
+  }
   return Array.isArray(data) ? data : [];
 }
 

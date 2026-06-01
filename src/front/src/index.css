@@ -1408,8 +1408,18 @@ a {
   flex: 1 1 auto;
 }
 
-.fleet-filters__toolbar .filter-tabs {
+.fleet-filters__toolbar > .fleet-filters__control {
   flex: 1 1 280px;
+}
+
+.fleet-filters__toolbar .filter-tabs {
+  flex: 0 0 auto;
+}
+
+.fleet-filters__toolbar .filter-tab {
+  min-width: 78px;
+  max-width: 138px;
+  white-space: nowrap;
 }
 
 .fleet-filters__controls {
@@ -1548,11 +1558,17 @@ a {
 
 .filter-tabs {
   display: flex;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
 .filter-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  height: 42px;
   min-height: 42px;
   padding: 0 14px;
   border-radius: 999px;

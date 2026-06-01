@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActionButton } from '../common/ActionButton';
 import { SectionCard } from '../common/SectionCard';
+import { getAuthSession } from '../../services/authSession';
 import { finalizarCorrida } from '../../services/registroUsoApi';
 import { listarUsuarios } from '../../services/usuarioApi';
 
@@ -10,8 +11,10 @@ function toIsoWithSeconds(value) {
 }
 
 export function FinalizarUsoForm({ veiculoId, onFinalizado }) {
+  const canManageUsuarios = getAuthSession()?.role === 'ROLE_ADMINISTRADOR';
   const [usuarios, setUsuarios] = useState([]);
   const [usuariosErro, setUsuariosErro] = useState(null);
+  const [canLoadUsuarios, setCanLoadUsuarios] = useState(canManageUsuarios);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [form, setForm] = useState({
@@ -25,16 +28,22 @@ export function FinalizarUsoForm({ veiculoId, onFinalizado }) {
   });
 
   useEffect(() => {
+    if (!canManageUsuarios) return undefined;
+
     const controller = new AbortController();
     listarUsuarios({ signal: controller.signal })
       .then(setUsuarios)
       .catch((error) => {
         if (error.name !== 'AbortError') {
+          if (error.status === 403 || /403|forbidden/i.test(error.message || '')) {
+            setCanLoadUsuarios(false);
+            return;
+          }
           setUsuariosErro(error.message || 'Não foi possível carregar motoristas.');
         }
       });
     return () => controller.abort();
-  }, []);
+  }, [canManageUsuarios]);
 
   const motoristas = useMemo(
     () =>
@@ -83,6 +92,10 @@ export function FinalizarUsoForm({ veiculoId, onFinalizado }) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (!canLoadUsuarios) {
+    return null;
   }
 
   return (
