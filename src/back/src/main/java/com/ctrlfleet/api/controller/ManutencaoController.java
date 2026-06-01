@@ -28,6 +28,11 @@ public class ManutencaoController {
         return ResponseEntity.ok(manutencaoService.listarManutencoes());
     }
 
+    @GetMapping("/veiculo/{veiculoId}")
+    public ResponseEntity<List<ManutencaoResponseDTO>> listarPorVeiculo(@PathVariable Long veiculoId) {
+        return ResponseEntity.ok(manutencaoService.listarManutencoesPorVeiculo(veiculoId));
+    }
+
     @PatchMapping("/{manutencaoId}/concluir")
     public ResponseEntity<ManutencaoResponseDTO> concluir(
             @PathVariable Long manutencaoId, @Valid @RequestBody ConcluirManutencaoRequestDTO request) {

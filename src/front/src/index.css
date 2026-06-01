@@ -6108,7 +6108,7 @@ a {
 
 .history-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -6197,6 +6197,98 @@ a {
   color: var(--muted);
 }
 
+.maintenance-history-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.maintenance-history-item,
+.vehicle-maintenance-summary__item {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  border-left: 5px solid rgba(135, 146, 166, 0.55);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.maintenance-history-item--maintenance,
+.vehicle-maintenance-summary__item--maintenance {
+  border-left-color: #c05621;
+  background: rgba(255, 247, 237, 0.92);
+}
+
+.maintenance-history-item--success,
+.vehicle-maintenance-summary__item--success {
+  border-left-color: #027a48;
+  background: rgba(236, 253, 245, 0.86);
+}
+
+.maintenance-history-item__head,
+.vehicle-maintenance-summary__item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.maintenance-history-item__head strong,
+.vehicle-maintenance-summary__item strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.maintenance-history-item__type,
+.vehicle-maintenance-summary__item > div > span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.maintenance-history-item__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.maintenance-history-item__meta dt {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.maintenance-history-item__meta dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.maintenance-history-item p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.vehicle-maintenance-summary {
+  display: grid;
+  gap: 12px;
+}
+
+.vehicle-maintenance-summary__item small {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
 @media (max-width: 760px) {
   .registro-uso-table-wrapper {
     display: none;
@@ -6258,6 +6350,16 @@ a {
 
   .reservation-lookup,
   .history-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenance-history-item__head,
+  .vehicle-maintenance-summary__item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .maintenance-history-item__meta {
     grid-template-columns: 1fr;
   }
 }
@@ -9592,6 +9694,18 @@ a {
   margin: 0;
   color: var(--text-muted);
   line-height: 1.5;
+}
+
+.maintenance-card__vehicle-link {
+  width: fit-content;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.maintenance-card__vehicle-link:hover {
+  text-decoration: underline;
 }
 
 .maintenance-card__meta {

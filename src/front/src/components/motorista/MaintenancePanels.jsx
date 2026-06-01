@@ -17,7 +17,7 @@ function MaintenanceCard({ badge, children, highlight = false, title }) {
   );
 }
 
-export function PreventiveMaintenanceList({ items }) {
+export function PreventiveMaintenanceList({ items, vehiclePathBase }) {
   if (!items.length) return null;
 
   return (
@@ -38,6 +38,11 @@ export function PreventiveMaintenanceList({ items }) {
             key={`preventiva-${item.id}`}
             title={`${item.placa} · ${item.vehicleLabel}`}
           >
+            {vehiclePathBase ? (
+              <Link className="maintenance-card__vehicle-link" to={`${vehiclePathBase}/${item.idVeiculo}`}>
+                Acessar veiculo
+              </Link>
+            ) : null}
             <p className="maintenance-card__description">{item.descricao}</p>
             <dl className="maintenance-card__meta">
               <div>
@@ -95,7 +100,7 @@ export function PreventiveAlertList({ items }) {
   );
 }
 
-export function MaintenanceRequestList({ emptyMessage, items, title, variant = 'default' }) {
+export function MaintenanceRequestList({ emptyMessage, items, title, vehiclePathBase, variant = 'default' }) {
   return (
     <section aria-label={title} className="maintenance-section">
       <div className="maintenance-section__header">
@@ -113,6 +118,11 @@ export function MaintenanceRequestList({ emptyMessage, items, title, variant = '
               key={`${variant}-${item.id}`}
               title={`${item.placa} · ${item.vehicleLabel}`}
             >
+              {vehiclePathBase ? (
+                <Link className="maintenance-card__vehicle-link" to={`${vehiclePathBase}/${item.idVeiculo}`}>
+                  Acessar veiculo
+                </Link>
+              ) : null}
               <p className="maintenance-card__description">{item.descricao}</p>
               <dl className="maintenance-card__meta">
                 <div>

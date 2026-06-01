@@ -147,6 +147,19 @@ public class MotoristaManutencaoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ManutencaoResponseDTO> listarManutencoesPorVeiculo(Long veiculoId) {
+        if (!veiculoRepository.existsById(veiculoId)) {
+            throw new IllegalArgumentException("Veiculo nao encontrado com id: " + veiculoId);
+        }
+
+        List<Manutencao> registros = manutencaoRepository.findByVeiculo_IdOrderByDataIdentificacaoDescIdDesc(veiculoId);
+        Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
+        return registros.stream()
+                .map(item -> enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId())))
+                .toList();
+    }
+
     @Transactional
     public ManutencaoResponseDTO concluirManutencao(Long manutencaoId, ConcluirManutencaoRequestDTO request) {
         Manutencao manutencao = manutencaoRepository

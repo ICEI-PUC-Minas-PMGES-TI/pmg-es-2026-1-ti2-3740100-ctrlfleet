@@ -11,8 +11,8 @@ import {
 } from '../../../components/motorista/MaintenancePanels';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { listarPainelManutencaoMotorista } from '../../../services/motoristaManutencaoApi';
-import { mapPainelManutencaoToView } from '../../../utils/manutencaoMappers';
 import { pad2 } from '../../../services/veiculoMappers';
+import { mapPainelManutencaoToView } from '../../../utils/manutencaoMappers';
 
 export function MotoristaManutencaoPage() {
   const location = useLocation();
@@ -42,7 +42,7 @@ export function MotoristaManutencaoPage() {
         if (error.name === 'AbortError') return;
         setPainel({
           loading: false,
-          error: error.message || 'Falha ao carregar manutenções.',
+          error: error.message || 'Falha ao carregar manutencoes.',
           data: null,
         });
       });
@@ -56,21 +56,21 @@ export function MotoristaManutencaoPage() {
 
     return [
       {
-        caption: 'Revisões chegando',
+        caption: 'Revisoes chegando',
         icon: 'preventive',
         title: 'Preventivas',
         value: pad2(data.preventivasProximas.length + data.alertasPreventivos.length),
         variant: 'maintenance',
       },
       {
-        caption: 'Aguardando análise da frota',
+        caption: 'Aguardando analise da frota',
         icon: 'alert',
-        title: 'Solicitações',
+        title: 'Solicitacoes',
         value: pad2(data.solicitacoes.length),
         variant: 'blocked',
       },
       {
-        caption: 'Veículos em oficina',
+        caption: 'Veiculos em oficina',
         icon: 'maintenance',
         title: 'Em andamento',
         value: pad2(data.emAndamento.length),
@@ -79,7 +79,7 @@ export function MotoristaManutencaoPage() {
       {
         caption: 'Registros recentes',
         icon: 'reports',
-        title: 'Histórico',
+        title: 'Historico',
         value: pad2(data.historico.length),
         variant: 'total',
       },
@@ -89,16 +89,18 @@ export function MotoristaManutencaoPage() {
   if (!motoristaId) {
     return (
       <div className="page-stack motorista-page">
-        <p className="motorista-dashboard__invalid">Sessão inválida para o perfil de motorista.</p>
+        <p className="motorista-dashboard__invalid">Sessao invalida para o perfil de motorista.</p>
       </div>
     );
   }
 
+  const vehiclePathBase = `/motorista/${motoristaId}/veiculos`;
+
   return (
     <div className="page-stack motorista-page motorista-maintenance-page">
       <PageHeader
-        subtitle="Acompanhe preventivas próximas, solicitações enviadas e manutenções em andamento."
-        title="Manutenções"
+        subtitle="Acompanhe preventivas proximas, solicitacoes enviadas e manutencoes em andamento."
+        title="Manutencoes"
       />
 
       <MaintenanceQuickActions motoristaId={motoristaId} />
@@ -113,45 +115,48 @@ export function MotoristaManutencaoPage() {
       {painel.loading ? (
         <div className="admin-dashboard__loading">
           <span aria-hidden="true" className="admin-dashboard__spinner" />
-          <p>Carregando manutenções...</p>
+          <p>Carregando manutencoes...</p>
         </div>
       ) : painel.error ? (
         <div className="admin-dashboard__error">
           <Icon name="alert" />
           <div>
-            <strong>Falha ao carregar manutenções</strong>
+            <strong>Falha ao carregar manutencoes</strong>
             <p>{painel.error}</p>
           </div>
         </div>
       ) : (
         <>
-          <section aria-label="Resumo de manutenções" className="stats-grid stats-grid--fleet">
+          <section aria-label="Resumo de manutencoes" className="stats-grid stats-grid--fleet">
             {summaryCards.map((stat) => (
               <StatCard key={stat.title} layout="vertical" {...stat} />
             ))}
           </section>
 
-          <PreventiveMaintenanceList items={painel.data.preventivasProximas} />
+          <PreventiveMaintenanceList items={painel.data.preventivasProximas} vehiclePathBase={vehiclePathBase} />
           <PreventiveAlertList items={painel.data.alertasPreventivos} />
 
           <MaintenanceRequestList
-            emptyMessage="Nenhuma solicitação pendente no momento."
+            emptyMessage="Nenhuma solicitacao pendente no momento."
             items={painel.data.solicitacoes}
-            title="Solicitações pendentes"
+            title="Solicitacoes pendentes"
+            vehiclePathBase={vehiclePathBase}
             variant="pending"
           />
 
           <MaintenanceRequestList
-            emptyMessage="Nenhum veículo em manutenção no momento."
+            emptyMessage="Nenhum veiculo em manutencao no momento."
             items={painel.data.emAndamento}
-            title="Manutenções em andamento"
+            title="Manutencoes em andamento"
+            vehiclePathBase={vehiclePathBase}
             variant="active"
           />
 
           <MaintenanceRequestList
-            emptyMessage="Ainda não há histórico de manutenções para sua frota."
+            emptyMessage="Ainda nao ha historico de manutencoes para sua frota."
             items={painel.data.historico}
-            title="Histórico recente"
+            title="Historico recente"
+            vehiclePathBase={vehiclePathBase}
             variant="history"
           />
         </>

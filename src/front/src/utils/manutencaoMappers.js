@@ -2,7 +2,7 @@ const STATUS_LABELS = {
   PENDENTE: 'Pendente',
   AGENDADA: 'Agendada',
   EM_ANDAMENTO: 'Em andamento',
-  CONCLUIDA: 'Concluída',
+  CONCLUIDA: 'Concluida',
   CANCELADA: 'Cancelada',
   REPROVADA: 'Reprovada',
 };
@@ -14,20 +14,20 @@ const TIPO_LABELS = {
 
 const PRIORIDADE_LABELS = {
   BAIXA: 'Baixa',
-  MEDIA: 'Média',
+  MEDIA: 'Media',
   ALTA: 'Alta',
-  CRITICA: 'Crítica',
+  CRITICA: 'Critica',
 };
 
 function formatDateBr(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   const date = new Date(String(value).includes('T') ? value : `${value}T12:00:00`);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat('pt-BR').format(date);
 }
 
 function formatDateTimeBr(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat('pt-BR', {
@@ -40,18 +40,28 @@ function formatDateTimeBr(value) {
 }
 
 function formatKm(value) {
-  if (value == null || !Number.isFinite(Number(value))) return '—';
+  if (value == null || !Number.isFinite(Number(value))) return '-';
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(Number(value))} km`;
 }
 
+function formatCurrencyBr(value) {
+  if (value == null || !Number.isFinite(Number(value))) return '-';
+  return new Intl.NumberFormat('pt-BR', {
+    currency: 'BRL',
+    style: 'currency',
+  }).format(Number(value));
+}
+
 export function mapManutencaoToView(dto) {
+  const dataReferencia = dto.dataConclusao || dto.dataAgendada || dto.dataIdentificacao;
+
   return {
     id: dto.id,
     idVeiculo: dto.idVeiculo,
-    placa: dto.placa || '—',
+    placa: dto.placa || '-',
     marca: dto.marca || '',
     modelo: dto.modelo || '',
-    vehicleLabel: [dto.marca, dto.modelo].filter(Boolean).join(' ') || 'Veículo',
+    vehicleLabel: [dto.marca, dto.modelo].filter(Boolean).join(' ') || 'Veiculo',
     tipo: dto.tipoManutencao,
     tipoLabel: TIPO_LABELS[dto.tipoManutencao] || dto.tipoManutencao,
     descricao: dto.descricaoProblema || '',
@@ -59,6 +69,10 @@ export function mapManutencaoToView(dto) {
     dataAgendadaLabel: formatDateBr(dto.dataAgendada),
     dataIdentificacao: dto.dataIdentificacao,
     dataIdentificacaoLabel: formatDateTimeBr(dto.dataIdentificacao),
+    dataReferencia,
+    dataReferenciaLabel: String(dataReferencia || '').includes('T')
+      ? formatDateTimeBr(dataReferencia)
+      : formatDateBr(dataReferencia),
     quilometragemRegistro: dto.quilometragemRegistro,
     quilometragemRegistroLabel: formatKm(dto.quilometragemRegistro),
     quilometragemAtual: dto.quilometragemAtual,
@@ -66,9 +80,14 @@ export function mapManutencaoToView(dto) {
     kmRestantes: dto.kmRestantes,
     kmRestantesLabel: dto.kmRestantes == null ? null : formatKm(Math.max(0, dto.kmRestantes)),
     diasRestantes: dto.diasRestantes,
-    proximidadeLabel: dto.proximidadeLabel || 'Próxima da data prevista',
+    proximidadeLabel: dto.proximidadeLabel || 'Proxima da data prevista',
     custoTotal: dto.custoTotal,
+    custoTotalLabel: formatCurrencyBr(dto.custoTotal),
     oficinaExecutor: dto.oficinaExecutor,
+    oficinaExecutorLabel: dto.oficinaExecutor || 'Nao informada',
+    servicosRealizados: dto.servicosRealizados || '',
+    dataConclusao: dto.dataConclusao,
+    dataConclusaoLabel: formatDateBr(dto.dataConclusao),
     status: dto.status,
     statusLabel: STATUS_LABELS[dto.status] || dto.status,
     emergencia: Boolean(dto.emergencia),
@@ -81,7 +100,7 @@ export function mapAlertaToView(dto) {
   return {
     id: dto.id,
     idVeiculo: dto.idVeiculo,
-    placa: dto.placa || '—',
+    placa: dto.placa || '-',
     prioridade: dto.prioridade,
     prioridadeLabel: PRIORIDADE_LABELS[dto.prioridade] || dto.prioridade,
     mensagem: dto.mensagem || '',

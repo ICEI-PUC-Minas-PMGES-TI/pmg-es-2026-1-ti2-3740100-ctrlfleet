@@ -11,6 +11,8 @@ public interface ManutencaoRepository extends JpaRepository<Manutencao, Long> {
 
     List<Manutencao> findAllByOrderByDataIdentificacaoDescIdDesc();
 
+    List<Manutencao> findByVeiculo_IdOrderByDataIdentificacaoDescIdDesc(Long veiculoId);
+
     List<Manutencao> findByVeiculo_Motorista_IdOrderByDataIdentificacaoDescIdDesc(Long motoristaId);
 
     List<Manutencao> findByMotorista_IdOrderByDataIdentificacaoDescIdDesc(Long motoristaId);

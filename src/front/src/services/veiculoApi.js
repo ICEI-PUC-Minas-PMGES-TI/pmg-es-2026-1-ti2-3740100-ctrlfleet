@@ -59,6 +59,13 @@ export function buscarVeiculo(id, { signal } = {}) {
   });
 }
 
+export function listarManutencoesPorVeiculo(id, { signal } = {}) {
+  return requestJson(`/manutencoes/veiculo/${id}`, {
+    method: 'GET',
+    signal,
+  });
+}
+
 export function desativarVeiculo(id) {
   return requestJson(`/veiculos/${id}/desativar`, {
     method: 'PATCH',
