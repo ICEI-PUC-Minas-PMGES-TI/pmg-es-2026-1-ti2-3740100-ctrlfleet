@@ -228,7 +228,7 @@ export function ReservasGestorPage() {
     (!isRejection || decisionModal.motivo.trim().length > 0);
 
   return (
-    <div className="page-stack">
+    <div className="page-stack gestor-page gestor-reservas-page">
       <PageHeader
         subtitle="Aprovação, reprovação e acompanhamento do ciclo das reservas."
         title="Reservas"
@@ -270,14 +270,14 @@ export function ReservasGestorPage() {
           </div>
         ) : (
           <>
-            <div className="table-summary">
+            <div className="motorista-dashboard__summary">
               <span>
                 Mostrando {filteredReservas.length} de {state.items.length} reservas
                 {hasActiveReservaFilters({ search, status: activeFilters.status })
                   ? ` · Status: ${activeFilters.status}`
                   : ''}
               </span>
-              <span>Cards com rota, veículo e ações rápidas de aprovação.</span>
+              <span>Layout com rota, veículo e ações de aprovação.</span>
             </div>
 
             <ReservationCardGrid

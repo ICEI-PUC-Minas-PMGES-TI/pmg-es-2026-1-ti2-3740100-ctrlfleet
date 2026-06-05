@@ -1,24 +1,21 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '../common/Icon';
+import { StatusBadge } from '../common/StatusBadge';
 import { formatKm } from '../../utils/registroUsoFormatters';
 import { resolveRegistrosUsoForReserva } from '../../utils/mockRegistroUso';
-import { ReservationCardThumbnail } from './ReservationCardThumbnail';
+import {
+  formatDateTime,
+  formatStatusReserva,
+} from '../../utils/motoristaReservaUtils';
 
-function formatDateTime(value) {
-  if (!value) return '—';
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value));
+function statusHeaderModifier(status) {
+  return (status || 'SOLICITADA').toLowerCase().replace(/_/g, '-');
 }
 
 export function ReservationCardGrid({ onApprove, onReject, registrosPorReserva = {}, reservas }) {
   if (!reservas.length) {
     return (
-      <div className="reservation-grid-empty">
+      <div className="motorista-viagens-empty">
         <Icon name="reservations" />
         <p>Nenhuma reserva encontrada com os filtros atuais.</p>
       </div>
@@ -26,7 +23,7 @@ export function ReservationCardGrid({ onApprove, onReject, registrosPorReserva =
   }
 
   return (
-    <div className="reservation-grid">
+    <div className="motorista-viagens-grid">
       {reservas.map((reserva) => {
         const isPending = reserva.statusReserva === 'SOLICITADA';
         const isCompleted = reserva.statusReserva === 'CONCLUIDA';
@@ -34,84 +31,129 @@ export function ReservationCardGrid({ onApprove, onReject, registrosPorReserva =
           ? resolveRegistrosUsoForReserva(reserva, registrosPorReserva[reserva.idReserva] || [])[0]
           : null;
 
-        return (
-          <article className="reservation-card" key={reserva.idReserva}>
-            <ReservationCardThumbnail reserva={reserva} />
+        const kmSaida =
+          registroUso?.quilometragemSaida ??
+          reserva.quilometragemSaidaTrajeto;
+        const kmRetorno =
+          registroUso?.quilometragemRetorno ??
+          reserva.quilometragemRetornoTrajeto;
+        const kmPercorrida =
+          registroUso?.quilometragemPercorrida ??
+          reserva.quilometragemPercorridaTrajeto ??
+          (kmSaida != null && kmRetorno != null ? kmRetorno - kmSaida : null);
 
-            <div className="reservation-card__body">
-              <div className="reservation-card__headline">
-                <h3 className="reservation-card__title">{reserva.modeloVeiculo}</h3>
+        const statusLabel = formatStatusReserva(reserva.statusReserva);
+        const actionsClassName = isPending
+          ? 'motorista-viagem-card__actions motorista-viagem-card__actions--gestor-pending'
+          : 'motorista-viagem-card__actions';
+
+        return (
+          <article className="motorista-viagem-card" key={reserva.idReserva}>
+            <header
+              className={`motorista-viagem-card__header motorista-viagem-card__header--${statusHeaderModifier(reserva.statusReserva)}`}
+            >
+              <span className="motorista-viagem-card__trip-label">
+                RESERVA #{reserva.idReserva}
+              </span>
+              <StatusBadge label={statusLabel} />
+            </header>
+
+            <div className="motorista-viagem-card__body">
+              <div
+                aria-label={`Trajeto de ${reserva.origem} para ${reserva.destino}`}
+                className="motorista-viagem-card__route"
+              >
+                <div className="motorista-viagem-card__route-point">
+                  <span
+                    aria-hidden="true"
+                    className="motorista-viagem-card__route-badge motorista-viagem-card__route-badge--origem"
+                  >
+                    A
+                  </span>
+                  <div>
+                    <span className="motorista-viagem-card__route-label">Origem</span>
+                    <strong>{reserva.origem}</strong>
+                  </div>
+                </div>
+
+                <div className="motorista-viagem-card__route-point">
+                  <span
+                    aria-hidden="true"
+                    className="motorista-viagem-card__route-badge motorista-viagem-card__route-badge--destino"
+                  >
+                    B
+                  </span>
+                  <div>
+                    <span className="motorista-viagem-card__route-label">Destino</span>
+                    <strong>{reserva.destino}</strong>
+                  </div>
+                </div>
               </div>
 
-              <p className="reservation-card__requester">
+              <div className="motorista-viagem-card__vehicle">
+                <strong>{reserva.modeloVeiculo || 'Veículo não informado'}</strong>
+                <span className="motorista-viagem-card__plate">{reserva.placaVeiculo || '—'}</span>
+              </div>
+
+              <p className="motorista-viagem-card__driver">
                 <Icon name="users" />
-                <span>{reserva.nomeSolicitante}</span>
+                <span>{reserva.nomeSolicitante || '—'}</span>
               </p>
 
-              {registroUso ? (
-                <div className="reservation-card__uso">
-                  <div className="reservation-card__uso-head">
-                    <Icon name="history" />
-                    <strong>Registro de uso vinculado</strong>
-                  </div>
-                  <dl className="reservation-card__uso-meta">
-                    <div>
-                      <dt>Motorista</dt>
-                      <dd>{registroUso.nomeMotorista || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>KM percorridos</dt>
-                      <dd>{formatKm(registroUso.quilometragemPercorrida)}</dd>
-                    </div>
-                    <div>
-                      <dt>Saída</dt>
-                      <dd>{formatDateTime(registroUso.dataSaida)}</dd>
-                    </div>
-                    <div>
-                      <dt>Retorno</dt>
-                      <dd>{formatDateTime(registroUso.dataRetorno)}</dd>
-                    </div>
-                  </dl>
-                  {registroUso.observacoesVeiculo ? (
-                    <p className="reservation-card__uso-obs">{registroUso.observacoesVeiculo}</p>
-                  ) : null}
+              {isPending ? (
+                <div className="motorista-viagem-card__alert">
+                  <Icon name="alert" />
+                  <span>Aguardando sua aprovação ou reprovação.</span>
                 </div>
               ) : null}
 
-              <dl className="reservation-card__meta">
+              {registroUso?.nomeMotorista ? (
+                <div className="motorista-viagem-card__alert motorista-viagem-card__alert--ok">
+                  <Icon name="check" />
+                  <span>Motorista: {registroUso.nomeMotorista}</span>
+                </div>
+              ) : null}
+
+              <dl className="motorista-viagem-card__meta">
                 <div>
                   <dt>Solicitação</dt>
                   <dd>{formatDateTime(reserva.dataHoraSolicitacao)}</dd>
                 </div>
                 <div>
-                  <dt>Início previsto</dt>
+                  <dt>Saída prevista</dt>
                   <dd>{formatDateTime(reserva.dataHoraInicioPrevista)}</dd>
                 </div>
                 <div>
-                  <dt>Fim estimado</dt>
+                  <dt>Chegada prevista</dt>
                   <dd>{formatDateTime(reserva.dataHoraFimEstimada)}</dd>
                 </div>
                 <div>
-                  <dt>Veículo</dt>
-                  <dd>{reserva.placaVeiculo}</dd>
+                  <dt>KM inicial (saída)</dt>
+                  <dd>{formatKm(kmSaida)}</dd>
+                </div>
+                <div>
+                  <dt>KM final (retorno)</dt>
+                  <dd>{formatKm(kmRetorno)}</dd>
+                </div>
+                <div>
+                  <dt>KM percorrida</dt>
+                  <dd>{formatKm(kmPercorrida)}</dd>
                 </div>
               </dl>
             </div>
 
-            <footer className="reservation-card__actions">
+            <footer className={actionsClassName}>
               <Link
-                aria-label={`Ver histórico da reserva ${reserva.idReserva}`}
-                className="reservation-card__action reservation-card__action--primary"
+                className="motorista-viagem-card__action motorista-viagem-card__action--primary"
                 to={`/gestor/reservas/${reserva.idReserva}/historico`}
               >
-                <Icon name="history" />
-                <span>{isCompleted ? 'Ver uso' : 'Histórico'}</span>
+                {isCompleted ? 'Ver uso' : 'Ver histórico'}
               </Link>
 
               {isPending ? (
                 <>
                   <button
-                    className="reservation-card__action reservation-card__action--success"
+                    className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
                     onClick={() => onApprove?.(reserva)}
                     type="button"
                   >
@@ -119,7 +161,7 @@ export function ReservationCardGrid({ onApprove, onReject, registrosPorReserva =
                     <span>Aprovar</span>
                   </button>
                   <button
-                    className="reservation-card__action reservation-card__action--danger"
+                    className="motorista-viagem-card__action motorista-viagem-card__action--danger"
                     onClick={() => onReject?.(reserva)}
                     type="button"
                   >
@@ -128,7 +170,7 @@ export function ReservationCardGrid({ onApprove, onReject, registrosPorReserva =
                   </button>
                 </>
               ) : (
-                <span className="reservation-card__action reservation-card__action--muted" aria-hidden="true">
+                <span className="motorista-viagem-card__action motorista-viagem-card__action--muted">
                   <Icon name="reservations" />
                   <span>{isCompleted ? 'Encerrada' : 'Decidida'}</span>
                 </span>

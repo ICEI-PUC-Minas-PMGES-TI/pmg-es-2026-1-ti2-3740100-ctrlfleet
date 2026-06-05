@@ -4284,6 +4284,21 @@ a {
   white-space: nowrap;
 }
 
+.motorista-viagem-card__actions--gestor-pending {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.motorista-viagem-card__action--danger {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+  border: none;
+  cursor: pointer;
+}
+
+.motorista-viagem-card__action--danger:hover {
+  background: rgba(220, 38, 38, 0.16);
+}
+
 @media (max-width: 900px) {
   .motorista-dashboard__summary {
     flex-direction: column;
@@ -4294,7 +4309,8 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .motorista-viagem-card__actions {
+  .motorista-viagem-card__actions,
+  .motorista-viagem-card__actions--gestor-pending {
     grid-template-columns: 1fr;
   }
 
@@ -8653,6 +8669,265 @@ a {
   background: linear-gradient(90deg, #94a3b8, #cbd5e1);
 }
 
+/* Gestor dashboard */
+.gestor-dashboard-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(207, 78, 54, 0.2);
+  background: linear-gradient(135deg, rgba(207, 78, 54, 0.1), rgba(47, 76, 107, 0.08));
+  box-shadow: var(--shadow);
+}
+
+.gestor-dashboard-hero__copy h2 {
+  margin: 0.2rem 0 0.45rem;
+  font-size: 1.55rem;
+}
+
+.gestor-dashboard-hero__copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  max-width: 42rem;
+}
+
+.gestor-dashboard-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.gestor-dashboard-hero__metrics {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.gestor-dashboard-hero__metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 5.5rem;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  text-align: center;
+}
+
+.gestor-dashboard-hero__metric svg {
+  width: 22px;
+  height: 22px;
+  color: #2f4c6b;
+}
+
+.gestor-dashboard-hero__metric span {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.gestor-dashboard-hero__metric small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gestor-dashboard-hero__metric--accent svg {
+  color: var(--accent);
+}
+
+.gestor-dashboard-main,
+.gestor-dashboard-side {
+  display: grid;
+  gap: 18px;
+}
+
+.gestor-reserva-list,
+.gestor-activity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.gestor-reserva-item,
+.gestor-activity-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gestor-reserva-item:hover {
+  border-color: rgba(207, 78, 54, 0.22);
+  box-shadow: 0 8px 20px rgba(15, 17, 23, 0.06);
+}
+
+.gestor-reserva-item--active {
+  border-color: rgba(45, 139, 87, 0.25);
+  background: rgba(45, 139, 87, 0.04);
+}
+
+.gestor-reserva-item__kicker,
+.gestor-activity-item span {
+  display: block;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.gestor-reserva-item h3,
+.gestor-activity-item strong {
+  margin: 0.15rem 0;
+  font-size: 1rem;
+}
+
+.gestor-reserva-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.gestor-reserva-item small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.gestor-reserva-item__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.gestor-reserva-item__meta span {
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.gestor-reserva-item__link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.gestor-reserva-item__link:hover {
+  text-decoration: underline;
+}
+
+.gestor-activity-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gestor-status-breakdown {
+  display: grid;
+  gap: 14px;
+}
+
+.gestor-status-breakdown--compact {
+  gap: 10px;
+}
+
+.gestor-status-breakdown__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 120px) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.gestor-status-breakdown--compact .gestor-status-breakdown__row {
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 120px);
+}
+
+.gestor-status-breakdown__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+
+.gestor-status-breakdown__label strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.gestor-status-breakdown__track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(231, 230, 235, 0.9);
+  overflow: hidden;
+}
+
+.gestor-status-breakdown__bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  min-width: 4px;
+}
+
+.gestor-status-breakdown__percent {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.gestor-status-breakdown__bar--active {
+  background: linear-gradient(90deg, #2d8b57, #34d399);
+}
+
+.gestor-status-breakdown__bar--maintenance {
+  background: linear-gradient(90deg, #d58d21, #fbbf24);
+}
+
+.gestor-status-breakdown__bar--blocked {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.gestor-status-breakdown__bar--pending {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.gestor-status-breakdown__bar--approved {
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.gestor-status-breakdown__bar--done {
+  background: linear-gradient(90deg, #64748b, #94a3b8);
+}
+
+.gestor-status-breakdown__bar--rejected {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.gestor-reservas-page .motorista-dashboard__summary {
+  margin-bottom: 4px;
+}
+
 .requester-empty--compact {
   padding: 1.25rem;
   text-align: center;
@@ -9609,9 +9884,35 @@ a {
 }
 
 @media (max-width: 720px) {
-  .requester-dashboard-hero {
+  .requester-dashboard-hero,
+  .gestor-dashboard-hero {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .gestor-dashboard-hero__metrics {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .gestor-reserva-item,
+  .gestor-activity-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gestor-reserva-item__meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .gestor-status-breakdown__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .gestor-status-breakdown__percent {
+    text-align: left;
   }
 
   .requester-trip-item,
