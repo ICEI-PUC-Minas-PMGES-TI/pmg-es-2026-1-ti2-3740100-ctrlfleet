@@ -83,4 +83,17 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
             @Param("veiculo") com.ctrlfleet.api.domain.model.Veiculo veiculo, 
             @Param("inicio") LocalDateTime inicio, 
             @Param("fim") LocalDateTime fim);
+
+    @Query("""
+            select r
+            from Reserva r
+            join fetch r.usuario
+            join fetch r.veiculo v
+            left join fetch v.motorista
+            where r.statusReserva = com.ctrlfleet.api.domain.enums.StatusReserva.APROVADA
+              and r.lembreteUmDiaEnviadoEm is null
+              and r.dataHoraInicioPrevista between :inicio and :fim
+            """)
+    List<Reserva> findReservasParaLembreteUmDia(
+            @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
 }

@@ -46,14 +46,17 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoriaService;
+    private final NotificationEmailService notificationEmailService;
 
     public UsuarioService(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
-            AuditoriaService auditoriaService) {
+            AuditoriaService auditoriaService,
+            NotificationEmailService notificationEmailService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditoriaService = auditoriaService;
+        this.notificationEmailService = notificationEmailService;
     }
 
     @Transactional(readOnly = true)
@@ -110,6 +113,8 @@ public class UsuarioService {
         usuario.setStatus("ATIVO");
         usuario.setDataDesligamento(null);
 
+        String senhaPlana = dto.getSenha();
+
         if (tipoCadastro.equals("motorista")) {
             LocalDate validade = parseDataObrigatoria(dto.getCnhValidade(), "cnhValidade");
             Motorista motorista =
@@ -125,6 +130,8 @@ public class UsuarioService {
                 "info",
                 null,
                 "Conta criada com perfil " + salvo.getPerfilAcesso() + ".");
+
+        notificationEmailService.enviarContaCriada(salvo, senhaPlana);
 
         return new UsuarioResponseDTO(salvo.getId(), salvo.getNome(), salvo.getEmail());
     }
@@ -206,6 +213,7 @@ public class UsuarioService {
                 "info",
                 ip,
                 "Solicitacao pendente aprovada e acesso liberado.");
+        notificationEmailService.enviarContaAprovada(salvo);
         return UsuarioResponseDTO.fromEntity(salvo);
     }
 
@@ -267,13 +275,15 @@ public class UsuarioService {
                 "info",
                 ip,
                 "Convite de acesso reenviado para " + usuario.getEmail() + ".");
+        notificationEmailService.enviarConviteReenviado(usuario);
         return UsuarioResponseDTO.fromEntity(usuario);
     }
 
     @Transactional
     public UsuarioResponseDTO redefinirSenha(Long id, String ip) {
         Usuario usuario = buscarEntidade(id);
-        usuario.setSenha(passwordEncoder.encode("CtrlFleet@123"));
+        String senhaProvisoria = "CtrlFleet@123";
+        usuario.setSenha(passwordEncoder.encode(senhaProvisoria));
         Usuario salvo = usuarioRepository.save(usuario);
         registrarAuditoria(
                 "Senha redefinida",
@@ -282,6 +292,7 @@ public class UsuarioService {
                 "warning",
                 ip,
                 "Senha provisoria redefinida pelo painel administrativo.");
+        notificationEmailService.enviarSenhaRedefinida(salvo, senhaProvisoria);
         return UsuarioResponseDTO.fromEntity(salvo);
     }
 
