@@ -10864,3 +10864,133 @@ a {
   border-radius: 10px;
   background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
+
+.stats-grid--preventiva {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.gestor-preventiva-page .section-card + .section-card {
+  margin-top: 0;
+}
+
+.gestor-preventiva-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px dashed rgba(231, 230, 235, 0.95);
+  color: var(--text-muted);
+}
+
+.gestor-preventiva-stopped-grid,
+.gestor-preventiva-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.gestor-preventiva-stopped-card,
+.gestor-preventiva-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.gestor-preventiva-stopped-card__header,
+.gestor-preventiva-action-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.gestor-preventiva-stopped-card__header h3,
+.gestor-preventiva-action-card__header h3 {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+}
+
+.gestor-preventiva-stopped-card__eyebrow,
+.gestor-preventiva-action-card__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.gestor-preventiva-stopped-card__days {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  color: var(--warning);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gestor-preventiva-stopped-card__reason {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.gestor-preventiva-stopped-card__meta,
+.gestor-preventiva-action-card__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.gestor-preventiva-stopped-card__meta dt,
+.gestor-preventiva-action-card__meta dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.gestor-preventiva-stopped-card__meta dd,
+.gestor-preventiva-action-card__meta dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.gestor-preventiva-stopped-card__actions,
+.gestor-preventiva-action-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.gestor-preventiva-stopped-card__link,
+.gestor-preventiva-action-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.gestor-preventiva-action-card--overdue {
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--border-subtle));
+  background: color-mix(in srgb, var(--danger) 4%, white);
+}
+
+.gestor-preventiva-action-card__description {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}

@@ -37,3 +37,23 @@ export async function definirPrioridadeManutencao(manutencaoId, payload = {}) {
     body: JSON.stringify(payload),
   });
 }
+
+export async function listarPainelPreventivaGestor(options = {}) {
+  return request('/gestor/manutencoes/preventiva', { signal: options.signal });
+}
+
+export async function iniciarManutencao(manutencaoId, payload = {}) {
+  return request(`/gestor/manutencoes/${manutencaoId}/iniciar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function concluirManutencao(manutencaoId, payload = {}) {
+  return request(`/gestor/manutencoes/${manutencaoId}/concluir`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}

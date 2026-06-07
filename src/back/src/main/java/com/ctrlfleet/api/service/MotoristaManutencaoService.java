@@ -31,9 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MotoristaManutencaoService {
 
-    private static final int PREVENTIVE_DAYS_THRESHOLD = 45;
-    private static final double PREVENTIVE_KM_THRESHOLD = 2000d;
-
     private final ManutencaoRepository manutencaoRepository;
     private final AlertaRepository alertaRepository;
     private final VeiculoRepository veiculoRepository;
@@ -66,7 +63,7 @@ public class MotoristaManutencaoService {
         Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
 
         MotoristaManutencaoPainelDTO painel = new MotoristaManutencaoPainelDTO();
-        painel.setPreventivasProximas(extrairPreventivasProximas(registros, kmPorVeiculo));
+        painel.setPreventivasProximas(ManutencaoPreventivaUtil.extrairPreventivasProximas(registros, kmPorVeiculo));
         painel.setAlertasPreventivos(extrairAlertasPreventivos(motoristaId));
         painel.setSolicitacoes(filtrarPorStatus(registros, kmPorVeiculo, StatusManutencao.PENDENTE));
         painel.setEmAndamento(filtrarPorStatus(registros, kmPorVeiculo, StatusManutencao.EM_ANDAMENTO));
@@ -132,27 +129,6 @@ public class MotoristaManutencaoService {
         return enriquecerDto(salva, request.getQuilometragemAtual());
     }
 
-    private List<ManutencaoResponseDTO> extrairPreventivasProximas(
-            List<Manutencao> registros, Map<Long, Double> kmPorVeiculo) {
-        LocalDate hoje = LocalDate.now();
-        Map<Long, ManutencaoResponseDTO> deduplicado = new LinkedHashMap<>();
-
-        registros.stream()
-                .filter(item -> item.getTipoManutencao() == TipoManutencao.PREVENTIVA
-                        && item.getStatus() == StatusManutencao.AGENDADA)
-                .sorted(Comparator.comparing(Manutencao::getDataRealizada, Comparator.nullsLast(Comparator.naturalOrder())))
-                .forEach(item -> {
-                    ManutencaoResponseDTO dto = enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId()));
-                    if (!isPreventivaProxima(dto, hoje)) return;
-                    deduplicado.putIfAbsent(item.getVeiculo().getId(), dto);
-                });
-
-        return deduplicado.values().stream()
-                .sorted(Comparator.comparing(ManutencaoResponseDTO::getDiasRestantes, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(ManutencaoResponseDTO::getKmRestantes, Comparator.nullsLast(Comparator.naturalOrder())))
-                .toList();
-    }
-
     private List<AlertaResponseDTO> extrairAlertasPreventivos(Long motoristaId) {
         return alertaRepository.findByVeiculo_Motorista_IdAndLidoFalseOrderByDataGeracaoDesc(motoristaId).stream()
                 .map(AlertaResponseDTO::fromEntity)
@@ -186,23 +162,7 @@ public class MotoristaManutencaoService {
     }
 
     private ManutencaoResponseDTO enriquecerDto(Manutencao manutencao, Double quilometragemAtual) {
-        ManutencaoResponseDTO dto = ManutencaoResponseDTO.fromEntity(manutencao, quilometragemAtual);
-        if (manutencao.getQuilometragemRegistro() != null && quilometragemAtual != null) {
-            dto.setKmRestantes(manutencao.getQuilometragemRegistro() - quilometragemAtual);
-        }
-        ManutencaoResponseDTO.aplicarIndicadoresCalendario(dto);
-        return dto;
-    }
-
-    private boolean isPreventivaProxima(ManutencaoResponseDTO dto, LocalDate hoje) {
-        if (ManutencaoResponseDTO.calcularPreventivaAtrasada(dto)) {
-            return true;
-        }
-        boolean porData = dto.getDataAgendada() != null
-                && !dto.getDataAgendada().isBefore(hoje.minusDays(7))
-                && !dto.getDataAgendada().isAfter(hoje.plusDays(PREVENTIVE_DAYS_THRESHOLD));
-        boolean porKm = dto.getKmRestantes() != null && dto.getKmRestantes() <= PREVENTIVE_KM_THRESHOLD;
-        return porData || porKm;
+        return ManutencaoPreventivaUtil.enriquecerDto(manutencao, quilometragemAtual);
     }
 
     private void garantirDataAberturaPersistida(Manutencao manutencao) {

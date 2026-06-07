@@ -2,6 +2,7 @@ package com.ctrlfleet.api.controller;
 
 import com.ctrlfleet.api.dto.manutencao.DecisaoManutencaoRequestDTO;
 import com.ctrlfleet.api.dto.manutencao.GestorManutencaoPainelDTO;
+import com.ctrlfleet.api.dto.manutencao.GestorPreventivaPainelDTO;
 import com.ctrlfleet.api.dto.manutencao.ManutencaoResponseDTO;
 import com.ctrlfleet.api.service.GestorManutencaoService;
 import java.util.Map;
@@ -34,6 +35,11 @@ public class GestorManutencaoController {
         return ResponseEntity.ok(Map.of("pendentes", gestorManutencaoService.contarPendentes()));
     }
 
+    @GetMapping("/preventiva")
+    public ResponseEntity<GestorPreventivaPainelDTO> listarPainelPreventiva() {
+        return ResponseEntity.ok(gestorManutencaoService.montarPainelPreventiva());
+    }
+
     @PostMapping("/{manutencaoId}/aprovar")
     public ResponseEntity<ManutencaoResponseDTO> aprovar(
             @PathVariable Long manutencaoId, @RequestBody(required = false) DecisaoManutencaoRequestDTO dto) {
@@ -50,5 +56,17 @@ public class GestorManutencaoController {
     public ResponseEntity<ManutencaoResponseDTO> definirPrioridade(
             @PathVariable Long manutencaoId, @RequestBody DecisaoManutencaoRequestDTO dto) {
         return ResponseEntity.ok(gestorManutencaoService.definirPrioridade(manutencaoId, dto));
+    }
+
+    @PostMapping("/{manutencaoId}/iniciar")
+    public ResponseEntity<ManutencaoResponseDTO> iniciar(
+            @PathVariable Long manutencaoId, @RequestBody(required = false) DecisaoManutencaoRequestDTO dto) {
+        return ResponseEntity.ok(gestorManutencaoService.iniciar(manutencaoId, dto));
+    }
+
+    @PostMapping("/{manutencaoId}/concluir")
+    public ResponseEntity<ManutencaoResponseDTO> concluir(
+            @PathVariable Long manutencaoId, @RequestBody(required = false) DecisaoManutencaoRequestDTO dto) {
+        return ResponseEntity.ok(gestorManutencaoService.concluir(manutencaoId, dto));
     }
 }

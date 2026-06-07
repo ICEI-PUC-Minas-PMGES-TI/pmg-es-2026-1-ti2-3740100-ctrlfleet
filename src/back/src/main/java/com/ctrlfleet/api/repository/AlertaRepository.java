@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AlertaRepository extends JpaRepository<Alerta, Long> {
 
     List<Alerta> findByVeiculo_Motorista_IdAndLidoFalseOrderByDataGeracaoDesc(Long motoristaId);
+
+    List<Alerta> findByLidoFalseOrderByDataGeracaoDesc();
 }

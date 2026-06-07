@@ -104,6 +104,55 @@ export function mapPainelGestorManutencaoToView(dto) {
   };
 }
 
+const STATUS_VEICULO_LABELS = {
+  DISPONIVEL: 'Disponível',
+  EM_USO: 'Em uso',
+  MANUTENCAO: 'Em manutenção',
+  DESATIVADO: 'Desativado',
+};
+
+export function mapVeiculoParadoToView(dto) {
+  const manutencao = dto.manutencaoAtiva ? mapManutencaoToView(dto.manutencaoAtiva) : null;
+  return {
+    idVeiculo: dto.idVeiculo,
+    placa: dto.placa || '—',
+    marca: dto.marca || '',
+    modelo: dto.modelo || '',
+    vehicleLabel: [dto.marca, dto.modelo].filter(Boolean).join(' ') || 'Veículo',
+    statusVeiculo: dto.statusVeiculo,
+    statusVeiculoLabel: STATUS_VEICULO_LABELS[dto.statusVeiculo] || dto.statusVeiculo,
+    nomeMotorista: dto.nomeMotorista || '—',
+    manutencao,
+    diasParado: dto.diasParado,
+    diasParadoLabel:
+      dto.diasParado == null
+        ? '—'
+        : dto.diasParado === 0
+          ? 'Parado hoje'
+          : `${dto.diasParado} dia(s) parado`,
+    motivoParada: dto.motivoParada || 'Indisponível para operação',
+  };
+}
+
+export function mapPainelPreventivaGestorToView(dto) {
+  const resumo = dto.resumo || {};
+  return {
+    resumo: {
+      preventivasProximas: resumo.preventivasProximas ?? 0,
+      preventivasAtrasadas: resumo.preventivasAtrasadas ?? 0,
+      preventivasAgendadas: resumo.preventivasAgendadas ?? 0,
+      veiculosParados: resumo.veiculosParados ?? 0,
+      emAndamento: resumo.emAndamento ?? 0,
+      alertasPreventivos: resumo.alertasPreventivos ?? 0,
+    },
+    preventivasProximas: (dto.preventivasProximas || []).map(mapManutencaoToView),
+    preventivasAgendadas: (dto.preventivasAgendadas || []).map(mapManutencaoToView),
+    veiculosParadosRevisao: (dto.veiculosParadosRevisao || []).map(mapVeiculoParadoToView),
+    emAndamento: (dto.emAndamento || []).map(mapManutencaoToView),
+    alertasPreventivos: (dto.alertasPreventivos || []).map(mapAlertaToView),
+  };
+}
+
 export function mapAlertaToView(dto) {
   return {
     id: dto.id,
