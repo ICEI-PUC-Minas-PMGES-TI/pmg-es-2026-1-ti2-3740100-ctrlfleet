@@ -980,3 +980,21 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('reservas', 'id_reserva'), COALESCE((SELECT MAX(id_reserva) FROM reservas), 0));
 SELECT setval(pg_get_serial_sequence('registros_uso', 'id_uso'), COALESCE((SELECT MAX(id_uso) FROM registros_uso), 0));
+
+-- =====================================================================
+-- 15. RESERVA 11 — reset para testes de corrida ida e volta
+-- =====================================================================
+DELETE FROM carro_checklist WHERE id_uso IN (SELECT id_uso FROM registros_uso WHERE id_reserva = 11);
+DELETE FROM registros_uso WHERE id_reserva = 11;
+
+UPDATE reservas SET
+  status_reserva = 'APROVADA',
+  datahora_solicitacao = DATE_TRUNC('day', NOW()) + TIME '17:30:00',
+  datahora_inicio_prevista = DATE_TRUNC('day', NOW()) + TIME '20:40:00',
+  datahora_fim_estimada = DATE_TRUNC('day', NOW()) + TIME '23:30:00',
+  origem = 'Garagem Central — Av. Afonso Pena, 1212, Centro, Belo Horizonte',
+  destino = 'Parque Municipal Américo Renné Giannetti — Belo Horizonte',
+  justificativa = 'Viagem de teste — corrida ida e volta'
+WHERE id_reserva = 11;
+
+UPDATE veiculos SET status = 'DISPONIVEL' WHERE id = 3;

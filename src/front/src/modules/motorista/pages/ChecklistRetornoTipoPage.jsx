@@ -38,6 +38,21 @@ export function ChecklistRetornoTipoPage() {
     [checkedItems, items],
   );
   const canSubmit = allChecked && !submitState.loading;
+  const corridaPath = `/motorista/${motoristaId}/reservas/${reservaId}/corrida`;
+
+  if (!tripSummary) {
+    return (
+      <div className="page-stack motorista-page">
+        <div className="motorista-viagem-card__alert">
+          <Icon name="alert" />
+          <span>Finalize a corrida no mapa antes de preencher o checklist de retorno.</span>
+          <Link className="action-button action-button--secondary" state={{ reserva }} to={corridaPath}>
+            Ir para a corrida
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();

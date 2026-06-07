@@ -192,6 +192,9 @@ export function filterReservasByDateRange(reservas, rangeId) {
 
   const cutoff = Date.now() - range.days * 24 * 60 * 60 * 1000;
   return reservas.filter((reserva) => {
+    const status = reserva?.statusReserva || reserva?.status;
+    if (status === 'APROVADA' || status === 'EM_USO') return true;
+
     const tripDate = getReservaReferenceDate(reserva)?.getTime();
     return tripDate != null && tripDate >= cutoff;
   });

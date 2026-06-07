@@ -5,9 +5,15 @@ import { Icon } from '../../../components/common/Icon';
 import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
+import { getAuthSession } from '../../../services/authSession';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
 import { iniciarTrajeto } from '../../../services/motoristaApi';
 import { useMotoristaViagemNumber } from '../../../hooks/useMotoristaViagemNumbers';
+import {
+  DEFAULT_FLEET_SIMULATION_MS,
+  FLEET_SIMULATION_DURATION_OPTIONS,
+  writeSimulationDurationMs,
+} from '../../../utils/fleetActiveTripsStorage';
 import {
   canStartTrip,
   formatDateTime,
@@ -26,6 +32,9 @@ export function MotoristaIniciarCorridaPage() {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
+  const [simulationDurationMs, setSimulationDurationMs] = useState(DEFAULT_FLEET_SIMULATION_MS);
+
+  const session = getAuthSession();
 
   const canStart = canStartTrip(reserva);
   const windowMessage = getChecklistWindowMessage(reserva);
@@ -35,6 +44,7 @@ export function MotoristaIniciarCorridaPage() {
     setSubmitState({ loading: true, error: null });
     try {
       await iniciarTrajeto(reservaId, { idMotorista: motoristaId });
+      writeSimulationDurationMs(reservaId, simulationDurationMs);
       setConfirmOpen(false);
       const updatedReserva = { ...reserva, statusReserva: 'EM_USO', checklistSaidaConcluido: true };
       navigate(`/motorista/${motoristaId}/reservas/${reservaId}/corrida`, {
@@ -42,6 +52,7 @@ export function MotoristaIniciarCorridaPage() {
         state: {
           reserva: updatedReserva,
           tripStartedAt: Date.now(),
+          simulationDurationMs,
         },
       });
     } catch (error) {
@@ -117,6 +128,28 @@ export function MotoristaIniciarCorridaPage() {
           </p>
         ) : null}
 
+        <div className="trip-simulation-duration">
+          <div className="trip-simulation-duration__head">
+            <strong>Tempo da simulação no mapa</strong>
+            <span>Escolha a duração para visualizar o deslocamento no mapa da frota.</span>
+          </div>
+          <div aria-label="Duração da simulação" className="trip-simulation-duration__menu" role="group">
+            {FLEET_SIMULATION_DURATION_OPTIONS.map((option) => (
+              <button
+                aria-pressed={simulationDurationMs === option.ms}
+                className={`trip-simulation-duration__option${
+                  simulationDurationMs === option.ms ? ' is-active' : ''
+                }`}
+                key={option.id}
+                onClick={() => setSimulationDurationMs(option.ms)}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {submitState.error ? (
           <div className="admin-dashboard__error">
             <Icon name="alert" />
@@ -160,11 +193,19 @@ export function MotoristaIniciarCorridaPage() {
           if (!submitState.loading) setConfirmOpen(false);
         }}
         open={confirmOpen}
-        subtitle="O veículo e a reserva passarão para o status em uso."
+        subtitle="O veículo e a reserva passarão para o status em uso. A simulação no mapa da frota usará a duração selecionada."
         title="Confirmar início da corrida"
       >
         <p className="admin-modal-detail">
           Checklist de saída já registrado. Confirme apenas se o motorista está saindo com o veículo agora.
+        </p>
+        <p className="trip-simulation-duration__modal-note">
+          Simulação configurada para{' '}
+          <strong>
+            {FLEET_SIMULATION_DURATION_OPTIONS.find((option) => option.ms === simulationDurationMs)?.label ||
+              '1 min'}
+          </strong>
+          {session?.nome ? ` · motorista ${session.nome}` : ''}.
         </p>
       </Modal>
     </div>

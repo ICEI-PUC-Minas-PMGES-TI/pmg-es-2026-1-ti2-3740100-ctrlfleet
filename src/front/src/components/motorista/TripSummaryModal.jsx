@@ -30,14 +30,28 @@ export function TripSummaryModal({ open, onClose, summary, onContinue }) {
       title="Corrida finalizada"
     >
       <dl className="trip-summary-modal">
+        <div>
+          <dt>Distância percorrida (ida + volta)</dt>
+          <dd>{formatKm(summary.distanceKm)}</dd>
+          {summary.oneWayDistanceKm != null ? (
+            <small>
+              Ida: {formatKm(summary.oneWayDistanceKm)} · Volta: {formatKm(summary.oneWayDistanceKm)} · Total ×2
+            </small>
+          ) : (
+            <small>A quilometragem de retorno será calculada automaticamente ao concluir o checklist.</small>
+          )}
+        </div>
         <div className="trip-summary-modal__route">
-          <dt>Rota</dt>
+          <dt>Rota completa</dt>
           <dd>
             <span className="trip-summary-modal__point trip-summary-modal__point--a">A</span>
             {summary.origem}
             <span className="trip-summary-modal__arrow">→</span>
             <span className="trip-summary-modal__point trip-summary-modal__point--b">B</span>
             {summary.destino}
+            <span className="trip-summary-modal__arrow">→</span>
+            <span className="trip-summary-modal__point trip-summary-modal__point--a">A</span>
+            {summary.origem}
           </dd>
         </div>
         <div>
@@ -45,11 +59,6 @@ export function TripSummaryModal({ open, onClose, summary, onContinue }) {
           <dd>
             {summary.veiculo} · {summary.placa}
           </dd>
-        </div>
-        <div>
-          <dt>Distância (rota)</dt>
-          <dd>{formatKm(summary.distanceKm)}</dd>
-          <small>A quilometragem de retorno será calculada automaticamente ao concluir o checklist.</small>
         </div>
         <div className="trip-summary-modal__times">
           <div>

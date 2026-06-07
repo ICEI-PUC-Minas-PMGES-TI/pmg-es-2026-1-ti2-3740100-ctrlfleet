@@ -4,9 +4,8 @@ import { FLEET_GARAGE } from '../../services/fleetMapLocations';
 import {
   DESTINATION_MAP_ICON_LABEL,
   ORIGIN_MAP_ICON_LABEL,
-  VEHICLE_MAP_ICON,
 } from '../../utils/routeMapIcons';
-import { positionAlongRoute } from '../../utils/routeSimulationUtils';
+import { positionAlongRoute, reverseRoutePositions } from '../../utils/routeSimulationUtils';
 
 const OSM_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
@@ -41,6 +40,18 @@ function FitRouteOnce({ positions }) {
   return null;
 }
 
+function buildTraveledLine(positions, progress) {
+  if (!positions.length || progress <= 0) return [];
+  const pts = [];
+  const steps = Math.max(2, Math.floor(positions.length * progress));
+  for (let i = 0; i <= steps; i += 1) {
+    const t = Math.min(1, (i / steps) * progress);
+    const p = positionAlongRoute(positions, t);
+    if (p) pts.push([p.lat, p.lng]);
+  }
+  return pts;
+}
+
 export function RouteSimulationMap({
   className = '',
   destinoCoords,
@@ -48,25 +59,33 @@ export function RouteSimulationMap({
   origemCoords,
   progress = 0,
   routePositions = [],
+  tripLeg = 'outbound',
 }) {
   const [mounted, setMounted] = useState(false);
 
-  const vehiclePosition = useMemo(
-    () => positionAlongRoute(routePositions, progress),
-    [progress, routePositions],
+  const returnPositions = useMemo(
+    () => reverseRoutePositions(routePositions),
+    [routePositions],
   );
 
-  const traveledLine = useMemo(() => {
-    if (!routePositions.length || progress <= 0) return [];
-    const pts = [];
-    const steps = Math.max(2, Math.floor(routePositions.length * progress));
-    for (let i = 0; i <= steps; i += 1) {
-      const t = Math.min(1, (i / steps) * progress);
-      const p = positionAlongRoute(routePositions, t);
-      if (p) pts.push([p.lat, p.lng]);
+  const activePositions = tripLeg === 'return' ? returnPositions : routePositions;
+
+  const vehiclePosition = useMemo(
+    () => positionAlongRoute(activePositions, progress),
+    [activePositions, progress],
+  );
+
+  const outboundTraveled = useMemo(() => {
+    if (tripLeg === 'outbound') {
+      return buildTraveledLine(routePositions, progress);
     }
-    return pts;
-  }, [progress, routePositions]);
+    return routePositions.length >= 2 ? routePositions : [];
+  }, [progress, routePositions, tripLeg]);
+
+  const returnTraveled = useMemo(() => {
+    if (tripLeg !== 'return') return [];
+    return buildTraveledLine(returnPositions, progress);
+  }, [progress, returnPositions, tripLeg]);
 
   useEffect(() => {
     setMounted(true);
@@ -100,8 +119,11 @@ export function RouteSimulationMap({
           positions={routePositions}
         />
       ) : null}
-      {traveledLine.length >= 2 ? (
-        <Polyline color="#cf4e36" pathOptions={{ weight: 5, opacity: 0.92 }} positions={traveledLine} />
+      {outboundTraveled.length >= 2 ? (
+        <Polyline color="#cf4e36" pathOptions={{ weight: 5, opacity: 0.92 }} positions={outboundTraveled} />
+      ) : null}
+      {returnTraveled.length >= 2 ? (
+        <Polyline color="#2563eb" pathOptions={{ weight: 5, opacity: 0.88, dashArray: '8 6' }} positions={returnTraveled} />
       ) : null}
       {hasOrigin ? (
         <Marker icon={ORIGIN_MAP_ICON_LABEL} position={[origemCoords.lat, origemCoords.lng]} />
@@ -109,12 +131,7 @@ export function RouteSimulationMap({
       {hasDest ? (
         <Marker icon={DESTINATION_MAP_ICON_LABEL} position={[destinoCoords.lat, destinoCoords.lng]} />
       ) : null}
-      {vehiclePosition ? (
-        <>
-          <Marker icon={VEHICLE_MAP_ICON} position={[vehiclePosition.lat, vehiclePosition.lng]} />
-          <FollowVehicle position={vehiclePosition} />
-        </>
-      ) : null}
+      {vehiclePosition ? <FollowVehicle position={vehiclePosition} /> : null}
     </MapContainer>
   );
 }

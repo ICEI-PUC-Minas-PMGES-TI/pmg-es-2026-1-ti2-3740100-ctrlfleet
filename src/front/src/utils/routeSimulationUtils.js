@@ -25,6 +25,24 @@ export function polylineLengthMeters(positions) {
   return total;
 }
 
+/** Direção em graus (0–360) ao longo da rota no progresso informado. */
+export function bearingAlongRoute(positions, progress) {
+  if (!positions?.length) return 0;
+  const epsilon = 0.008;
+  const p1 = positionAlongRoute(positions, Math.max(0, progress - epsilon));
+  const p2 = positionAlongRoute(positions, Math.min(1, progress + epsilon));
+  if (!p1 || !p2) return 0;
+
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const toDeg = (rad) => (rad * 180) / Math.PI;
+  const dLng = toRad(p2.lng - p1.lng);
+  const lat1 = toRad(p1.lat);
+  const lat2 = toRad(p2.lat);
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
 /** Posição interpolada (0–1) ao longo da rota. */
 export function positionAlongRoute(positions, progress) {
   if (!positions?.length) return null;
@@ -105,6 +123,17 @@ export function reservationPlannedDurationMin(reserva) {
   return Math.round((end - start) / 60000);
 }
 
+/** Distância ida e volta (2× a rota A→B). */
+export function roundTripDistanceKm(oneWayKm) {
+  const oneWay = Number(oneWayKm) || 0;
+  return Math.round(oneWay * 2 * 10) / 10;
+}
+
+export function reverseRoutePositions(positions) {
+  if (!positions?.length) return [];
+  return [...positions].reverse();
+}
+
 /** Distância da rota em km (OSRM ou polyline). */
 export function resolveRouteDistanceKm(routeDistanceKm, routePositions) {
   if (routeDistanceKm != null && Number.isFinite(routeDistanceKm) && routeDistanceKm > 0) {
@@ -127,6 +156,7 @@ export function calculateReturnMileage(kmSaida, distanceKm) {
 export function buildTripSummary({
   reserva,
   routeDistanceKm,
+  oneWayDistanceKm,
   routeDurationMin,
   tripStartedAt,
   tripEndedAt,
@@ -152,6 +182,8 @@ export function buildTripSummary({
     placa: reserva?.placaVeiculo || '—',
     veiculo: reserva?.modeloVeiculo || '—',
     distanceKm: routeDistanceKm,
+    oneWayDistanceKm: oneWayDistanceKm ?? routeDistanceKm,
+    roundTrip: oneWayDistanceKm != null && oneWayDistanceKm !== routeDistanceKm,
     tempoEstimadoMin: estimatedMin,
     tempoEstimadoLabel: formatDurationMinutes(estimatedMin),
     tempoRealMs: actualMs,

@@ -5858,9 +5858,16 @@ a {
 }
 
 .motorista-corrida-page__badge--arrived,
+.motorista-corrida-page__badge--returned,
+.motorista-corrida-page__badge--awaiting_checklist,
 .motorista-corrida-page__badge--finished {
   background: rgba(45, 139, 87, 0.15);
   color: #1f6b43;
+}
+
+.motorista-corrida-page__badge--returning {
+  background: rgba(37, 99, 235, 0.14);
+  color: #1d4ed8;
 }
 
 .motorista-corrida-page__progress {
@@ -5910,7 +5917,7 @@ a {
 
 .motorista-corrida-page__meta {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -5941,6 +5948,65 @@ a {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.trip-simulation-duration {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(207, 78, 54, 0.16);
+  background: rgba(207, 78, 54, 0.05);
+}
+
+.trip-simulation-duration__head {
+  display: grid;
+  gap: 4px;
+}
+
+.trip-simulation-duration__head strong {
+  font-size: 0.95rem;
+}
+
+.trip-simulation-duration__head span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.trip-simulation-duration__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trip-simulation-duration__option {
+  min-width: 4.5rem;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(231, 230, 235, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--foreground);
+  font-size: 0.86rem;
+  font-weight: 700;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.trip-simulation-duration__option:hover {
+  border-color: rgba(207, 78, 54, 0.28);
+}
+
+.trip-simulation-duration__option.is-active {
+  border-color: rgba(207, 78, 54, 0.35);
+  background: rgba(207, 78, 54, 0.14);
+  color: var(--accent);
+}
+
+.trip-simulation-duration__modal-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
 }
 
 .trip-summary-modal {
@@ -8263,6 +8329,13 @@ a {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 600;
+}
+
+.fleet-map-vehicle-list__route {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .fleet-map-sidebar__detail {

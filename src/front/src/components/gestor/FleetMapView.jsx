@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../common/Icon';
 import { StatusBadge } from '../common/StatusBadge';
 import { statusTabs, vehicleTypeTabs } from '../../data/fleetData';
-import { applyGarageLocations, FLEET_GARAGE } from '../../services/fleetMapLocations';
+import { useFleetActiveTrips } from '../../hooks/useFleetActiveTrips';
+import {
+  applyActiveTripsToFleetVehicles,
+  FLEET_GARAGE,
+} from '../../services/fleetMapLocations';
 import {
   filterFleetVehicles,
   hasActiveFleetFilters,
@@ -30,7 +34,17 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
   const [selectedType, setSelectedType] = useState('Todos');
   const isModal = variant === 'modal';
 
-  const mapVehicles = useMemo(() => applyGarageLocations(vehicles), [vehicles]);
+  const activeTrips = useFleetActiveTrips();
+
+  const mapVehicles = useMemo(
+    () => applyActiveTripsToFleetVehicles(vehicles, activeTrips),
+    [activeTrips, vehicles],
+  );
+
+  const drivingCount = useMemo(
+    () => mapVehicles.filter((vehicle) => vehicle.mapContext?.placeType === 'driving').length,
+    [mapVehicles],
+  );
 
   const filteredList = useMemo(
     () =>
@@ -79,6 +93,9 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
         <div className="fleet-map-summary" aria-label="Resumo da frota">
           <SummaryChip count={mapVehicles.length} icon="fleet" label="Veículos" modifier="total" />
           <SummaryChip count={filteredList.length} icon="fleet" label="Exibidos" modifier="garage" />
+          {drivingCount > 0 ? (
+            <SummaryChip count={drivingCount} icon="fleet" label="Em rota" modifier="driving" />
+          ) : null}
         </div>
       ) : null}
 
@@ -86,6 +103,11 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
         <div className="fleet-map-layout__map">
           <div className="fleet-map-toolbar">
             <p className="fleet-map-toolbar__context">
+              {drivingCount > 0 ? (
+                <>
+                  <strong>{drivingCount}</strong> veículo(s) em rota ·{' '}
+                </>
+              ) : null}
               {filteredList.length === mapVehicles.length ? (
                 <>
                   Todos os veículos em <strong>{FLEET_GARAGE.label}</strong>
@@ -101,6 +123,7 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
           </div>
 
           <FleetLeafletMap
+            activeTrips={activeTrips}
             onSelectVehicle={handleSelectVehicle}
             selectedVehicle={selectedVehicle}
             vehicles={filteredList}
@@ -119,6 +142,18 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
               <span className="fleet-map-legend__car fleet-map-legend__car--garage" />
               Garagem
             </span>
+            {drivingCount > 0 ? (
+              <>
+                <span className="fleet-map-legend__item">
+                  <span className="fleet-map-legend__car fleet-map-legend__car--driving" />
+                  Em rota
+                </span>
+                <span className="fleet-map-legend__item fleet-map-legend__item--line">
+                  <span className="fleet-map-legend__route" aria-hidden="true" />
+                  Trajeto ativo
+                </span>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -222,11 +257,17 @@ export function FleetMapView({ variant = 'default', vehicles = [] }) {
                     <div className="fleet-map-vehicle-list__main">
                       <span className="fleet-map-vehicle-list__plate">{vehicle.plate}</span>
                       <span className="fleet-map-vehicle-list__model">{vehicle.model}</span>
-                      {vehicle.vehicleTypeLabel ? (
+                      {vehicle.mapContext?.placeType === 'driving' ? (
+                        <span className="fleet-map-vehicle-list__route">{vehicle.mapContext.label}</span>
+                      ) : vehicle.vehicleTypeLabel ? (
                         <span className="fleet-map-vehicle-list__type">{vehicle.vehicleTypeLabel}</span>
                       ) : null}
                     </div>
-                    <StatusBadge label={vehicle.status} />
+                    <StatusBadge
+                      label={
+                        vehicle.mapContext?.placeType === 'driving' ? 'Em rota' : vehicle.status
+                      }
+                    />
                   </button>
                 </li>
               ))

@@ -11,6 +11,7 @@ import {
   getChecklistStartWindow,
   getChecklistWindowMessage,
 } from '../../utils/motoristaReservaUtils';
+import { isCorridaFinalizada, loadTripSummary } from '../../utils/tripSummaryStorage';
 
 function statusHeaderModifier(status) {
   return (status || 'APROVADA').toLowerCase().replace(/_/g, '-');
@@ -32,6 +33,15 @@ function getSecondaryAction({ reserva, motoristaId, checklistDone, canFillCheckl
   }
 
   if (isEmUso) {
+    if (isCorridaFinalizada(reserva.idReserva)) {
+      return {
+        type: 'link',
+        icon: 'check',
+        label: 'Checklist de retorno',
+        to: `${base}/checklist-retorno`,
+        state: { reserva, tripSummary: loadTripSummary(reserva.idReserva) },
+      };
+    }
     return {
       type: 'link',
       icon: 'fleet',
