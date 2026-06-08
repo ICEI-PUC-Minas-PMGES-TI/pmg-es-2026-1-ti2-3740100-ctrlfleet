@@ -7,6 +7,7 @@ import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { listarVeiculos } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView, pad2 } from '../../../services/veiculoMappers';
+import { listarAlertasPreventivos, verificarAlertas } from '../../../services/alertaApi';
 
 /**
  * Deriva os alertas exibidos no dashboard a partir da lista de veículos
@@ -41,6 +42,8 @@ export function FleetDashboardPage() {
     items: [],
   });
 
+  const [alertasPreventivos, setAlertasPreventivos] = useState([]);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -63,6 +66,14 @@ export function FleetDashboardPage() {
       });
 
     return () => controller.abort();
+
+    useEffect(() => {
+      // Primeiro verifica e gera alertas novos, depois lista os existentes
+      verificarAlertas().then(() => {
+        listarAlertasPreventivos().then((lista) => setAlertasPreventivos(lista));
+      });
+    }, []);
+
   }, []);
 
   const stats = useMemo(() => {
@@ -143,6 +154,14 @@ export function FleetDashboardPage() {
                   <div>
                     <StatusBadge label={alert.status} />
                     <p>{alert.text}</p>
+                  </div>
+                </article>
+              ))}
+              {alertasPreventivos.map((alerta) => (
+                <article className="alert-item" key={`prev-${alerta.id}`}>
+                  <div>
+                    <StatusBadge label="Preventivo" />
+                    <p>{alerta.mensagem}</p>
                   </div>
                 </article>
               ))}
