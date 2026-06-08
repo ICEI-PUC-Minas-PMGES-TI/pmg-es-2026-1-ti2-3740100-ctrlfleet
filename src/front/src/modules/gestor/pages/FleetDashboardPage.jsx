@@ -66,14 +66,12 @@ export function FleetDashboardPage() {
       });
 
     return () => controller.abort();
+  }, []);
 
-    useEffect(() => {
-      // Primeiro verifica e gera alertas novos, depois lista os existentes
-      verificarAlertas().then(() => {
-        listarAlertasPreventivos().then((lista) => setAlertasPreventivos(lista));
-      });
-    }, []);
-
+  useEffect(() => {
+    verificarAlertas().then(() => {
+      listarAlertasPreventivos().then((lista) => setAlertasPreventivos(lista));
+    });
   }, []);
 
   const stats = useMemo(() => {
