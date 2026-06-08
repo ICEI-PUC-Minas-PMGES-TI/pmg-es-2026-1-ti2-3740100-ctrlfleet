@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
+import { PagePagination } from '../../../components/common/PagePagination';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
@@ -13,17 +14,23 @@ function severityToStatus(severity) {
   return 'Ativo';
 }
 
+const AUDIT_PAGE_SIZE = 5;
+
 export function AdminAuditPage() {
   const [auditData, setAuditData] = useState({
     loading: true,
     error: null,
     items: [],
   });
+  const [currentPage, setCurrentPage] = useState(1);
 
   function loadAudit(signal) {
     setAuditData((current) => ({ ...current, loading: true, error: null }));
     return listarAuditoria({ signal })
-      .then((items) => setAuditData({ loading: false, error: null, items }))
+      .then((items) => {
+        setCurrentPage(1);
+        setAuditData({ loading: false, error: null, items });
+      })
       .catch((error) => {
         if (error.name === 'AbortError') return;
         setAuditData({
@@ -73,6 +80,18 @@ export function AdminAuditPage() {
     ];
   }, [auditData.items]);
 
+  const totalPages = Math.max(1, Math.ceil(auditData.items.length / AUDIT_PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+
+  const visibleEvents = useMemo(() => {
+    const start = (safePage - 1) * AUDIT_PAGE_SIZE;
+    return auditData.items.slice(start, start + AUDIT_PAGE_SIZE);
+  }, [auditData.items, safePage]);
+
+  function handlePageChange(page) {
+    setCurrentPage(page);
+  }
+
   return (
     <div className="page-stack">
       <PageHeader
@@ -106,20 +125,28 @@ export function AdminAuditPage() {
             <p>Nenhum evento registrado ainda.</p>
           </div>
         ) : (
-          <div className="history-list">
-            {auditData.items.map((event) => (
-              <article className="history-item audit-item" key={event.id}>
-                <div>
-                  <span>{event.date}</span>
-                  <StatusBadge label={event.status || severityToStatus(event.severity)} />
-                </div>
-                <p>{event.action}</p>
-                <small>
-                  {event.actor} - {event.detail} Alvo: {event.target}. IP: {event.ip}.
-                </small>
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="history-list">
+              {visibleEvents.map((event) => (
+                <article className="history-item audit-item" key={event.id}>
+                  <div>
+                    <span>{event.date}</span>
+                    <StatusBadge label={event.status || severityToStatus(event.severity)} />
+                  </div>
+                  <p>{event.action}</p>
+                  <small>
+                    {event.actor} - {event.detail} Alvo: {event.target}. IP: {event.ip}.
+                  </small>
+                </article>
+              ))}
+            </div>
+            <PagePagination
+              currentPage={safePage}
+              onPageChange={handlePageChange}
+              pageSize={AUDIT_PAGE_SIZE}
+              totalItems={auditData.items.length}
+            />
+          </>
         )}
       </SectionCard>
     </div>

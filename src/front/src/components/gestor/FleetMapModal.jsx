@@ -7,10 +7,10 @@ import { FleetMapView } from './FleetMapView';
 export function FleetMapModal({ onClose, open, vehicles = [] }) {
   const vehicleCount = vehicles.length;
 
-  const subtitle = useMemo(
-    () => `${vehicleCount} veículo(s) na garagem · OpenStreetMap`,
-    [vehicleCount],
-  );
+  const subtitle = useMemo(() => {
+    const base = `${vehicleCount} veículo(s) · OpenStreetMap`;
+    return `${base} · veículos em corrida aparecem em tempo real no mapa`;
+  }, [vehicleCount]);
 
   return (
     <Modal

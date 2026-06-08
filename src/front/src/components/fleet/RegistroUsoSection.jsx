@@ -65,6 +65,32 @@ export function RegistroUsoSection({ veiculoId }) {
         <>
           <div className="registro-uso-resumo">
             <span>{registros.length} registro{registros.length !== 1 ? 's' : ''} encontrado{registros.length !== 1 ? 's' : ''}</span>
+            <div className="registro-uso-resumo__stats">
+              <article className="registro-uso-stat">
+                <span>KM acumulado</span>
+                <strong>
+                  {formatKm(
+                    registros.reduce((acc, item) => acc + (Number(item.quilometragemPercorrida) || 0), 0),
+                  )}
+                </strong>
+              </article>
+              <article className="registro-uso-stat">
+                <span>Retornos finalizados</span>
+                <strong>{registros.filter((item) => item.dataRetorno).length}</strong>
+              </article>
+              <article className="registro-uso-stat">
+                <span>Última saída</span>
+                <strong>
+                  {formatDateTime(
+                    registros.reduce((latest, item) => {
+                      if (!item?.dataSaida) return latest;
+                      if (!latest) return item.dataSaida;
+                      return new Date(item.dataSaida) > new Date(latest) ? item.dataSaida : latest;
+                    }, null),
+                  )}
+                </strong>
+              </article>
+            </div>
           </div>
 
           {/* Desktop: tabela */}
@@ -84,11 +110,12 @@ export function RegistroUsoSection({ veiculoId }) {
               <tbody>
                 {registros.map((reg) => {
                   const kmRodados = reg.quilometragemPercorrida;
+                  const motorista = reg.nomeMotorista || 'Não informado';
 
                   return (
                     <tr key={reg.id}>
-                      <td>{formatDateTime(reg.dataSaida)}</td>
-                      <td>{formatDateTime(reg.dataRetorno)}</td>
+                      <td className="registro-uso-datetime">{formatDateTime(reg.dataSaida)}</td>
+                      <td className="registro-uso-datetime">{formatDateTime(reg.dataRetorno)}</td>
                       <td>{formatKm(reg.quilometragemSaida)}</td>
                       <td>{formatKm(reg.quilometragemRetorno)}</td>
                       <td>
@@ -96,7 +123,12 @@ export function RegistroUsoSection({ veiculoId }) {
                           {kmRodados != null ? formatKm(kmRodados) : '—'}
                         </span>
                       </td>
-                      <td>{reg.nomeMotorista || '—'}</td>
+                      <td>
+                        <span className="registro-uso-motorista">
+                          <span className="registro-uso-motorista__avatar">{motorista.charAt(0).toUpperCase()}</span>
+                          <span>{motorista}</span>
+                        </span>
+                      </td>
                       <td className="registro-uso-obs">
                         {reg.observacoesVeiculo || '—'}
                       </td>
@@ -115,7 +147,10 @@ export function RegistroUsoSection({ veiculoId }) {
               return (
                 <article className="registro-uso-card" key={reg.id}>
                   <div className="registro-uso-card__header">
-                    <strong>{formatDateTime(reg.dataSaida)}</strong>
+                    <div className="registro-uso-card__trip">
+                      <strong>Saída: {formatDateTime(reg.dataSaida)}</strong>
+                      <span>Registro #{reg.id}</span>
+                    </div>
                     <span className="registro-uso-km-badge">
                       {kmRodados != null ? formatKm(kmRodados) : '—'}
                     </span>

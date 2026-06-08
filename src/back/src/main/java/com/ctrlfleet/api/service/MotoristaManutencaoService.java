@@ -19,14 +19,10 @@ import com.ctrlfleet.api.repository.ManutencaoRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MotoristaManutencaoService {
 
-    private static final int PREVENTIVE_DAYS_THRESHOLD = 45;
-    private static final double PREVENTIVE_KM_THRESHOLD = 2000d;
     private static final List<StatusManutencao> STATUS_MANUTENCAO_ABERTA =
             List.of(StatusManutencao.PENDENTE, StatusManutencao.EM_ANDAMENTO);
 
@@ -63,16 +57,17 @@ public class MotoristaManutencaoService {
         this.auditoriaService = auditoriaService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public MotoristaManutencaoPainelDTO montarPainel(Long motoristaId) {
         validarMotoristaAtivo(motoristaId);
 
         List<Manutencao> registros =
                 manutencaoRepository.findByVeiculo_Motorista_IdOrderByDataIdentificacaoDescIdDesc(motoristaId);
+        registros.forEach(this::garantirDataAberturaPersistida);
         Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
 
         MotoristaManutencaoPainelDTO painel = new MotoristaManutencaoPainelDTO();
-        painel.setPreventivasProximas(extrairPreventivasProximas(registros, kmPorVeiculo));
+        painel.setPreventivasProximas(ManutencaoPreventivaUtil.extrairPreventivasProximas(registros, kmPorVeiculo));
         painel.setAlertasPreventivos(extrairAlertasPreventivos(motoristaId));
         painel.setSolicitacoes(filtrarPorStatus(registros, kmPorVeiculo, StatusManutencao.PENDENTE));
         painel.setEmAndamento(filtrarPorStatus(registros, kmPorVeiculo, StatusManutencao.EM_ANDAMENTO));
@@ -210,27 +205,6 @@ public class MotoristaManutencaoService {
         return enriquecerDto(salva, quilometragemAtual);
     }
 
-    private List<ManutencaoResponseDTO> extrairPreventivasProximas(
-            List<Manutencao> registros, Map<Long, Double> kmPorVeiculo) {
-        LocalDate hoje = LocalDate.now();
-        Map<Long, ManutencaoResponseDTO> deduplicado = new LinkedHashMap<>();
-
-        registros.stream()
-                .filter(item -> item.getTipoManutencao() == TipoManutencao.PREVENTIVA
-                        && item.getStatus() == StatusManutencao.AGENDADA)
-                .sorted(Comparator.comparing(Manutencao::getDataRealizada, Comparator.nullsLast(Comparator.naturalOrder())))
-                .forEach(item -> {
-                    ManutencaoResponseDTO dto = enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId()));
-                    if (!isPreventivaProxima(dto, hoje)) return;
-                    deduplicado.putIfAbsent(item.getVeiculo().getId(), dto);
-                });
-
-        return deduplicado.values().stream()
-                .sorted(Comparator.comparing(ManutencaoResponseDTO::getDiasRestantes, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(ManutencaoResponseDTO::getKmRestantes, Comparator.nullsLast(Comparator.naturalOrder())))
-                .toList();
-    }
-
     private List<AlertaResponseDTO> extrairAlertasPreventivos(Long motoristaId) {
         return alertaRepository.findByVeiculo_Motorista_IdAndLidoFalseOrderByDataGeracaoDesc(motoristaId).stream()
                 .map(AlertaResponseDTO::fromEntity)
@@ -264,49 +238,18 @@ public class MotoristaManutencaoService {
     }
 
     private ManutencaoResponseDTO enriquecerDto(Manutencao manutencao, Double quilometragemAtual) {
-        ManutencaoResponseDTO dto = ManutencaoResponseDTO.fromEntity(manutencao, quilometragemAtual);
-        LocalDate hoje = LocalDate.now();
-
-        if (manutencao.getDataRealizada() != null) {
-            long dias = ChronoUnit.DAYS.between(hoje, manutencao.getDataRealizada());
-            dto.setDiasRestantes((int) dias);
-        }
-
-        if (manutencao.getQuilometragemRegistro() != null && quilometragemAtual != null) {
-            dto.setKmRestantes(manutencao.getQuilometragemRegistro() - quilometragemAtual);
-        }
-
-        dto.setProximidadeLabel(montarProximidadeLabel(dto));
-        return dto;
+        return ManutencaoPreventivaUtil.enriquecerDto(manutencao, quilometragemAtual);
     }
 
-    private boolean isPreventivaProxima(ManutencaoResponseDTO dto, LocalDate hoje) {
-        boolean porData = dto.getDataAgendada() != null
-                && !dto.getDataAgendada().isBefore(hoje.minusDays(7))
-                && !dto.getDataAgendada().isAfter(hoje.plusDays(PREVENTIVE_DAYS_THRESHOLD));
-        boolean porKm = dto.getKmRestantes() != null && dto.getKmRestantes() <= PREVENTIVE_KM_THRESHOLD;
-        return porData || porKm;
-    }
-
-    private String montarProximidadeLabel(ManutencaoResponseDTO dto) {
-        List<String> partes = new ArrayList<>();
-        if (dto.getDiasRestantes() != null) {
-            if (dto.getDiasRestantes() < 0) {
-                partes.add("Agendada há " + Math.abs(dto.getDiasRestantes()) + " dia(s)");
-            } else if (dto.getDiasRestantes() == 0) {
-                partes.add("Prevista para hoje");
-            } else {
-                partes.add("Em " + dto.getDiasRestantes() + " dia(s)");
-            }
+    private void garantirDataAberturaPersistida(Manutencao manutencao) {
+        if (manutencao.getDataIdentificacao() != null) {
+            return;
         }
-        if (dto.getKmRestantes() != null) {
-            if (dto.getKmRestantes() <= 0) {
-                partes.add("Quilometragem atingida");
-            } else {
-                partes.add(String.format(Locale.forLanguageTag("pt-BR"), "%.0f km restantes", dto.getKmRestantes()));
-            }
+        var abertura = ManutencaoResponseDTO.resolverDataAbertura(manutencao);
+        if (abertura != null) {
+            manutencao.setDataIdentificacao(abertura);
+            manutencaoRepository.save(manutencao);
         }
-        return partes.isEmpty() ? "Próxima da data prevista" : String.join(" · ", partes);
     }
 
     private void liberarVeiculoSePossivel(Manutencao manutencao) {

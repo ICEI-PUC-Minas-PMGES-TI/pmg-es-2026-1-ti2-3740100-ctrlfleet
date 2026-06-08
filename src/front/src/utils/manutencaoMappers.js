@@ -44,6 +44,8 @@ function formatKm(value) {
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(Number(value))} km`;
 }
 
+const FINALIZED_STATUSES = new Set(['CONCLUIDA', 'CANCELADA', 'REPROVADA']);
+
 function formatCurrencyBr(value) {
   if (value == null || !Number.isFinite(Number(value))) return '-';
   return new Intl.NumberFormat('pt-BR', {
@@ -52,9 +54,20 @@ function formatCurrencyBr(value) {
   }).format(Number(value));
 }
 
-export function mapManutencaoToView(dto) {
-  const dataReferencia = dto.dataConclusao || dto.dataAgendada || dto.dataIdentificacao;
+function computePreventivaAtrasada(dto) {
+  if (dto.atrasada) return true;
+  if (dto.tipoManutencao !== 'PREVENTIVA' || !dto.dataAgendada) return false;
+  if (FINALIZED_STATUSES.has(dto.status)) return false;
+  const scheduled = new Date(`${dto.dataAgendada}T12:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  scheduled.setHours(0, 0, 0, 0);
+  return scheduled < today;
+}
 
+export function mapManutencaoToView(dto) {
+  const atrasada = computePreventivaAtrasada(dto);
+  const dataReferencia = dto.dataConclusao || dto.dataAgendada || dto.dataIdentificacao;
   return {
     id: dto.id,
     idVeiculo: dto.idVeiculo,
@@ -67,12 +80,14 @@ export function mapManutencaoToView(dto) {
     descricao: dto.descricaoProblema || '',
     dataAgendada: dto.dataAgendada,
     dataAgendadaLabel: formatDateBr(dto.dataAgendada),
+    dataAgendamentoLabel: formatDateBr(dto.dataAgendada),
     dataIdentificacao: dto.dataIdentificacao,
     dataIdentificacaoLabel: formatDateTimeBr(dto.dataIdentificacao),
     dataReferencia,
     dataReferenciaLabel: String(dataReferencia || '').includes('T')
       ? formatDateTimeBr(dataReferencia)
       : formatDateBr(dataReferencia),
+    dataAberturaLabel: formatDateTimeBr(dto.dataIdentificacao),
     quilometragemRegistro: dto.quilometragemRegistro,
     quilometragemRegistroLabel: formatKm(dto.quilometragemRegistro),
     quilometragemAtual: dto.quilometragemAtual,
@@ -80,7 +95,8 @@ export function mapManutencaoToView(dto) {
     kmRestantes: dto.kmRestantes,
     kmRestantesLabel: dto.kmRestantes == null ? null : formatKm(Math.max(0, dto.kmRestantes)),
     diasRestantes: dto.diasRestantes,
-    proximidadeLabel: dto.proximidadeLabel || 'Proxima da data prevista',
+    proximidadeLabel: dto.proximidadeLabel || (atrasada ? 'Atrasada' : 'Próxima da data prevista'),
+    atrasada,
     custoTotal: dto.custoTotal,
     custoTotalLabel: formatCurrencyBr(dto.custoTotal),
     oficinaExecutor: dto.oficinaExecutor,
@@ -93,6 +109,65 @@ export function mapManutencaoToView(dto) {
     emergencia: Boolean(dto.emergencia),
     prioridade: dto.prioridade,
     prioridadeLabel: PRIORIDADE_LABELS[dto.prioridade] || dto.prioridade,
+    nomeMotorista: dto.nomeMotorista || '',
+  };
+}
+
+export function mapPainelGestorManutencaoToView(dto) {
+  return {
+    pendentes: (dto.pendentes || []).map(mapManutencaoToView),
+    agendadas: (dto.agendadas || []).map(mapManutencaoToView),
+    emAndamento: (dto.emAndamento || []).map(mapManutencaoToView),
+    historico: (dto.historico || []).map(mapManutencaoToView),
+  };
+}
+
+const STATUS_VEICULO_LABELS = {
+  DISPONIVEL: 'Disponível',
+  EM_USO: 'Em uso',
+  MANUTENCAO: 'Em manutenção',
+  DESATIVADO: 'Desativado',
+};
+
+export function mapVeiculoParadoToView(dto) {
+  const manutencao = dto.manutencaoAtiva ? mapManutencaoToView(dto.manutencaoAtiva) : null;
+  return {
+    idVeiculo: dto.idVeiculo,
+    placa: dto.placa || '—',
+    marca: dto.marca || '',
+    modelo: dto.modelo || '',
+    vehicleLabel: [dto.marca, dto.modelo].filter(Boolean).join(' ') || 'Veículo',
+    statusVeiculo: dto.statusVeiculo,
+    statusVeiculoLabel: STATUS_VEICULO_LABELS[dto.statusVeiculo] || dto.statusVeiculo,
+    nomeMotorista: dto.nomeMotorista || '—',
+    manutencao,
+    diasParado: dto.diasParado,
+    diasParadoLabel:
+      dto.diasParado == null
+        ? '—'
+        : dto.diasParado === 0
+          ? 'Parado hoje'
+          : `${dto.diasParado} dia(s) parado`,
+    motivoParada: dto.motivoParada || 'Indisponível para operação',
+  };
+}
+
+export function mapPainelPreventivaGestorToView(dto) {
+  const resumo = dto.resumo || {};
+  return {
+    resumo: {
+      preventivasProximas: resumo.preventivasProximas ?? 0,
+      preventivasAtrasadas: resumo.preventivasAtrasadas ?? 0,
+      preventivasAgendadas: resumo.preventivasAgendadas ?? 0,
+      veiculosParados: resumo.veiculosParados ?? 0,
+      emAndamento: resumo.emAndamento ?? 0,
+      alertasPreventivos: resumo.alertasPreventivos ?? 0,
+    },
+    preventivasProximas: (dto.preventivasProximas || []).map(mapManutencaoToView),
+    preventivasAgendadas: (dto.preventivasAgendadas || []).map(mapManutencaoToView),
+    veiculosParadosRevisao: (dto.veiculosParadosRevisao || []).map(mapVeiculoParadoToView),
+    emAndamento: (dto.emAndamento || []).map(mapManutencaoToView),
+    alertasPreventivos: (dto.alertasPreventivos || []).map(mapAlertaToView),
   };
 }
 

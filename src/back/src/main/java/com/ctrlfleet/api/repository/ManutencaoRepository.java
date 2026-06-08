@@ -22,4 +22,14 @@ public interface ManutencaoRepository extends JpaRepository<Manutencao, Long> {
 
     boolean existsByVeiculo_IdAndStatusInAndIdNot(
             Long veiculoId, Collection<StatusManutencao> statuses, Long manutencaoId);
+
+    List<Manutencao> findByTipoManutencaoAndStatusOrderByDataRealizadaAscIdAsc(
+            TipoManutencao tipoManutencao, StatusManutencao status);
+
+    List<Manutencao> findByStatusOrderByDataIdentificacaoDescIdDesc(StatusManutencao status);
+
+    List<Manutencao> findByVeiculo_IdAndStatusInOrderByDataIdentificacaoDescIdDesc(
+            Long veiculoId, List<StatusManutencao> statuses);
+
+    long countByStatus(StatusManutencao status);
 }

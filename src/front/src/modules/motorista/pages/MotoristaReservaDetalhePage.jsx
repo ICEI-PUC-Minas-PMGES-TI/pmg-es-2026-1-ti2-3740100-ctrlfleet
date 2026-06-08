@@ -19,6 +19,7 @@ import {
 } from '../../../utils/motoristaReservaUtils';
 import { formatViagemLabel } from '../../../utils/userReservaNumbers';
 import { resolveVehicleImageUrl } from '../../../utils/vehicleImage';
+import { isCorridaFinalizada, loadTripSummary } from '../../../utils/tripSummaryStorage';
 
 function normalizeReserva(reserva) {
   return {
@@ -93,6 +94,7 @@ export function MotoristaReservaDetalhePage() {
   const windowMessage = getChecklistWindowMessage(reserva);
   const flashMessage = location.state?.flashMessage;
   const detailBasePath = `/motorista/${motoristaId}/reservas/${reserva?.idReserva}`;
+  const corridaFinalizada = isCorridaFinalizada(reserva?.idReserva);
 
   if (!motoristaId) {
     return (
@@ -231,16 +233,23 @@ export function MotoristaReservaDetalhePage() {
                   to={`${detailBasePath}/corrida`}
                 >
                   <Icon name="fleet" />
-                  <span>Ver corrida no mapa</span>
+                  <span>{corridaFinalizada ? 'Ver corrida finalizada' : 'Ver corrida no mapa'}</span>
                 </Link>
-                <Link
-                  className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
-                  state={{ reserva }}
-                  to={`${detailBasePath}/checklist-retorno`}
-                >
-                  <Icon name="check" />
-                  <span>Checklist de retorno</span>
-                </Link>
+                {corridaFinalizada ? (
+                  <Link
+                    className="motorista-viagem-card__action motorista-viagem-card__action--secondary"
+                    state={{ reserva, tripSummary: loadTripSummary(reserva.idReserva) }}
+                    to={`${detailBasePath}/checklist-retorno`}
+                  >
+                    <Icon name="check" />
+                    <span>Preencher checklist de retorno</span>
+                  </Link>
+                ) : (
+                  <div className="motorista-viagem-card__alert">
+                    <Icon name="alert" />
+                    <span>Finalize a corrida no mapa antes do checklist de retorno.</span>
+                  </div>
+                )}
               </>
             ) : null}
 

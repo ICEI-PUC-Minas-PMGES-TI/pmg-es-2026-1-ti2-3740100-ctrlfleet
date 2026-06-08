@@ -20,6 +20,19 @@ export function VehicleCardGrid({ onDeactivate, readOnly = false, vehicles, view
     return `/gestor/frota/${vehicle.id}`;
   }
 
+  function getIndisponibilidadeMensagem(vehicle) {
+    if (vehicle.status === 'Bloqueado') {
+      return 'Veículo indisponível — bloqueado por documentação pendente/vencida.';
+    }
+    if (vehicle.status === 'Inativo' || vehicle.availabilityStatus === 'DESATIVADO') {
+      return 'Veículo inativo — não disponível para uso.';
+    }
+    if (vehicle.availabilityStatus === 'EM_USO') {
+      return 'Veículo em uso no momento.';
+    }
+    return `Veículo indisponível — ${vehicle.availabilityLabel}`;
+  }
+
   return (
     <div className="fleet-vehicle-grid">
       {vehicles.map((vehicle) => (
@@ -50,7 +63,7 @@ export function VehicleCardGrid({ onDeactivate, readOnly = false, vehicles, view
             {!readOnly && !vehicle.isDisponivel ? (
               <div className="fleet-vehicle-card__alert">
                 <Icon name="alert" />
-                <span>Veículo indisponível — {vehicle.availabilityLabel}</span>
+                <span>{getIndisponibilidadeMensagem(vehicle)}</span>
               </div>
             ) : null}
 

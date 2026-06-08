@@ -68,6 +68,9 @@ public class Reserva {
     @Column(name = "status_reserva", nullable = false, length = 30)
     private StatusReserva statusReserva = StatusReserva.SOLICITADA;
 
+    @Column(name = "lembrete_um_dia_enviado_em")
+    private LocalDateTime lembreteUmDiaEnviadoEm;
+
     public Reserva() {
     }
 
@@ -185,5 +188,13 @@ public class Reserva {
 
     public void setStatusReserva(StatusReserva statusReserva) {
         this.statusReserva = statusReserva;
+    }
+
+    public LocalDateTime getLembreteUmDiaEnviadoEm() {
+        return lembreteUmDiaEnviadoEm;
+    }
+
+    public void setLembreteUmDiaEnviadoEm(LocalDateTime lembreteUmDiaEnviadoEm) {
+        this.lembreteUmDiaEnviadoEm = lembreteUmDiaEnviadoEm;
     }
 }

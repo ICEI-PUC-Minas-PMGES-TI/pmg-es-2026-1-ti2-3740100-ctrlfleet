@@ -11,7 +11,8 @@ import {
 } from '../../../services/motoristaApi';
 import { ChecklistTipoCard } from '../../../components/motorista/ChecklistTipoCard';
 import { formatKm } from '../../../utils/motoristaReservaUtils';
-import { loadTripSummary } from '../../../utils/tripSummaryStorage';
+import { loadTripSummary, clearTripSummary } from '../../../utils/tripSummaryStorage';
+import { removeActiveFleetTrip } from '../../../utils/fleetActiveTripsStorage';
 import { calculateReturnMileage } from '../../../utils/routeSimulationUtils';
 
 export function ChecklistRetornoPage() {
@@ -68,6 +69,8 @@ export function ChecklistRetornoPage() {
         distanciaPercorridaKm: tripSummary?.distanceKm ?? 0,
         observacoesVeiculo: observacoesVeiculo.trim() || undefined,
       });
+      removeActiveFleetTrip(reservaId);
+      clearTripSummary(reservaId);
       navigate(historicoPath, {
         replace: true,
         state: {

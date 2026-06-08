@@ -17,6 +17,8 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, Long> {
 
     List<Veiculo> findByMotorista_IdAndStatusOrderByPlacaAsc(Long motoristaId, StatusVeiculo status);
 
+    List<Veiculo> findByStatusOrderByPlacaAsc(StatusVeiculo status);
+
     int countByMotorista_Id(Long motoristaId);
 
     @Query(

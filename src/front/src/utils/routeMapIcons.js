@@ -3,32 +3,17 @@ import L from 'leaflet';
 function createRoutePin(color, label) {
   return L.divIcon({
     className: 'route-map-marker-wrap',
-    html: `
-      <div class="route-map-marker" style="--route-pin:${color}">
-        <span class="route-map-marker__dot" aria-hidden="true"></span>
-        <span class="route-map-marker__label">${label}</span>
-      </div>
-    `,
-    iconAnchor: [14, 36],
-    popupAnchor: [0, -32],
-  });
-}
-
-export const ORIGIN_MAP_ICON = createRoutePin('#0d7a5f', 'A');
-export const DESTINATION_MAP_ICON = createRoutePin('#c2410c', 'B');
-
-/** Apenas badge A/B, sem círculo (mapa de simulação ao vivo). */
-function createRoutePinLabelOnly(color, label) {
-  return L.divIcon({
-    className: 'route-map-marker-wrap',
     html: `<span class="route-map-marker__label route-map-marker__label--solo" style="--route-pin:${color}">${label}</span>`,
     iconAnchor: [14, 14],
     popupAnchor: [0, -14],
   });
 }
 
-export const ORIGIN_MAP_ICON_LABEL = createRoutePinLabelOnly('#0d7a5f', 'A');
-export const DESTINATION_MAP_ICON_LABEL = createRoutePinLabelOnly('#c2410c', 'B');
+export const ORIGIN_MAP_ICON = createRoutePin('#0d7a5f', 'A');
+export const DESTINATION_MAP_ICON = createRoutePin('#c2410c', 'B');
+
+export const ORIGIN_MAP_ICON_LABEL = ORIGIN_MAP_ICON;
+export const DESTINATION_MAP_ICON_LABEL = DESTINATION_MAP_ICON;
 
 export const VEHICLE_MAP_ICON = L.divIcon({
   className: 'route-map-marker-wrap route-map-marker-wrap--vehicle',

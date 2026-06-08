@@ -178,6 +178,14 @@ export function mapBackendVehicleToView(dto) {
     licenseCategory: inferLicenseCategory(dto),
     quilometragemAtual: dto.quilometragemAtual ?? null,
     documents,
+    motoristaResponsavel: dto.motorista
+      ? {
+          id: dto.motorista.id != null ? String(dto.motorista.id) : null,
+          nome: dto.motorista.nome || null,
+          email: dto.motorista.email || null,
+          matricula: dto.motorista.matricula || null,
+        }
+      : null,
     location: resolveVehicleLocation(dto),
   };
 }

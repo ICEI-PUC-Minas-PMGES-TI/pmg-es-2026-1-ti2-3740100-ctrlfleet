@@ -5,7 +5,7 @@ import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { MotoristaReservationCardGrid } from '../../../components/motorista/MotoristaReservationCardGrid';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
-import { listarHistoricoMotorista, listarReservasConcluidas } from '../../../services/motoristaApi';
+import { listarReservasAprovadas, listarReservasConcluidas, listarReservasEmUso } from '../../../services/motoristaApi';
 import {
   DATE_RANGE_FILTERS,
   MOTORISTA_RESERVA_SORT_KEY,
@@ -28,12 +28,27 @@ function normalizeReserva(reserva) {
   };
 }
 
+function mergeMotoristaReservas({ aprovadas = [], concluidas = [], emUso = [] }) {
+  const byId = new Map();
+
+  concluidas.forEach((reserva) => {
+    byId.set(reserva.idReserva, normalizeReserva(reserva));
+  });
+  aprovadas.forEach((reserva) => {
+    byId.set(reserva.idReserva, normalizeReserva(reserva));
+  });
+  emUso.forEach((reserva) => {
+    byId.set(reserva.idReserva, normalizeReserva(reserva));
+  });
+
+  return [...byId.values()];
+}
+
 export function MotoristaDashboardPage() {
   const location = useLocation();
   const motoristaId = getCurrentMotoristaId();
 
   const [reservas, setReservas] = useState([]);
-  const [viagemCatalog, setViagemCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
@@ -54,12 +69,12 @@ export function MotoristaDashboardPage() {
     setError(null);
 
     try {
-      const [concluidas, historico] = await Promise.all([
+      const [aprovadas, emUso, concluidas] = await Promise.all([
+        listarReservasAprovadas(motoristaId),
+        listarReservasEmUso(motoristaId),
         listarReservasConcluidas(motoristaId),
-        listarHistoricoMotorista(motoristaId),
       ]);
-      setReservas((concluidas || []).map(normalizeReserva));
-      setViagemCatalog(historico || []);
+      setReservas(mergeMotoristaReservas({ aprovadas, emUso, concluidas }));
     } catch (err) {
       setError(err.message || 'Não foi possível carregar as viagens.');
     } finally {
@@ -72,9 +87,18 @@ export function MotoristaDashboardPage() {
   }, [loadReservas, location.key]);
 
   const viagemNumbers = useMemo(
-    () => buildMotoristaViagemNumbers(viagemCatalog),
-    [viagemCatalog],
+    () => buildMotoristaViagemNumbers(reservas),
+    [reservas],
   );
+
+  const reservaCounts = useMemo(() => {
+    const count = (status) => reservas.filter((item) => item.statusReserva === status).length;
+    return {
+      aprovadas: count('APROVADA'),
+      emUso: count('EM_USO'),
+      concluidas: count('CONCLUIDA'),
+    };
+  }, [reservas]);
 
   const filteredReservas = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -115,7 +139,10 @@ export function MotoristaDashboardPage() {
 
   return (
     <div className="page-stack motorista-page motorista-dashboard">
-      <PageHeader title="Minhas viagens" />
+      <PageHeader
+        subtitle="Reservas aprovadas, viagens em andamento e histórico concluído."
+        title="Minhas viagens"
+      />
 
       <FleetFilters
         className="fleet-filters--motorista"
@@ -147,7 +174,10 @@ export function MotoristaDashboardPage() {
         <>
           <div className="motorista-dashboard__summary">
             <span>
-              Mostrando {filteredReservas.length} de {reservas.length} viagens concluídas
+              Mostrando {filteredReservas.length} de {reservas.length} viagens
+              {reservaCounts.aprovadas + reservaCounts.emUso > 0
+                ? ` · ${reservaCounts.aprovadas} aprovada(s) · ${reservaCounts.emUso} em uso`
+                : ''}
             </span>
             <span>Ordenado por: {getSortOrderLabel(sortOrder, RESERVA_SORT_FILTERS)}</span>
           </div>

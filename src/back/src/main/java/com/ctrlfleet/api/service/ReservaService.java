@@ -27,18 +27,21 @@ public class ReservaService {
     private final UsuarioRepository usuarioRepository;
     private final VeiculoRepository veiculoRepository;
     private final AuditoriaService auditoriaService;
+    private final NotificationEmailService notificationEmailService;
 
     public ReservaService(
             ReservaRepository reservaRepository,
             RegistroUsoRepository registroUsoRepository,
             UsuarioRepository usuarioRepository,
             VeiculoRepository veiculoRepository,
-            AuditoriaService auditoriaService) {
+            AuditoriaService auditoriaService,
+            NotificationEmailService notificationEmailService) {
         this.reservaRepository = reservaRepository;
         this.registroUsoRepository = registroUsoRepository;
         this.usuarioRepository = usuarioRepository;
         this.veiculoRepository = veiculoRepository;
         this.auditoriaService = auditoriaService;
+        this.notificationEmailService = notificationEmailService;
     }
 
     @Transactional(readOnly = true)
@@ -139,6 +142,7 @@ public class ReservaService {
                 "info",
                 null,
                 "Solicitante criou reserva para o veiculo " + veiculo.getPlaca());
+        notificationEmailService.enviarReservaCriada(salva);
         return ReservaResponseDTO.fromEntity(salva);
     }
 
@@ -156,8 +160,11 @@ public class ReservaService {
         }
 
         reserva.setStatusReserva(StatusReserva.APROVADA);
-        registrarDecisao("RESERVA_APROVADA", reserva, dto, "Aprovada", "success");
-        return ReservaResponseDTO.fromEntity(reserva);
+        Reserva salva = reservaRepository.save(reserva);
+        registrarDecisao("RESERVA_APROVADA", salva, dto, "Aprovada", "success");
+        notificationEmailService.enviarReservaAprovadaSolicitante(salva);
+        notificationEmailService.enviarReservaAprovadaMotorista(salva);
+        return ReservaResponseDTO.fromEntity(salva);
     }
 
     @Transactional //Adicionei um teste para ver se o texto do motivo veio nulo ou vazio (isBlank()). Se veio vazio, o sistema joga um erro na tela e não deixa reprovar sem justificativa.
@@ -169,8 +176,11 @@ public class ReservaService {
         }
 
         reserva.setStatusReserva(StatusReserva.REPROVADA);
-        registrarDecisao("RESERVA_REPROVADA", reserva, dto, "Reprovada", "warning");
-        return ReservaResponseDTO.fromEntity(reserva);
+        Reserva salva = reservaRepository.save(reserva);
+        String motivo = dto == null ? null : dto.getMotivo();
+        registrarDecisao("RESERVA_REPROVADA", salva, dto, "Reprovada", "warning");
+        notificationEmailService.enviarReservaReprovada(salva, motivo);
+        return ReservaResponseDTO.fromEntity(salva);
     }   
 
     @Transactional
@@ -181,8 +191,11 @@ public class ReservaService {
             throw new IllegalArgumentException("Reserva em uso ou concluida nao pode ser cancelada");
         }
         reserva.setStatusReserva(StatusReserva.CANCELADA);
-        registrarDecisao("RESERVA_CANCELADA", reserva, dto, "Cancelada", "warning");
-        return ReservaResponseDTO.fromEntity(reserva);
+        Reserva salva = reservaRepository.save(reserva);
+        String motivo = dto == null ? null : dto.getMotivo();
+        registrarDecisao("RESERVA_CANCELADA", salva, dto, "Cancelada", "warning");
+        notificationEmailService.enviarReservaCancelada(salva, motivo);
+        return ReservaResponseDTO.fromEntity(salva);
     }
 
     @Transactional

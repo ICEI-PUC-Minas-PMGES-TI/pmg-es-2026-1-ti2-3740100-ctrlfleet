@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
+import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
@@ -9,13 +10,6 @@ import { buscarVeiculo, listarManutencoesPorVeiculo } from '../../../services/ve
 import { mapBackendVehicleToView } from '../../../services/veiculoMappers';
 import { mapManutencaoToView, resolveManutencaoStatusVariant } from '../../../utils/manutencaoMappers';
 import { formatDateTime, formatKm } from '../../../utils/registroUsoFormatters';
-
-function formatCurrency(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    currency: 'BRL',
-    style: 'currency',
-  }).format(Number(value || 0));
-}
 
 export function VehicleHistoryPage() {
   const { vehicleId } = useParams();
@@ -66,8 +60,8 @@ export function VehicleHistoryPage() {
     );
     const ultimaUtilizacao = state.registros[0]?.dataRetorno || state.registros[0]?.dataSaida || null;
     const manutencoesAtivas = state.manutencoes.filter((item) => item.status === 'EM_ANDAMENTO').length;
-    const custoTotal = state.manutencoes.reduce((total, item) => total + Number(item.custoTotal || 0), 0);
-    return { custoTotal, manutencoesAtivas, totalKm, ultimaUtilizacao };
+    const mediaKm = state.registros.length > 0 ? totalKm / state.registros.length : 0;
+    return { manutencoesAtivas, totalKm, ultimaUtilizacao, mediaKm };
   }, [state.manutencoes, state.registros]);
 
   if (state.loading) {
@@ -90,7 +84,7 @@ export function VehicleHistoryPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack vehicle-history-page">
       <PageHeader
         actionIcon="fleet"
         actionLabel="Voltar ao veiculo"
@@ -99,20 +93,44 @@ export function VehicleHistoryPage() {
         title={`Historico de ${state.vehicle.model}`}
       />
 
-      <div className="detail-hero">
+      <div className="detail-hero vehicle-history-hero">
         <div>
           <span className="plate-chip">{state.vehicle.plate}</span>
           <h2>{state.vehicle.model}</h2>
-          <p>{state.vehicle.marca} - {state.vehicle.year}</p>
+          <p>{state.vehicle.marca} · {state.vehicle.year} · {state.vehicle.secretaria}</p>
         </div>
         <StatusBadge label={state.vehicle.status} />
       </div>
 
       <div className="history-metrics">
-        <SectionCard subtitle="Registros concluidos" title={String(state.registros.length)} />
-        <SectionCard subtitle="Quilometragem registrada" title={formatKm(resumo.totalKm)} />
-        <SectionCard subtitle="Manutencoes no prontuario" title={String(state.manutencoes.length)} />
-        <SectionCard subtitle="Custo acumulado" title={formatCurrency(resumo.custoTotal)} />
+        <article className="history-metric-card">
+          <span className="history-metric-card__icon"><Icon name="history" /></span>
+          <div>
+            <p>Registros concluídos</p>
+            <strong>{String(state.registros.length)}</strong>
+          </div>
+        </article>
+        <article className="history-metric-card">
+          <span className="history-metric-card__icon"><Icon name="dashboard" /></span>
+          <div>
+            <p>Quilometragem registrada</p>
+            <strong>{formatKm(resumo.totalKm)}</strong>
+          </div>
+        </article>
+        <article className="history-metric-card">
+          <span className="history-metric-card__icon"><Icon name="calendar" /></span>
+          <div>
+            <p>Última movimentação</p>
+            <strong>{formatDateTime(resumo.ultimaUtilizacao)}</strong>
+          </div>
+        </article>
+        <article className="history-metric-card">
+          <span className="history-metric-card__icon"><Icon name="fleet" /></span>
+          <div>
+            <p>Média por uso</p>
+            <strong>{formatKm(resumo.mediaKm)}</strong>
+          </div>
+        </article>
       </div>
 
       <SectionCard
@@ -177,12 +195,15 @@ export function VehicleHistoryPage() {
                     <strong>{registro.nomeMotorista || 'Motorista nao informado'}</strong>
                     <span>{formatKm(registro.quilometragemPercorrida || 0)}</span>
                   </div>
+                  <div className="operational-timeline__chips">
+                    <span>{registro.idReserva ? `Reserva #${registro.idReserva}` : 'Sem reserva vinculada'}</span>
+                    <span>{formatDateTime(registro.dataSaida)}</span>
+                  </div>
                   <p>
                     Saida em {formatDateTime(registro.dataSaida)} - retorno em {formatDateTime(registro.dataRetorno)}
                   </p>
                   <small>
-                    KM {formatKm(registro.quilometragemSaida)} - {formatKm(registro.quilometragemRetorno)}
-                    {registro.idReserva ? ` - reserva #${registro.idReserva}` : ''}
+                    KM {formatKm(registro.quilometragemSaida)} → {formatKm(registro.quilometragemRetorno)}
                   </small>
                   {registro.observacoesVeiculo ? <em>{registro.observacoesVeiculo}</em> : null}
                 </div>

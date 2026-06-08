@@ -1,27 +1,35 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FinalizarUsoForm } from '../../../components/fleet/FinalizarUsoForm';
 import { RegistroUsoSection } from '../../../components/fleet/RegistroUsoSection';
 import { DocumentPills } from '../../../components/gestor/DocumentPills';
 import { ActionButton } from '../../../components/common/ActionButton';
+import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
-import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { buscarVeiculo, editarDocumentacaoVeiculo, listarManutencoesPorVeiculo } from '../../../services/veiculoApi';
+import { buscarVeiculo, editarDocumentacaoVeiculo } from '../../../services/veiculoApi';
 import { mapBackendVehicleToView } from '../../../services/veiculoMappers';
-import { mapManutencaoToView, resolveManutencaoStatusVariant } from '../../../utils/manutencaoMappers';
+import { resolveVehicleImageUrl } from '../../../utils/vehicleImage';
+import { formatKm } from '../../../utils/registroUsoFormatters';
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    currency: 'BRL',
-    style: 'currency',
-  }).format(Number(value || 0));
+const PAYMENT_STATUS_LABELS = {
+  PAGO: 'Pago',
+  PENDENTE: 'Pendente',
+  ATRASADO: 'Atrasado',
+};
+
+function formatPaymentStatus(value) {
+  return PAYMENT_STATUS_LABELS[String(value || '').toUpperCase()] || value || '—';
+}
+
+function documentStateLabel(state) {
+  if (state === 'expired') return 'Vencido';
+  if (state === 'warning') return 'Atenção';
+  return 'Em dia';
 }
 
 export function VehicleDetailPage() {
   const { vehicleId } = useParams();
   const [vehicleState, setVehicleState] = useState({ loading: true, error: null, item: null });
-  const [maintenanceState, setMaintenanceState] = useState({ loading: true, error: null, items: [] });
   const [editingDocs, setEditingDocs] = useState({});
   const [historyVersion, setHistoryVersion] = useState(0);
 
@@ -59,30 +67,6 @@ export function VehicleDetailPage() {
     return () => controller.abort();
   }, [loadVehicle]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    setMaintenanceState((current) => ({ ...current, loading: true, error: null }));
-
-    listarManutencoesPorVeiculo(vehicleId, { signal: controller.signal })
-      .then((items) => {
-        setMaintenanceState({
-          loading: false,
-          error: null,
-          items: (items || []).map(mapManutencaoToView),
-        });
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setMaintenanceState({
-          loading: false,
-          error: error.message || 'Falha ao carregar manutencoes.',
-          items: [],
-        });
-      });
-
-    return () => controller.abort();
-  }, [vehicleId]);
-
   async function handleSaveDocument(documento) {
     const form = editingDocs[documento.id];
     if (!form) return;
@@ -94,11 +78,6 @@ export function VehicleDetailPage() {
       valorPago: form.valorPago === '' ? null : Number(form.valorPago),
     });
     await loadVehicle();
-  }
-
-  async function handleUsoFinalizado() {
-    await loadVehicle();
-    setHistoryVersion((current) => current + 1);
   }
 
   if (vehicleState.loading) {
@@ -121,13 +100,11 @@ export function VehicleDetailPage() {
   }
 
   const vehicle = vehicleState.item;
-  const activeMaintenances = maintenanceState.items.filter((item) => item.status === 'EM_ANDAMENTO');
-  const completedMaintenances = maintenanceState.items.filter((item) => item.status === 'CONCLUIDA');
-  const maintenanceCost = maintenanceState.items.reduce((total, item) => total + Number(item.custoTotal || 0), 0);
-  const recentMaintenances = maintenanceState.items.slice(0, 3);
+  const vehicleImageUrl = resolveVehicleImageUrl(vehicle);
+  const motorista = vehicle.motoristaResponsavel;
 
   return (
-    <div className="page-stack">
+    <div className="page-stack motorista-veiculo-detail">
       <PageHeader
         actionIcon="edit"
         actionLabel="Editar cadastro"
@@ -136,14 +113,34 @@ export function VehicleDetailPage() {
         title={vehicle.model}
       />
 
-      <div className="detail-hero">
-        <div>
-          <span className="plate-chip">{vehicle.plate}</span>
-          <h2>{vehicle.model}</h2>
-          <p>{vehicle.year}</p>
+      <article className="motorista-veiculo-detail__hero">
+        <div className="motorista-veiculo-detail__media">
+          <img
+            alt={`${vehicle.marca} ${vehicle.model}`}
+            className="motorista-veiculo-detail__photo"
+            src={vehicleImageUrl}
+          />
+          <span className="motorista-veiculo-detail__type-badge">{vehicle.vehicleTypeLabel}</span>
         </div>
-        <StatusBadge label={vehicle.status} />
-      </div>
+
+        <div className="motorista-veiculo-detail__hero-copy">
+          <div className="motorista-veiculo-detail__hero-top">
+            <span className="motorista-veiculo-detail__plate">{vehicle.plate}</span>
+            <StatusBadge label={vehicle.status} />
+          </div>
+          <h1>
+            {vehicle.marca} {vehicle.model}
+          </h1>
+          <p>Ano {vehicle.year} · CNH categoria {vehicle.licenseCategory}</p>
+          <p className="motorista-veiculo-detail__odometer">
+            <Icon name="dashboard" />
+            <span>
+              Quilometragem atual: <strong>{formatKm(vehicle.quilometragemAtual)}</strong>
+            </span>
+          </p>
+          <p className="motorista-veiculo-detail__secretaria">{vehicle.secretaria}</p>
+        </div>
+      </article>
 
       <div className="detail-actions">
         <ActionButton icon="history" to={`/gestor/frota/${vehicleId}/historico`} variant="secondary">
@@ -154,36 +151,76 @@ export function VehicleDetailPage() {
         </ActionButton>
       </div>
 
-      <div className="content-grid">
-        <SectionCard subtitle="Campos principais do cadastro." title="Informacoes gerais">
-          <dl className="summary-list">
-            <div>
-              <dt>Marca</dt>
-              <dd>{vehicle.marca}</dd>
-            </div>
-            <div>
-              <dt>Modelo</dt>
-              <dd>{vehicle.model}</dd>
-            </div>
-            <div>
-              <dt>Ano</dt>
-              <dd>{vehicle.year}</dd>
-            </div>
-            <div>
-              <dt>CNH minima</dt>
-              <dd>{vehicle.licenseCategory}</dd>
-            </div>
-          </dl>
-        </SectionCard>
-      </div>
+      <section aria-label="Informações do veículo" className="motorista-veiculo-detail__stats">
+        <div className="motorista-veiculo-detail__stat">
+          <Icon name="fleet" />
+          <div>
+            <span>Tipo</span>
+            <strong>{vehicle.vehicleTypeLabel}</strong>
+          </div>
+        </div>
+        <div className="motorista-veiculo-detail__stat">
+          <Icon name="calendar" />
+          <div>
+            <span>Ano</span>
+            <strong>{vehicle.year}</strong>
+          </div>
+        </div>
+        <div className="motorista-veiculo-detail__stat">
+          <Icon name="users" />
+          <div>
+            <span>CNH mínima</span>
+            <strong>Categoria {vehicle.licenseCategory}</strong>
+          </div>
+        </div>
+        <div className="motorista-veiculo-detail__stat">
+          <Icon name="dashboard" />
+          <div>
+            <span>Quilometragem</span>
+            <strong>{formatKm(vehicle.quilometragemAtual)}</strong>
+          </div>
+        </div>
+        <div className="motorista-veiculo-detail__stat">
+          <Icon name="clipboard" />
+          <div>
+            <span>Secretaria</span>
+            <strong>{vehicle.secretaria}</strong>
+          </div>
+        </div>
+        <div className="motorista-veiculo-detail__stat">
+          <Icon name="users" />
+          <div>
+            <span>Motorista responsável</span>
+            <strong>{motorista?.nome || 'Não atribuído'}</strong>
+            {motorista?.matricula ? <div>{motorista.matricula}</div> : null}
+          </div>
+        </div>
+      </section>
 
-      <SectionCard subtitle="Situacao dos vencimentos monitorados." title="Documentacao">
-        <DocumentPills documents={vehicle.documents} />
-        <div className="documents-list">
+      <section className="motorista-veiculo-detail__docs-panel">
+        <header className="motorista-veiculo-detail__section-head">
+          <div>
+            <span className="motorista-veiculo-detail__eyebrow">Frota</span>
+            <h2>Documentação</h2>
+            <p>Situação de IPVA, seguro e licenciamento monitorados pela gestão.</p>
+          </div>
+          <DocumentPills documents={vehicle.documents} />
+        </header>
+
+        <div className="motorista-veiculo-detail__docs-grid">
           {vehicle.documents.map((item) => (
-            <div className="documents-list__item" key={item.id || item.label}>
-              <strong>{item.label}</strong>
-              <span>Valido ate {item.dueDate}</span>
+            <article className={`motorista-doc-card motorista-doc-card--${item.state}`} key={item.id || item.label}>
+              <div className="motorista-doc-card__head">
+                <strong>{item.label}</strong>
+                <span className={`motorista-doc-card__state motorista-doc-card__state--${item.state}`}>
+                  {documentStateLabel(item.state)}
+                </span>
+              </div>
+              <p className="motorista-doc-card__due">Válido até {item.dueDate}</p>
+              <p className="motorista-doc-card__payment">
+                Pagamento: <strong>{formatPaymentStatus(item.statusPagamento)}</strong>
+              </p>
+
               {typeof item.id === 'number' ? (
                 <div className="form-grid">
                   <label className="form-field">
@@ -216,56 +253,14 @@ export function VehicleDetailPage() {
                     </select>
                   </label>
                   <ActionButton onClick={() => handleSaveDocument(item)} type="button" variant="secondary">
-                    Salvar documento
+                    Salvar
                   </ActionButton>
                 </div>
               ) : null}
-            </div>
+            </article>
           ))}
         </div>
-      </SectionCard>
-
-      <SectionCard
-        subtitle={`${activeMaintenances.length} em andamento, ${completedMaintenances.length} concluidas. Custo total ${formatCurrency(maintenanceCost)}.`}
-        title="Manutencoes do veiculo"
-      >
-        {maintenanceState.loading ? (
-          <div className="registro-uso-vazio">
-            <p>Carregando manutencoes...</p>
-          </div>
-        ) : maintenanceState.error ? (
-          <div className="registro-uso-vazio">
-            <p>{maintenanceState.error}</p>
-          </div>
-        ) : recentMaintenances.length === 0 ? (
-          <div className="registro-uso-vazio">
-            <p>Nenhuma manutencao registrada para este veiculo.</p>
-          </div>
-        ) : (
-          <div className="vehicle-maintenance-summary">
-            {recentMaintenances.map((manutencao) => (
-              <article
-                className={`vehicle-maintenance-summary__item vehicle-maintenance-summary__item--${resolveManutencaoStatusVariant(manutencao.status)}`}
-                key={manutencao.id}
-              >
-                <div>
-                  <span>{manutencao.tipoLabel}</span>
-                  <strong>{manutencao.descricao || 'Manutencao sem descricao'}</strong>
-                  <small>
-                    {manutencao.dataReferenciaLabel} - {manutencao.quilometragemRegistroLabel} - {manutencao.custoTotalLabel}
-                  </small>
-                </div>
-                <StatusBadge label={manutencao.statusLabel} />
-              </article>
-            ))}
-            <ActionButton icon="history" to={`/gestor/frota/${vehicleId}/historico`} variant="secondary">
-              Ver prontuario completo
-            </ActionButton>
-          </div>
-        )}
-      </SectionCard>
-
-      <FinalizarUsoForm onFinalizado={handleUsoFinalizado} veiculoId={vehicleId} />
+      </section>
 
       <RegistroUsoSection key={historyVersion} veiculoId={vehicleId} />
     </div>

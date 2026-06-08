@@ -10,17 +10,14 @@ import { ReservationCardGrid } from '../../../components/gestor/ReservationCardG
 import { listarRegistrosPorReserva } from '../../../services/registroUsoApi';
 import { aprovarReserva, listarReservas, reprovarReserva } from '../../../services/reservaApi';
 import { pad2 } from '../../../services/veiculoMappers';
+import {
+  buildReservaStatusTabs,
+  filterReservas,
+  hasActiveReservaFilters,
+  resolveReservaFilterSelection,
+} from '../../../utils/reservaFilters';
 
 const STATUS_TABS = ['Todas', 'Solicitada', 'Aprovada', 'Em uso', 'Concluída', 'Reprovada', 'Cancelada'];
-
-const STATUS_FILTER_MAP = {
-  Solicitada: 'SOLICITADA',
-  Aprovada: 'APROVADA',
-  'Em uso': 'EM_USO',
-  Concluída: 'CONCLUIDA',
-  Reprovada: 'REPROVADA',
-  Cancelada: 'CANCELADA',
-};
 
 function formatDateTime(value) {
   if (!value) return '-';
@@ -58,11 +55,43 @@ export function ReservasGestorPage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    setSearch('');
+    setSelectedStatus('Todas');
     Promise.resolve().then(() => {
       if (!controller.signal.aborted) carregarReservas(controller.signal);
     });
     return () => controller.abort();
   }, [carregarReservas]);
+
+  const statusTabOptions = useMemo(
+    () => buildReservaStatusTabs(state.items, STATUS_TABS),
+    [state.items],
+  );
+
+  const activeFilters = useMemo(
+    () =>
+      resolveReservaFilterSelection({
+        status: selectedStatus,
+        statusTabs: statusTabOptions,
+      }),
+    [selectedStatus, statusTabOptions],
+  );
+
+  useEffect(() => {
+    setSelectedStatus((current) => (current === activeFilters.status ? current : activeFilters.status));
+  }, [activeFilters.status]);
+
+  const filteredReservas = useMemo(
+    () =>
+      filterReservas(state.items, {
+        search,
+        status: activeFilters.status,
+      }),
+    [search, activeFilters.status, state.items],
+  );
+
+  const showStatusFilter = statusTabOptions.length > 1;
+  const filtersReady = !state.loading && !state.error && state.items.length > 0;
 
   useEffect(() => {
     const concluidas = state.items.filter((item) => item.statusReserva === 'CONCLUIDA');
@@ -90,25 +119,6 @@ export function ReservasGestorPage() {
       ignore = true;
     };
   }, [state.items]);
-
-  const filteredReservas = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    const statusFilter = STATUS_FILTER_MAP[selectedStatus];
-
-    return state.items.filter((reserva) => {
-      const matchesStatus = !statusFilter || reserva.statusReserva === statusFilter;
-      const matchesSearch =
-        term.length === 0 ||
-        String(reserva.idReserva).includes(term) ||
-        (reserva.destino || '').toLowerCase().includes(term) ||
-        (reserva.origem || '').toLowerCase().includes(term) ||
-        (reserva.placaVeiculo || '').toLowerCase().includes(term) ||
-        (reserva.modeloVeiculo || '').toLowerCase().includes(term) ||
-        (reserva.nomeSolicitante || '').toLowerCase().includes(term);
-
-      return matchesStatus && matchesSearch;
-    });
-  }, [search, selectedStatus, state.items]);
 
   const summaryCards = useMemo(() => {
     const items = state.items;
@@ -218,7 +228,7 @@ export function ReservasGestorPage() {
     (!isRejection || decisionModal.motivo.trim().length > 0);
 
   return (
-    <div className="page-stack">
+    <div className="page-stack gestor-page gestor-reservas-page">
       <PageHeader
         subtitle="Aprovação, reprovação e acompanhamento do ciclo das reservas."
         title="Reservas"
@@ -231,14 +241,19 @@ export function ReservasGestorPage() {
       </section>
 
       <SectionCard>
-        <FleetFilters
-          onSearchChange={setSearch}
-          onStatusChange={setSelectedStatus}
-          search={search}
-          searchPlaceholder="Buscar por destino, placa, solicitante ou nº..."
-          selectedStatus={selectedStatus}
-          statusTabs={STATUS_TABS}
-        />
+        {filtersReady ? (
+          <FleetFilters
+            className="fleet-filters--gestor"
+            controlIdPrefix="gestor-reservas"
+            onSearchChange={setSearch}
+            onStatusChange={setSelectedStatus}
+            search={search}
+            searchPlaceholder="Buscar por destino, placa, solicitante ou nº..."
+            selectedStatus={activeFilters.status}
+            statusSelectMode
+            statusTabs={showStatusFilter ? statusTabOptions : null}
+          />
+        ) : null}
 
         {state.loading ? (
           <div className="admin-dashboard__loading">
@@ -255,11 +270,14 @@ export function ReservasGestorPage() {
           </div>
         ) : (
           <>
-            <div className="table-summary">
+            <div className="motorista-dashboard__summary">
               <span>
                 Mostrando {filteredReservas.length} de {state.items.length} reservas
+                {hasActiveReservaFilters({ search, status: activeFilters.status })
+                  ? ` · Status: ${activeFilters.status}`
+                  : ''}
               </span>
-              <span>Cards com rota, veículo e ações rápidas de aprovação.</span>
+              <span>Layout com rota, veículo e ações de aprovação.</span>
             </div>
 
             <ReservationCardGrid
