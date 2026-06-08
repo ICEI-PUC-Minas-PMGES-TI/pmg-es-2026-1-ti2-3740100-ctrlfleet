@@ -10,6 +10,7 @@ public class EmailProperties {
     private boolean enabled = true;
     private String from = "noreply@ctrlfleet.gov.br";
     private String fromName = "CtrlFleet";
+    private String appUrl = "";
 
     public boolean isEnabled() {
         return enabled;
@@ -33,5 +34,13 @@ public class EmailProperties {
 
     public void setFromName(String fromName) {
         this.fromName = fromName;
+    }
+
+    public String getAppUrl() {
+        return appUrl;
+    }
+
+    public void setAppUrl(String appUrl) {
+        this.appUrl = appUrl;
     }
 }

@@ -65,6 +65,7 @@ services:
       CTRLFLEET_MAIL_ENABLED: ${CTRLFLEET_MAIL_ENABLED:-true}
       CTRLFLEET_MAIL_FROM: ${CTRLFLEET_MAIL_FROM:-noreply@ctrlfleet.gov.br}
       CTRLFLEET_MAIL_FROM_NAME: ${CTRLFLEET_MAIL_FROM_NAME:-CtrlFleet}
+      CTRLFLEET_MAIL_APP_URL: ${CTRLFLEET_MAIL_APP_URL:-http://localhost:5173}
       TZ: ${TZ:-America/Sao_Paulo}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--Duser.timezone=America/Sao_Paulo}
     volumes:
