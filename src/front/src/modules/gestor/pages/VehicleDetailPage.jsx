@@ -31,7 +31,6 @@ export function VehicleDetailPage() {
   const { vehicleId } = useParams();
   const [vehicleState, setVehicleState] = useState({ loading: true, error: null, item: null });
   const [editingDocs, setEditingDocs] = useState({});
-  const [historyVersion, setHistoryVersion] = useState(0);
 
   const loadVehicle = useCallback((signal) => {
     setVehicleState((current) => ({ ...current, loading: true, error: null }));
@@ -262,7 +261,7 @@ export function VehicleDetailPage() {
         </div>
       </section>
 
-      <RegistroUsoSection key={historyVersion} veiculoId={vehicleId} />
+      <RegistroUsoSection veiculoId={vehicleId} />
     </div>
   );
 }

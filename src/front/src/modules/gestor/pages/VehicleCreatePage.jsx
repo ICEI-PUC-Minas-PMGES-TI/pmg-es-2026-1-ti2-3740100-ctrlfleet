@@ -54,7 +54,7 @@ export function VehicleCreatePage() {
       });
 
     return () => controller.abort();
-  }, [isEditMode, vehicleId]);
+  }, [isEditMode, resetForm, updateForm, vehicleId]);
 
   async function handleSubmit(event) {
     event.preventDefault();

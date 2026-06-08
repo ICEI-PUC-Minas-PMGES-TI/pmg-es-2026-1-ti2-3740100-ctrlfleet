@@ -60,7 +60,7 @@ export function isReservationExpired(reserva) {
 
 export function canOpenChecklistSaida(reserva) {
   if (!reserva?.dataHoraInicioPrevista) return false;
-  if (Boolean(reserva.checklistSaidaConcluido)) return false;
+  if (reserva.checklistSaidaConcluido) return false;
   if (isReservationExpired(reserva)) return false;
 
   const now = new Date();
@@ -70,7 +70,7 @@ export function canOpenChecklistSaida(reserva) {
 }
 
 export function canStartTrip(reserva) {
-  if (!Boolean(reserva?.checklistSaidaConcluido)) return false;
+  if (!reserva?.checklistSaidaConcluido) return false;
   if (reserva.statusReserva !== 'APROVADA') return false;
   if (isReservationExpired(reserva)) return false;
   return true;
@@ -84,7 +84,7 @@ export function getChecklistWindowMessage(reserva) {
   const now = new Date();
   const windowStart = getChecklistStartWindow(reserva.dataHoraInicioPrevista);
 
-  if (Boolean(reserva.checklistSaidaConcluido)) {
+  if (reserva.checklistSaidaConcluido) {
     return null;
   }
 

@@ -46,32 +46,38 @@ public class SecurityConfiguration {
                 .requestMatchers("/health").permitAll()
 
                 .requestMatchers("/usuarios/**")
-                    .hasRole("ADMINISTRADOR")
+                    .hasAuthority("ROLE_ADMINISTRADOR")
 
                 .requestMatchers(HttpMethod.GET, "/veiculos/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA", "MOTORISTA", "SOLICITANTE")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA", "ROLE_MOTORISTA", "ROLE_SOLICITANTE")
                 .requestMatchers(HttpMethod.POST, "/veiculos/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA")
                 .requestMatchers(HttpMethod.PUT, "/veiculos/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA")
                 .requestMatchers(HttpMethod.PATCH, "/veiculos/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA")
 
                 .requestMatchers(HttpMethod.GET, "/reservas/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA", "MOTORISTA", "SOLICITANTE")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA", "ROLE_MOTORISTA", "ROLE_SOLICITANTE")
                 .requestMatchers(HttpMethod.POST, "/reservas")
-                    .hasAnyRole("SOLICITANTE", "ADMINISTRADOR")
+                    .hasAnyAuthority("ROLE_SOLICITANTE", "ROLE_ADMINISTRADOR")
                 .requestMatchers("/reservas/*/aprovar", "/reservas/*/reprovar")
-                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
+                    .hasAnyAuthority("ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
                 .requestMatchers("/reservas/*/cancelar")
-                    .hasAnyRole("SOLICITANTE", "GESTOR_FROTA", "ADMINISTRADOR")
+                    .hasAnyAuthority("ROLE_SOLICITANTE", "ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
                 .requestMatchers(HttpMethod.DELETE, "/reservas/**")
-                    .hasAnyRole("SOLICITANTE", "ADMINISTRADOR")
+                    .hasAnyAuthority("ROLE_SOLICITANTE", "ROLE_ADMINISTRADOR")
 
+                .requestMatchers(HttpMethod.GET, "/gestor/manutencoes/preventiva")
+                    .hasAnyAuthority("ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/gestor/manutencoes/contagem")
+                    .hasAnyAuthority("ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/gestor/manutencoes/**")
+                    .hasAnyAuthority("ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
                 .requestMatchers(HttpMethod.GET, "/manutencoes/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA")
                 .requestMatchers(HttpMethod.PATCH, "/manutencoes/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA")
 
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -87,21 +93,19 @@ public class SecurityConfiguration {
                     .hasAnyAuthority("ROLE_MOTORISTA", "ROLE_ADMINISTRADOR")
 
                 .requestMatchers("/auditoria/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA")
 
                 .requestMatchers("/registros-uso/**")
-                    .hasAnyRole("ADMINISTRADOR", "GESTOR_FROTA", "MOTORISTA")
+                    .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA", "ROLE_MOTORISTA")
 
-                .requestMatchers(HttpMethod.GET, "/gestor/manutencoes/**")
-                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
                 .requestMatchers(
                                 "/gestor/manutencoes/*/aprovar",
                                 "/gestor/manutencoes/*/reprovar",
                                 "/gestor/manutencoes/*/iniciar",
                                 "/gestor/manutencoes/*/concluir")
-                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
+                    .hasAnyAuthority("ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
                 .requestMatchers(HttpMethod.PATCH, "/gestor/manutencoes/*/prioridade")
-                    .hasAnyRole("GESTOR_FROTA", "ADMINISTRADOR")
+                    .hasAnyAuthority("ROLE_GESTOR_FROTA", "ROLE_ADMINISTRADOR")
 
                 .anyRequest().authenticated()
             )

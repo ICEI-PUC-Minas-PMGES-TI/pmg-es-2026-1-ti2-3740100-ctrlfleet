@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RouteMapPreview } from '../solicitante/RouteMapPreview';
 import { fetchDrivingRoute } from '../../services/geocodingApi';
 import { coordsFromReservation, resolveReservationCoords } from '../../utils/resolveReservationCoords';
 import { hasReservationCoords } from '../../utils/motoristaReservaUtils';
 
 export function ReservationRouteMapPanel({ className = '', compact = false, reserva }) {
-  const fromApi = coordsFromReservation(reserva);
+  const fromApi = useMemo(() => coordsFromReservation(reserva), [reserva]);
 
   const [coords, setCoords] = useState({
     origem: fromApi.origemCoords,
@@ -86,6 +86,9 @@ export function ReservationRouteMapPanel({ className = '', compact = false, rese
     reserva?.origem,
     reserva?.origemLat,
     reserva?.origemLng,
+    fromApi.destinoCoords,
+    fromApi.origemCoords,
+    reserva,
   ]);
 
   useEffect(() => {

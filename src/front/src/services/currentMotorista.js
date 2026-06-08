@@ -1,4 +1,4 @@
-import { getAuthSession, getMotoristaHomePathFromSession, getMotoristaIdFromSession } from './authSession';
+import { getMotoristaHomePathFromSession, getMotoristaIdFromSession } from './authSession';
 
 const STORAGE_KEY = 'ctrlfleet:motoristaId';
 

@@ -12,7 +12,6 @@ import {
   mapRequesterReservation,
   parseReservationDate,
 } from '../../../services/requesterReservationUtils';
-import { buscarUsuario } from '../../../services/usuarioApi';
 import { attachSolicitanteReservaNumbers, formatReservaUsuarioLabel } from '../../../utils/userReservaNumbers';
 
 function pad2(value) {
@@ -31,11 +30,10 @@ export function RequesterDashboardPage() {
   const solicitanteId = getCurrentSolicitanteId();
   const matriculaFallback = getCurrentSolicitanteMatricula();
 
-  const [profile, setProfile] = useState({
-    loading: true,
+  const profile = {
     name: session?.nome ?? null,
     matricula: session?.matricula ?? matriculaFallback,
-  });
+  };
   const [reservationsData, setReservationsData] = useState({ loading: true, error: null, items: [] });
 
   const carregarReservas = useCallback(
@@ -63,22 +61,9 @@ export function RequesterDashboardPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-
-    buscarUsuario(solicitanteId, { signal: controller.signal })
-      .then((user) => {
-        setProfile({
-          loading: false,
-          name: user?.nome ?? null,
-          matricula: user?.matricula ?? matriculaFallback,
-        });
-      })
-      .catch(() => {
-        setProfile({ loading: false, name: null, matricula: matriculaFallback });
-      });
-
     carregarReservas(controller.signal);
     return () => controller.abort();
-  }, [carregarReservas, matriculaFallback, solicitanteId]);
+  }, [carregarReservas]);
 
   const reservations = useMemo(
     () => attachSolicitanteReservaNumbers(reservationsData.items),

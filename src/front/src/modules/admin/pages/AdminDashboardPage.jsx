@@ -174,8 +174,11 @@ export function AdminDashboardPage() {
     }
     const { item, intent } = approvalModal;
     try {
-      const updated =
-        intent === 'approve' ? await aprovarUsuario(item.id) : await recusarUsuario(item.id);
+      if (intent === 'approve') {
+        await aprovarUsuario(item.id);
+      } else {
+        await recusarUsuario(item.id);
+      }
       setDismissedPendingIds((current) => new Set(current).add(item.id));
       window.dispatchEvent(new Event('ctrlfleet:usuarios-updated'));
       await refresh();

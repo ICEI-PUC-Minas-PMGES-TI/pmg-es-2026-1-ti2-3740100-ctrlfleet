@@ -10,8 +10,8 @@ import { VehicleFormProvider } from './modules/gestor/context/VehicleFormContext
 import { FleetDashboardPage } from './modules/gestor/pages/FleetDashboardPage';
 import { FleetPage } from './modules/gestor/pages/FleetPage';
 import { ManutencaoGestorPage } from './modules/gestor/pages/ManutencaoGestorPage';
-import { ModulePlaceholderPage } from './modules/gestor/pages/ModulePlaceholderPage';
 import { ProgramacaoPreventivaGestorPage } from './modules/gestor/pages/ProgramacaoPreventivaGestorPage';
+import { ReportsPage } from './modules/gestor/pages/ReportsPage';
 import { ReservasGestorPage } from './modules/gestor/pages/ReservasGestorPage';
 import { ReservationTimelinePage } from './modules/gestor/pages/ReservationTimelinePage';
 import { VehicleCreatePage } from './modules/gestor/pages/VehicleCreatePage';
@@ -62,17 +62,7 @@ function App() {
               <Route path="reservas/:reservaId/historico" element={<ReservationTimelinePage />} />
               <Route path="manutencao" element={<ManutencaoGestorPage />} />
               <Route path="programacao-preventiva" element={<ProgramacaoPreventivaGestorPage />} />
-              <Route
-                path="relatorios"
-                element={
-                  <ModulePlaceholderPage
-                    ctaLabel="Voltar para frota"
-                    ctaTo="/gestor/frota"
-                    description="O espaço de relatórios ficou separado para encaixar indicadores, exportações e auditorias sem retrabalho."
-                    title="Relatórios"
-                  />
-                }
-              />
+              <Route path="relatorios" element={<ReportsPage />} />
             </Route>
           </Route>
 

@@ -37,7 +37,7 @@ export function ChecklistSaidaTipoPage() {
     return () => controller.abort();
   }, [tipoId]);
 
-  const items = checklistData.tipo?.itens || [];
+  const items = useMemo(() => checklistData.tipo?.itens || [], [checklistData.tipo]);
   const allChecked = useMemo(
     () => items.length > 0 && items.every((item) => checkedItems.has(item.id)),
     [checkedItems, items],

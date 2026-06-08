@@ -7,7 +7,6 @@ import { StatCard } from '../../../components/common/StatCard';
 import { RequesterReservationCard } from '../../../components/solicitante/RequesterReservationCard';
 import { getCurrentSolicitanteId } from '../../../services/currentSolicitante';
 import { cancelarReserva, excluirReservaDoHistorico, listarReservas } from '../../../services/reservaApi';
-import { coordsFromReservation } from '../../../utils/resolveReservationCoords';
 import { mapRequesterReservation } from '../../../services/requesterReservationUtils';
 import { attachSolicitanteReservaNumbers } from '../../../utils/userReservaNumbers';
 

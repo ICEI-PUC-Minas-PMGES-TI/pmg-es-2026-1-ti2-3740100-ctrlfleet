@@ -11124,3 +11124,120 @@ a {
   color: var(--text-muted);
   line-height: 1.5;
 }
+
+.reports-timeline {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.reports-timeline__item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 0.9rem;
+  position: relative;
+}
+
+.reports-timeline__item::before {
+  background: var(--border);
+  bottom: -1rem;
+  content: '';
+  left: 8px;
+  position: absolute;
+  top: 18px;
+  width: 2px;
+}
+
+.reports-timeline__item:last-child::before {
+  display: none;
+}
+
+.reports-timeline__dot {
+  background: #dbe7f8;
+  border: 3px solid var(--surface);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--border);
+  height: 18px;
+  margin-top: 1.1rem;
+  position: relative;
+  width: 18px;
+  z-index: 1;
+}
+
+.reports-timeline__dot--info {
+  background: #cfe0ff;
+}
+
+.reports-timeline__dot--success {
+  background: #d9f1e4;
+}
+
+.reports-timeline__dot--warning {
+  background: #fff2c7;
+}
+
+.reports-timeline__dot--critical {
+  background: #ffd7d7;
+}
+
+.reports-timeline__body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1rem 1.2rem;
+}
+
+.reports-timeline__head {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.reports-timeline__head strong {
+  color: var(--text);
+  font-size: 0.98rem;
+  line-height: 1.35;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.reports-timeline__status {
+  flex: 0 0 auto;
+  max-width: 9rem;
+}
+
+.reports-timeline__status .status-badge {
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+}
+
+.reports-timeline__body p {
+  color: var(--text);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.reports-timeline__body small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+  .reports-timeline__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .reports-timeline__status {
+    max-width: 100%;
+  }
+}

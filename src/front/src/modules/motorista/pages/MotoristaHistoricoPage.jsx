@@ -259,7 +259,7 @@ export function MotoristaHistoricoPage() {
           </header>
 
           <ol className="operational-timeline motorista-historico-page__timeline">
-            {registros.map((registro, index) => {
+            {registros.map((registro) => {
               const concluida = Boolean(registro.dataRetorno);
               const percorrida = kmPercorrida(registro);
 

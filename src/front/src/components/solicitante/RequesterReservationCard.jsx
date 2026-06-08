@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { fetchDrivingRoute } from '../../services/geocodingApi';
 import { coordsFromReservation, resolveReservationCoords } from '../../utils/resolveReservationCoords';
 import { formatReservaUsuarioLabel } from '../../utils/userReservaNumbers';
@@ -10,9 +10,9 @@ export function RequesterReservationCard({ onCancel, onDelete, cancelingId, dele
   const canCancel = reservation.statusKey === 'SOLICITADA';
   const canDelete = reservation.statusKey === 'CANCELADA';
   const hasTextRoute = Boolean(reservation.origem?.trim() && reservation.destino?.trim());
+  const fromApi = useMemo(() => coordsFromReservation(reservation), [reservation]);
 
   const [coords, setCoords] = useState(() => {
-    const fromApi = coordsFromReservation(reservation);
     return {
       origem: fromApi.origemCoords,
       destino: fromApi.destinoCoords,
@@ -26,7 +26,6 @@ export function RequesterReservationCard({ onCancel, onDelete, cancelingId, dele
   const [routeLoading, setRouteLoading] = useState(false);
 
   useEffect(() => {
-    const fromApi = coordsFromReservation(reservation);
     if (fromApi.origemCoords?.lat && fromApi.destinoCoords?.lat) {
       setCoords({
         origem: fromApi.origemCoords,
@@ -89,6 +88,9 @@ export function RequesterReservationCard({ onCancel, onDelete, cancelingId, dele
     reservation.origemLat,
     reservation.origemLng,
     reservation.rawId,
+    fromApi.destinoCoords,
+    fromApi.origemCoords,
+    reservation,
   ]);
 
   useEffect(() => {
