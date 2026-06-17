@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: ctrlfleet-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerContext: src/back
+    dockerfilePath: src/back/Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ctrlfleet-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CTRLFLEET_CORS_ALLOWED_ORIGINS
+        value: https://ctrlfleet-web.onrender.com
+      - key: CTRLFLEET_MAIL_ENABLED
+        value: false
+      - key: SPRING_JPA_SHOW_SQL
+        value: false
+      - key: TZ
+        value: America/Sao_Paulo
+      - key: JAVA_TOOL_OPTIONS
+        value: -Duser.timezone=America/Sao_Paulo
+
+  - type: web
+    name: ctrlfleet-web
+    runtime: static
+    buildCommand: cd src/front && npm ci && npm run build
+    staticPublishPath: src/front/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://ctrlfleet-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: ctrlfleet-db
+    plan: free
+    region: oregon
+    databaseName: ctrl_fleet
+    user: ctrlfleet

@@ -1,7 +1,10 @@
 package com.ctrlfleet.api.config;
 
 import com.ctrlfleet.api.security.JwtAuthFilter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,10 +25,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    private final JwtAuthFilter jwtAuthFilter;
+    private static final List<String> DEFAULT_ALLOWED_ORIGINS = List.of(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000");
 
-    public SecurityConfiguration(JwtAuthFilter jwtAuthFilter) {
+    private final JwtAuthFilter jwtAuthFilter;
+    private final String configuredAllowedOrigins;
+
+    public SecurityConfiguration(
+            JwtAuthFilter jwtAuthFilter,
+            @Value("${ctrlfleet.cors.allowed-origins:}") String configuredAllowedOrigins) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.configuredAllowedOrigins = configuredAllowedOrigins;
     }
 
     @Bean
@@ -117,8 +129,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(
-                List.of("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"));
+        config.setAllowedOriginPatterns(resolveAllowedOrigins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(false);
@@ -126,5 +137,15 @@ public class SecurityConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private List<String> resolveAllowedOrigins() {
+        return Stream.concat(
+                        DEFAULT_ALLOWED_ORIGINS.stream(),
+                        Arrays.stream(configuredAllowedOrigins.split(","))
+                                .map(String::trim)
+                                .filter(origin -> !origin.isBlank()))
+                .distinct()
+                .toList();
     }
 }
