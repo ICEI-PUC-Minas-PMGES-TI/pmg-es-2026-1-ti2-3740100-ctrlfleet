@@ -14,7 +14,7 @@ function developerInitials(name) {
  * Exibe foto em `/team/{slug}.jpg` ou `/team/{slug}.png`.
  * Coloque o arquivo em `public/team/` para substituir o mockup.
  */
-export function DeveloperAvatar({ name, slug }) {
+export function DeveloperAvatar({ className = '', name, slug }) {
   const [photoSrc, setPhotoSrc] = useState(() => `/team/${slug}.jpg`);
   const [showMockup, setShowMockup] = useState(false);
 
@@ -27,7 +27,7 @@ export function DeveloperAvatar({ name, slug }) {
   }
 
   return (
-    <span className="pub-dev-avatar">
+    <span className={`pub-dev-avatar${className ? ` ${className}` : ''}`}>
       {!showMockup ? (
         <img alt="" className="pub-dev-avatar__img" onError={handleError} src={photoSrc} />
       ) : null}

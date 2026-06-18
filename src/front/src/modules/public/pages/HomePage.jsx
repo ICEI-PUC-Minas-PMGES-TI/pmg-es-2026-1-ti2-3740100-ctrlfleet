@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
-import { DeveloperAvatar } from '../../../components/public/DeveloperAvatar';
+import { TeamCarousel } from '../../../components/public/TeamCarousel';
 import { FleetSceneAnimation } from '../../../components/public/FleetSceneAnimation';
 import { PublicThemeToggle } from '../../../components/public/PublicThemeToggle';
 import { ScrollReveal } from '../../../components/public/ScrollReveal';
@@ -405,20 +405,7 @@ export function HomePage() {
               <h2 className="pub-footer__team-title" id="pub-equipe-title">
                 Desenvolvido por
               </h2>
-              <ul className="pub-footer__devs">
-                {DEVELOPERS.map((dev, index) => (
-                  <ScrollReveal
-                    as="li"
-                    className="pub-footer__dev"
-                    delay={index * 60}
-                    key={dev.slug}
-                    variant="scale"
-                  >
-                    <DeveloperAvatar name={dev.name} slug={dev.slug} />
-                    <span className="pub-footer__dev-name">{dev.name}</span>
-                  </ScrollReveal>
-                ))}
-              </ul>
+              <TeamCarousel developers={DEVELOPERS} />
               <p className="pub-footer__team-meta">Turma TI-2 · PMG ES 2026/1</p>
             </section>
           </div>
