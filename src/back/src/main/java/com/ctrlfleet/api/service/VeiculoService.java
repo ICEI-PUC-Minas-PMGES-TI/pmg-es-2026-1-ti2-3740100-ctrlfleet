@@ -1,6 +1,8 @@
 package com.ctrlfleet.api.service;
 
+import com.ctrlfleet.api.domain.enums.PapelUsuario;
 import com.ctrlfleet.api.domain.model.Documentacao;
+import com.ctrlfleet.api.domain.model.Usuario;
 import com.ctrlfleet.api.domain.model.Veiculo;
 import com.ctrlfleet.api.dto.veiculo.DocumentacaoRequestDTO;
 import com.ctrlfleet.api.dto.veiculo.DocumentacaoResponseDTO;
@@ -8,6 +10,7 @@ import com.ctrlfleet.api.dto.veiculo.VeiculoRequestDTO;
 import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
 import com.ctrlfleet.api.repository.DocumentacaoRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
+import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.util.List;
 import org.springframework.data.domain.Sort;
@@ -20,14 +23,17 @@ public class VeiculoService {
     private final VeiculoRepository veiculoRepository;
     private final DocumentacaoRepository documentacaoRepository;
     private final RegistroUsoRepository registroUsoRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public VeiculoService(
             VeiculoRepository veiculoRepository,
             DocumentacaoRepository documentacaoRepository,
-            RegistroUsoRepository registroUsoRepository) {
+            RegistroUsoRepository registroUsoRepository,
+            UsuarioRepository usuarioRepository) {
         this.veiculoRepository = veiculoRepository;
         this.documentacaoRepository = documentacaoRepository;
         this.registroUsoRepository = registroUsoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional(readOnly = true)
@@ -67,6 +73,7 @@ public class VeiculoService {
         if (dto.getTipoVeiculo() != null) {
             veiculo.setTipoVeiculo(dto.getTipoVeiculo());
         }
+        veiculo.setMotorista(resolverMotorista(dto.getIdMotorista()));
 
         Veiculo salvo = veiculoRepository.save(veiculo);
         if (dto.getDocumentos() != null) {
@@ -103,6 +110,7 @@ public class VeiculoService {
         if (dto.getTipoVeiculo() != null) {
             veiculo.setTipoVeiculo(dto.getTipoVeiculo());
         }
+        veiculo.setMotorista(resolverMotorista(dto.getIdMotorista()));
 
         Veiculo salvo = veiculoRepository.save(veiculo);
         if (dto.getDocumentos() != null) {
@@ -140,6 +148,26 @@ public class VeiculoService {
         return veiculoRepository
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Veiculo nao encontrado"));
+    }
+
+    private Usuario resolverMotorista(Long idMotorista) {
+        if (idMotorista == null) {
+            throw new IllegalArgumentException("Motorista e obrigatorio");
+        }
+
+        Usuario motorista = usuarioRepository
+                .findById(idMotorista)
+                .orElseThrow(() -> new IllegalArgumentException("Motorista nao encontrado"));
+
+        if (motorista.getPapel() != PapelUsuario.ROLE_MOTORISTA) {
+            throw new IllegalArgumentException("Usuario informado nao e motorista");
+        }
+
+        if (!"ATIVO".equalsIgnoreCase(motorista.getStatus())) {
+            throw new IllegalArgumentException("Motorista precisa estar ativo");
+        }
+
+        return motorista;
     }
 
     private Documentacao salvarDocumento(Veiculo veiculo, DocumentacaoRequestDTO dto) {
