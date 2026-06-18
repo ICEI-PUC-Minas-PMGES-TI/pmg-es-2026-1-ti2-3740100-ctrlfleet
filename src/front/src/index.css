@@ -1718,6 +1718,16 @@ a {
   color: var(--danger);
 }
 
+.status-badge--meta-atingida {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.status-badge--abaixo-da-meta {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
 .document-pills,
 .table-actions {
   display: flex;
@@ -9486,6 +9496,78 @@ a {
   background: linear-gradient(90deg, #dc2626, #f87171);
 }
 
+.gestor-kpi-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.gestor-kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border, rgba(231, 230, 235, 0.9));
+  border-radius: 12px;
+}
+
+.gestor-kpi-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gestor-kpi-card__header h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.gestor-kpi-card__value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.gestor-kpi-card__track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(231, 230, 235, 0.9);
+  overflow: visible;
+}
+
+.gestor-kpi-card__bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  min-width: 4px;
+}
+
+.gestor-kpi-card__bar--success {
+  background: linear-gradient(90deg, #2d8b57, #34d399);
+}
+
+.gestor-kpi-card__bar--accent {
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.gestor-kpi-card__goal {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 14px;
+  background: var(--text, #1f2937);
+  opacity: 0.55;
+}
+
+.gestor-kpi-card small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 .gestor-reservas-page .motorista-dashboard__summary {
   margin-bottom: 4px;
 }
@@ -11239,5 +11321,338 @@ a {
 
   .reports-timeline__status {
     max-width: 100%;
+  }
+}
+
+/* ─── Admin Indicadores Page ─── */
+
+.admin-indicadores {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Date range bar */
+.ind-daterange-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+  flex-wrap: wrap;
+}
+
+.ind-daterange-bar__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.ind-daterange-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.ind-daterange-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ind-daterange-field__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ind-daterange-field__input {
+  padding: 0.55rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.7);
+  color: var(--foreground);
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-width: 140px;
+}
+
+.ind-daterange-field__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.ind-daterange-sep {
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 0 0.25rem;
+  padding-top: 1.2rem;
+}
+
+.ind-daterange-apply {
+  margin-top: 1.2rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.ind-daterange-apply:hover {
+  background: var(--accent-dark);
+}
+
+.ind-daterange-apply:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.ind-daterange-bar__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.ind-daterange-bar__range {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.ind-daterange-bar__days {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* Process section header */
+.ind-process-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.ind-process-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ind-process-period-note {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 0.2rem 0.6rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+/* KPI grid */
+.ind-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+/* KPI card */
+.ind-kpi-card {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.ind-kpi-card--met {
+  border-color: rgba(45, 139, 87, 0.28);
+  background: linear-gradient(140deg, rgba(45, 139, 87, 0.05), var(--card) 60%);
+}
+
+.ind-kpi-card--miss {
+  border-color: rgba(209, 79, 74, 0.24);
+  background: linear-gradient(140deg, rgba(209, 79, 74, 0.05), var(--card) 60%);
+}
+
+.ind-kpi-card__icon {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.ind-kpi-card--met .ind-kpi-card__icon {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.ind-kpi-card--miss .ind-kpi-card__icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.ind-kpi-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.ind-kpi-card__name {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1.4;
+}
+
+.ind-kpi-card__headline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ind-kpi-card__pct {
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.ind-kpi-card--met .ind-kpi-card__pct { color: var(--success); }
+.ind-kpi-card--miss .ind-kpi-card__pct { color: var(--danger); }
+
+.ind-kpi-card__track {
+  position: relative;
+  height: 10px;
+  background: rgba(0,0,0,0.07);
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.ind-kpi-card__fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.ind-kpi-card__fill--success { background: linear-gradient(90deg, #2d8b57, #34d399); }
+.ind-kpi-card__fill--danger  { background: linear-gradient(90deg, #d14f4a, #fb923c); }
+
+.ind-kpi-card__goal-marker {
+  position: absolute;
+  top: -5px;
+  width: 2px;
+  height: 20px;
+  background: var(--foreground);
+  opacity: 0.35;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+.ind-kpi-card__goal-marker::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ind-kpi-card__stats {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.ind-kpi-card__stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.ind-kpi-card__stats dt {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ind-kpi-card__stats dd {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.ind-kpi-card__note {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 680px) {
+  .ind-daterange-bar {
+    gap: 0.75rem;
+  }
+
+  .ind-daterange-bar__meta {
+    align-items: flex-start;
+  }
+
+  .ind-kpi-card {
+    flex-direction: column;
+  }
+
+  .ind-kpi-card__pct {
+    font-size: 2.2rem;
   }
 }

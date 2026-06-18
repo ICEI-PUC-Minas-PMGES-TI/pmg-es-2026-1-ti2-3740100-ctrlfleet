@@ -12,6 +12,7 @@ import com.ctrlfleet.api.dto.manutencao.DecisaoManutencaoRequestDTO;
 import com.ctrlfleet.api.dto.manutencao.GestorManutencaoPainelDTO;
 import com.ctrlfleet.api.dto.manutencao.GestorPreventivaPainelDTO;
 import com.ctrlfleet.api.dto.manutencao.GestorPreventivaResumoDTO;
+import com.ctrlfleet.api.dto.manutencao.IndicadoresManutencaoDTO;
 import com.ctrlfleet.api.dto.manutencao.ManutencaoResponseDTO;
 import com.ctrlfleet.api.dto.manutencao.VeiculoParadoRevisaoDTO;
 import com.ctrlfleet.api.repository.AlertaRepository;
@@ -21,6 +22,7 @@ import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -83,6 +85,70 @@ public class GestorManutencaoService {
     @Transactional(readOnly = true)
     public long contarPendentes() {
         return manutencaoRepository.countByStatus(StatusManutencao.PENDENTE);
+    }
+
+    private static final Set<StatusManutencao> STATUS_ABERTURA = Set.of(
+            StatusManutencao.PENDENTE,
+            StatusManutencao.AGENDADA,
+            StatusManutencao.EM_ANDAMENTO,
+            StatusManutencao.CONCLUIDA,
+            StatusManutencao.REPROVADA,
+            StatusManutencao.CANCELADA);
+
+    @Transactional
+    public IndicadoresManutencaoDTO calcularIndicadores(LocalDate inicio, LocalDate fim) {
+        LocalDate hoje = LocalDate.now();
+        LocalDate periodoInicio = inicio != null ? inicio : hoje.withDayOfMonth(1);
+        LocalDate periodoFim = fim != null ? fim : hoje.withDayOfMonth(hoje.lengthOfMonth());
+
+        LocalDateTime inicioPeriodo = periodoInicio.atStartOfDay();
+        LocalDateTime fimPeriodo = periodoFim.atTime(LocalTime.MAX);
+
+        List<Manutencao> registros = manutencaoRepository.findAllByOrderByDataIdentificacaoDescIdDesc();
+        registros.forEach(this::garantirDataAberturaPersistida);
+
+        List<Manutencao> abertasNoPeriodo = registros.stream()
+                .filter(item -> STATUS_ABERTURA.contains(item.getStatus()))
+                .filter(item -> item.getDataIdentificacao() != null
+                        && !item.getDataIdentificacao().isBefore(inicioPeriodo)
+                        && !item.getDataIdentificacao().isAfter(fimPeriodo))
+                .toList();
+
+        long totalAbertas = abertasNoPeriodo.size();
+        long totalConcluidas = abertasNoPeriodo.stream()
+                .filter(item -> item.getStatus() == StatusManutencao.CONCLUIDA)
+                .count();
+        double taxaConclusao = totalAbertas == 0 ? 0d : (totalConcluidas * 100.0 / totalAbertas);
+
+        long veiculosAtivos = veiculoRepository.findAll().stream()
+                .filter(veiculo -> veiculo.getStatus() != StatusVeiculo.DESATIVADO)
+                .count();
+
+        long veiculosComPreventivaCritica = contarVeiculosComPreventivaCritica();
+        double indiceAderenciaPreventiva = veiculosAtivos == 0
+                ? 0d
+                : ((veiculosAtivos - veiculosComPreventivaCritica) * 100.0 / veiculosAtivos);
+
+        IndicadoresManutencaoDTO dto = new IndicadoresManutencaoDTO();
+        dto.setPeriodoInicio(periodoInicio);
+        dto.setPeriodoFim(periodoFim);
+        dto.setTotalAbertas(totalAbertas);
+        dto.setTotalConcluidas(totalConcluidas);
+        dto.setTaxaConclusao(taxaConclusao);
+        dto.setVeiculosAtivos(veiculosAtivos);
+        dto.setVeiculosComPreventivaCritica(veiculosComPreventivaCritica);
+        dto.setIndiceAderenciaPreventiva(indiceAderenciaPreventiva);
+        return dto;
+    }
+
+    private long contarVeiculosComPreventivaCritica() {
+        List<Manutencao> preventivasAgendadas = manutencaoRepository
+                .findByTipoManutencaoAndStatusOrderByDataRealizadaAscIdAsc(
+                        TipoManutencao.PREVENTIVA, StatusManutencao.AGENDADA);
+        preventivasAgendadas.forEach(this::garantirDataAberturaPersistida);
+        Map<Long, Double> kmPorVeiculo = resolverQuilometragens(preventivasAgendadas);
+        return ManutencaoPreventivaUtil.extrairPreventivasProximas(preventivasAgendadas, kmPorVeiculo)
+                .size();
     }
 
     @Transactional

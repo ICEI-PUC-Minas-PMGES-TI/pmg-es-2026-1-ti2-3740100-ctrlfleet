@@ -3,6 +3,7 @@ export const adminNavigationItems = [
   { icon: 'users', label: 'Usuários', to: '/admin/usuarios' },
   { icon: 'shield', label: 'Perfis e permissões', to: '/admin/perfis' },
   { icon: 'reports', label: 'Auditoria', to: '/admin/auditoria' },
+  { icon: 'chart', label: 'Indicadores', to: '/admin/indicadores' },
 ];
 
 export const userStatusTabs = ['Todos', 'Ativo', 'Pendente', 'Bloqueado', 'Inativo'];

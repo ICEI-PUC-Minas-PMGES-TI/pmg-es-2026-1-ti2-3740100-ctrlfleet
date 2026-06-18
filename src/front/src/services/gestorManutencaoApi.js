@@ -42,6 +42,14 @@ export async function listarPainelPreventivaGestor(options = {}) {
   return request('/gestor/manutencoes/preventiva', { signal: options.signal });
 }
 
+export async function obterIndicadoresManutencaoGestor({ signal, inicio, fim } = {}) {
+  const params = new URLSearchParams();
+  if (inicio) params.set('inicio', inicio);
+  if (fim) params.set('fim', fim);
+  const query = params.toString() ? `?${params.toString()}` : '';
+  return request(`/gestor/manutencoes/indicadores${query}`, { signal });
+}
+
 export async function iniciarManutencao(manutencaoId, payload = {}) {
   return request(`/gestor/manutencoes/${manutencaoId}/iniciar`, {
     method: 'POST',
