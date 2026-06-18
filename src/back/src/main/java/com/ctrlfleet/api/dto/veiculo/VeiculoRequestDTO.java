@@ -29,37 +29,79 @@ public class VeiculoRequestDTO {
 
     private TipoVeiculo tipoVeiculo;
 
+    private Long idMotorista;
+
     @Valid private List<DocumentacaoRequestDTO> documentos = new ArrayList<>();
 
     public String getPlaca() {
         return placa;
     }
 
+    public void setPlaca(String placa) {
+        this.placa = placa;
+    }
+
     public String getModelo() {
         return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
     }
 
     public String getMarca() {
         return marca;
     }
 
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
     public String getSecretaria() {
         return secretaria;
+    }
+
+    public void setSecretaria(String secretaria) {
+        this.secretaria = secretaria;
     }
 
     public Integer getAno() {
         return ano;
     }
 
+    public void setAno(Integer ano) {
+        this.ano = ano;
+    }
+
     public StatusVeiculo getStatus() {
         return status;
+    }
+
+    public void setStatus(StatusVeiculo status) {
+        this.status = status;
     }
 
     public TipoVeiculo getTipoVeiculo() {
         return tipoVeiculo;
     }
 
+    public void setTipoVeiculo(TipoVeiculo tipoVeiculo) {
+        this.tipoVeiculo = tipoVeiculo;
+    }
+
+    public Long getIdMotorista() {
+        return idMotorista;
+    }
+
+    public void setIdMotorista(Long idMotorista) {
+        this.idMotorista = idMotorista;
+    }
+
     public List<DocumentacaoRequestDTO> getDocumentos() {
         return documentos;
+    }
+
+    public void setDocumentos(List<DocumentacaoRequestDTO> documentos) {
+        this.documentos = documentos;
     }
 }

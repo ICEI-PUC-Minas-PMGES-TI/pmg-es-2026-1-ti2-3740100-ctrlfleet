@@ -20,15 +20,31 @@ public class DocumentacaoRequestDTO {
         return tipoDocumento;
     }
 
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
     public LocalDate getDataVencimento() {
         return dataVencimento;
+    }
+
+    public void setDataVencimento(LocalDate dataVencimento) {
+        this.dataVencimento = dataVencimento;
     }
 
     public BigDecimal getValorPago() {
         return valorPago;
     }
 
+    public void setValorPago(BigDecimal valorPago) {
+        this.valorPago = valorPago;
+    }
+
     public String getStatusPagamento() {
         return statusPagamento;
+    }
+
+    public void setStatusPagamento(String statusPagamento) {
+        this.statusPagamento = statusPagamento;
     }
 }

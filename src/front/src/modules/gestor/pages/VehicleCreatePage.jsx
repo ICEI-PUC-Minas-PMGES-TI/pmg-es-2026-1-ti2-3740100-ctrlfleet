@@ -4,8 +4,8 @@ import { ActionButton } from '../../../components/common/ActionButton';
 import { PageHeader } from '../../../components/common/PageHeader';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { adminUsers } from '../../../data/adminData';
 import { vehicleFormOptions } from '../../../data/fleetData';
+import { listarMotoristasAtivos, mapMotoristaToView } from '../../../services/motoristaFrotaApi';
 import { atualizarVeiculo, buscarVeiculo, criarVeiculo } from '../../../services/veiculoApi';
 import { STATUS_VEICULO_LABELS, STATUS_VEICULO_VALUES } from '../../../services/veiculoMappers';
 import { useVehicleForm } from '../context/useVehicleForm';
@@ -15,9 +15,32 @@ export function VehicleCreatePage() {
   const { vehicleId } = useParams();
   const { formState, resetForm, updateForm } = useVehicleForm();
   const [submitState, setSubmitState] = useState({ loading: false, error: null });
+  const [driversState, setDriversState] = useState({ loading: true, error: null, items: [] });
   const isEditMode = Boolean(vehicleId);
-  const drivers = adminUsers.filter((user) => user.role === 'Motorista');
-  const selectedDriver = drivers.find((driver) => driver.id === formState.driverId) ?? null;
+  const selectedDriver = driversState.items.find((driver) => String(driver.id) === String(formState.driverId)) ?? null;
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    listarMotoristasAtivos({ signal: controller.signal })
+      .then((motoristas) => {
+        setDriversState({
+          loading: false,
+          error: null,
+          items: (motoristas || []).map(mapMotoristaToView),
+        });
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        setDriversState({
+          loading: false,
+          error: error.message || 'Nao foi possivel carregar os motoristas.',
+          items: [],
+        });
+      });
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (!isEditMode) {
@@ -45,6 +68,7 @@ export function VehicleCreatePage() {
           ipvaDueDate: documentsByType.IPVA?.dataVencimento || '',
           insuranceDueDate: documentsByType.SEGURO?.dataVencimento || '',
           licenseDueDate: documentsByType.LICENCIAMENTO?.dataVencimento || '',
+          driverId: vehicle.motorista?.id ? String(vehicle.motorista.id) : '',
         });
         setSubmitState({ loading: false, error: null });
       })
@@ -60,13 +84,14 @@ export function VehicleCreatePage() {
     event.preventDefault();
 
     const payload = {
-      placa: formState.plate,
-      marca: formState.brand,
-      modelo: formState.model,
-      secretaria: formState.secretaria || 'Garagem Central',
+      placa: formState.plate.trim(),
+      marca: formState.brand.trim(),
+      modelo: formState.model.trim(),
+      secretaria: formState.secretaria?.trim() || 'Garagem Central',
       ano: Number(formState.year),
       status: STATUS_VEICULO_VALUES[formState.status] || 'DISPONIVEL',
       tipoVeiculo: formState.tipoVeiculo || 'HATCH',
+      idMotorista: Number(formState.driverId),
       documentos: [
         { tipoDocumento: 'IPVA', dataVencimento: formState.ipvaDueDate, statusPagamento: 'PAGO' },
         { tipoDocumento: 'SEGURO', dataVencimento: formState.insuranceDueDate, statusPagamento: 'PAGO' },
@@ -203,12 +228,19 @@ export function VehicleCreatePage() {
             <label className="form-field">
               <span>Motorista responsável</span>
               <select
+                disabled={driversState.loading || Boolean(driversState.error)}
                 onChange={(event) => updateForm({ driverId: event.target.value })}
                 required
                 value={formState.driverId}
               >
-                <option value="">Selecione um motorista</option>
-                {drivers.map((driver) => (
+                <option value="">
+                  {driversState.loading
+                    ? 'Carregando motoristas...'
+                    : driversState.error
+                      ? 'Motoristas indisponiveis'
+                      : 'Selecione um motorista'}
+                </option>
+                {driversState.items.map((driver) => (
                   <option key={driver.id} value={driver.id}>
                     {driver.name}
                   </option>
@@ -216,33 +248,27 @@ export function VehicleCreatePage() {
               </select>
             </label>
 
+            {driversState.error ? <p className="form-error">{driversState.error}</p> : null}
+
             <div className="driver-association-card">
               {selectedDriver ? (
                 <>
                   <div className="driver-association-card__header">
                     <strong>{selectedDriver.name}</strong>
-                    <StatusBadge label={selectedDriver.status} />
+                    <StatusBadge label="Ativo" />
                   </div>
                   <dl className="driver-association-card__grid">
                     <div>
-                      <dt>E-mail</dt>
-                      <dd>{selectedDriver.email}</dd>
-                    </div>
-                    <div>
-                      <dt>CPF</dt>
-                      <dd>{selectedDriver.cpf}</dd>
+                      <dt>Matrícula</dt>
+                      <dd>{selectedDriver.matricula || 'Não informada'}</dd>
                     </div>
                     <div>
                       <dt>CNH</dt>
                       <dd>{selectedDriver.cnh || 'Não informada'}</dd>
                     </div>
                     <div>
-                      <dt>Validade da CNH</dt>
-                      <dd>{selectedDriver.cnhExpiry || 'Não informada'}</dd>
-                    </div>
-                    <div>
-                      <dt>Último acesso</dt>
-                      <dd>{selectedDriver.lastAccess}</dd>
+                      <dt>Veículos vinculados</dt>
+                      <dd>{selectedDriver.veiculosVinculados ?? 0}</dd>
                     </div>
                   </dl>
                 </>
@@ -293,7 +319,11 @@ export function VehicleCreatePage() {
               <ActionButton onClick={() => navigate('/gestor/frota')} type="button" variant="secondary">
                 Cancelar
               </ActionButton>
-              <ActionButton disabled={submitState.loading} icon="chevronDown" type="submit">
+              <ActionButton
+                disabled={submitState.loading || driversState.loading || Boolean(driversState.error)}
+                icon="chevronDown"
+                type="submit"
+              >
                 {submitState.loading ? 'Salvando...' : isEditMode ? 'Salvar alterações' : 'Salvar veículo'}
               </ActionButton>
             </div>
@@ -335,11 +365,11 @@ export function VehicleCreatePage() {
             </div>
             <div>
               <dt>Status do motorista</dt>
-              <dd>{selectedDriver ? <StatusBadge label={selectedDriver.status} /> : 'Pendente'}</dd>
+              <dd>{selectedDriver ? <StatusBadge label="Ativo" /> : 'Pendente'}</dd>
             </div>
             <div>
-              <dt>CNH do motorista</dt>
-              <dd>{selectedDriver?.cnh || 'Não informada'}</dd>
+              <dt>Matrícula do motorista</dt>
+              <dd>{selectedDriver?.matricula || 'Não informada'}</dd>
             </div>
             <div>
               <dt>IPVA</dt>
