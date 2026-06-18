@@ -3,6 +3,7 @@ import { RequireAuth } from './components/auth/RequireAuth';
 import { ManagerLayout } from './components/layout/ManagerLayout';
 import { AdminAuditPage } from './modules/admin/pages/AdminAuditPage';
 import { AdminDashboardPage } from './modules/admin/pages/AdminDashboardPage';
+import { AdminIndicadoresPage } from './modules/admin/pages/AdminIndicadoresPage';
 import { AdminRolesPage } from './modules/admin/pages/AdminRolesPage';
 import { AdminUserFormPage } from './modules/admin/pages/AdminUserFormPage';
 import { AdminUsersPage } from './modules/admin/pages/AdminUsersPage';
@@ -75,6 +76,7 @@ function App() {
               <Route path="usuarios/:userId/editar" element={<AdminUserFormPage />} />
               <Route path="perfis" element={<AdminRolesPage />} />
               <Route path="auditoria" element={<AdminAuditPage />} />
+              <Route path="indicadores" element={<AdminIndicadoresPage />} />
             </Route>
           </Route>
 

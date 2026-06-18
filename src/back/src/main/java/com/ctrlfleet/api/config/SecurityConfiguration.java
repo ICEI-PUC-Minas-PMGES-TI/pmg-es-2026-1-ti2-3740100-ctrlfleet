@@ -48,6 +48,9 @@ public class SecurityConfiguration {
                 .requestMatchers("/usuarios/**")
                     .hasAuthority("ROLE_ADMINISTRADOR")
 
+                .requestMatchers("/admin/indicadores", "/admin/indicadores/**")
+                    .hasAuthority("ROLE_ADMINISTRADOR")
+
                 .requestMatchers(HttpMethod.GET, "/veiculos/**")
                     .hasAnyAuthority("ROLE_ADMINISTRADOR", "ROLE_GESTOR_FROTA", "ROLE_MOTORISTA", "ROLE_SOLICITANTE")
                 .requestMatchers(HttpMethod.POST, "/veiculos/**")
