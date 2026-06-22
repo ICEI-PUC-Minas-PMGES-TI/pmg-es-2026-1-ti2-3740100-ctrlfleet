@@ -1,28 +1,26 @@
 import { apiFetch, parseApiResponse } from './apiBase';
 
 /**
- * Busca todos os veículos cadastrados, ordenados por id ascendente (definido
- * no backend pelo `VeiculoService.listarTodos`).
+ * Busca uma página de veículos cadastrados, ordenados por id ascendente.
  *
- * @param {{ signal?: AbortSignal }} [options]
- * @returns {Promise<Array<{
- *   id: number,
- *   placa: string,
- *   modelo: string,
- *   marca: string,
- *   ano: number,
- *   status: 'DISPONIVEL' | 'EM_USO' | 'MANUTENCAO' | 'DESATIVADO',
- * }>>}
+ * @param {{ page?: number, pageSize?: number, signal?: AbortSignal }} [options] `page` é 1-indexado.
+ * @returns {Promise<{ items: Array<object>, totalItems: number, page: number, totalPages: number }>}
  */
-export async function listarVeiculos({ signal } = {}) {
-  const res = await apiFetch('/veiculos', {
+export async function listarVeiculos({ page = 1, pageSize = 20, signal } = {}) {
+  const params = new URLSearchParams({ page: String(page - 1), size: String(pageSize) });
+  const res = await apiFetch(`/veiculos?${params}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
   });
 
   const data = await parseApiResponse(res);
-  return Array.isArray(data) ? data : [];
+  return {
+    items: Array.isArray(data?.content) ? data.content : [],
+    totalItems: data?.totalElements ?? 0,
+    page: (data?.page ?? 0) + 1,
+    totalPages: data?.totalPages ?? 1,
+  };
 }
 
 async function requestJson(path, options) {

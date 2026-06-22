@@ -15,8 +15,8 @@ export function ReservationTimelinePage() {
   useEffect(() => {
     let ignore = false;
 
-    listarReservas()
-      .then(async (reservas) => {
+    listarReservas(null, { pageSize: 1000 })
+      .then(async ({ items: reservas }) => {
         if (ignore) return;
         const reserva =
           (reservas || []).find((item) => String(item.idReserva) === String(reservaId)) || null;

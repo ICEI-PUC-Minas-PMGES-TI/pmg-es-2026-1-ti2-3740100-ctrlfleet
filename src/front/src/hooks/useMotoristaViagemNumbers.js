@@ -16,8 +16,8 @@ export function useMotoristaViagemNumbers(motoristaId) {
 
     const controller = new AbortController();
 
-    listarHistoricoMotorista(motoristaId, { signal: controller.signal })
-      .then((items) => setNumbers(buildMotoristaViagemNumbers(items || [])))
+    listarHistoricoMotorista(motoristaId, { pageSize: 1000, signal: controller.signal })
+      .then(({ items }) => setNumbers(buildMotoristaViagemNumbers(items || [])))
       .catch((error) => {
         if (error.name !== 'AbortError') setNumbers(new Map());
       });

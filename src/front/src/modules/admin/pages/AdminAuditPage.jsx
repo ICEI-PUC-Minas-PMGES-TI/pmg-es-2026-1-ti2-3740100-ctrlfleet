@@ -21,15 +21,15 @@ export function AdminAuditPage() {
     loading: true,
     error: null,
     items: [],
+    totalItems: 0,
   });
   const [currentPage, setCurrentPage] = useState(1);
 
   function loadAudit(signal) {
     setAuditData((current) => ({ ...current, loading: true, error: null }));
-    return listarAuditoria({ signal })
-      .then((items) => {
-        setCurrentPage(1);
-        setAuditData({ loading: false, error: null, items });
+    return listarAuditoria({ page: currentPage, pageSize: AUDIT_PAGE_SIZE, signal })
+      .then(({ items, totalItems }) => {
+        setAuditData({ loading: false, error: null, items, totalItems });
       })
       .catch((error) => {
         if (error.name === 'AbortError') return;
@@ -37,28 +37,31 @@ export function AdminAuditPage() {
           loading: false,
           error: error.message || 'Falha ao carregar auditoria.',
           items: [],
+          totalItems: 0,
         });
       });
   }
 
   useEffect(() => {
     const controller = new AbortController();
-    const refreshAudit = () => loadAudit();
-
     loadAudit(controller.signal);
-    window.addEventListener('ctrlfleet:usuarios-updated', refreshAudit);
+    return () => controller.abort();
+  }, [currentPage]);
 
-    return () => {
-      controller.abort();
-      window.removeEventListener('ctrlfleet:usuarios-updated', refreshAudit);
-    };
+  useEffect(() => {
+    function refreshAudit() {
+      setCurrentPage(1);
+      loadAudit();
+    }
+    window.addEventListener('ctrlfleet:usuarios-updated', refreshAudit);
+    return () => window.removeEventListener('ctrlfleet:usuarios-updated', refreshAudit);
   }, []);
 
   const auditStats = useMemo(() => {
     const items = auditData.items;
     const count = (predicate) => items.filter(predicate).length;
     return [
-      { caption: 'Eventos registrados', icon: 'reports', title: 'Eventos', value: pad2(items.length) },
+      { caption: 'Eventos registrados', icon: 'reports', title: 'Eventos', value: pad2(auditData.totalItems) },
       {
         caption: 'Alterações de acesso',
         icon: 'shield',
@@ -78,19 +81,7 @@ export function AdminAuditPage() {
         value: pad2(count((event) => event.severity === 'warning' || event.severity === 'critical')),
       },
     ];
-  }, [auditData.items]);
-
-  const totalPages = Math.max(1, Math.ceil(auditData.items.length / AUDIT_PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
-
-  const visibleEvents = useMemo(() => {
-    const start = (safePage - 1) * AUDIT_PAGE_SIZE;
-    return auditData.items.slice(start, start + AUDIT_PAGE_SIZE);
-  }, [auditData.items, safePage]);
-
-  function handlePageChange(page) {
-    setCurrentPage(page);
-  }
+  }, [auditData.items, auditData.totalItems]);
 
   return (
     <div className="page-stack">
@@ -127,7 +118,7 @@ export function AdminAuditPage() {
         ) : (
           <>
             <div className="history-list">
-              {visibleEvents.map((event) => (
+              {auditData.items.map((event) => (
                 <article className="history-item audit-item" key={event.id}>
                   <div>
                     <span>{event.date}</span>
@@ -141,10 +132,10 @@ export function AdminAuditPage() {
               ))}
             </div>
             <PagePagination
-              currentPage={safePage}
-              onPageChange={handlePageChange}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
               pageSize={AUDIT_PAGE_SIZE}
-              totalItems={auditData.items.length}
+              totalItems={auditData.totalItems}
             />
           </>
         )}

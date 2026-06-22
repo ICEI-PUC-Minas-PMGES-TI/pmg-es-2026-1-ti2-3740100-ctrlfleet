@@ -1,11 +1,14 @@
 package com.ctrlfleet.api.controller;
 
+import com.ctrlfleet.api.dto.common.PageResponseDTO;
 import com.ctrlfleet.api.dto.reserva.DecisaoReservaRequestDTO;
 import com.ctrlfleet.api.dto.reserva.ReservaRequestDTO;
 import com.ctrlfleet.api.dto.reserva.ReservaResponseDTO;
 import com.ctrlfleet.api.service.ReservaService;
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,9 +31,13 @@ public class ReservaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservaResponseDTO>> listar(
-            @RequestParam(required = false) String status, @RequestParam(required = false) Long idUsuario) {
-        return ResponseEntity.ok(reservaService.listar(status, idUsuario));
+    public ResponseEntity<PageResponseDTO<ReservaResponseDTO>> listar(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long idUsuario,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("dataHoraInicioPrevista").descending());
+        return ResponseEntity.ok(PageResponseDTO.from(reservaService.listarPaginado(status, idUsuario, pageable)));
     }
 
     @PostMapping

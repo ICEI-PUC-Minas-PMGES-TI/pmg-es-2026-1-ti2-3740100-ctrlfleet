@@ -13,7 +13,8 @@ import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.UsuarioRepository;
 import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.util.List;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,10 +38,8 @@ public class VeiculoService {
     }
 
     @Transactional(readOnly = true)
-    public List<VeiculoResponseDTO> listarTodos() {
-        return veiculoRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<VeiculoResponseDTO> listarPaginado(Pageable pageable) {
+        return veiculoRepository.findAll(pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)

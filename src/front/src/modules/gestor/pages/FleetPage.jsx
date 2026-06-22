@@ -5,6 +5,7 @@ import { FleetMapModal } from '../../../components/gestor/FleetMapModal';
 import { VehicleCardGrid } from '../../../components/gestor/VehicleCardGrid';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
+import { PagePagination } from '../../../components/common/PagePagination';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { desativarVeiculo, listarVeiculos } from '../../../services/veiculoApi';
@@ -17,27 +18,32 @@ import {
   resolveFleetFilterSelection,
 } from '../../../utils/fleetVehicleFilters';
 
+const FLEET_PAGE_SIZE = 20;
+
 export function FleetPage() {
   const location = useLocation();
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todos');
   const [selectedType, setSelectedType] = useState('Todos');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [vehiclesData, setVehiclesData] = useState({
     loading: true,
     error: null,
     items: [],
+    totalItems: 0,
   });
 
   function carregarVeiculos(signal) {
     setVehiclesData((current) => ({ ...current, loading: true, error: null }));
-    return listarVeiculos({ signal })
-      .then((items) => {
+    return listarVeiculos({ page: currentPage, pageSize: FLEET_PAGE_SIZE, signal })
+      .then(({ items, totalItems }) => {
         setVehiclesData({
           loading: false,
           error: null,
           items: items.map(mapBackendVehicleToView),
+          totalItems,
         });
       })
       .catch((error) => {
@@ -46,19 +52,21 @@ export function FleetPage() {
           loading: false,
           error: error.message || 'Falha ao carregar veículos.',
           items: [],
+          totalItems: 0,
         });
       });
   }
 
   useEffect(() => {
     const controller = new AbortController();
+    carregarVeiculos(controller.signal);
+    return () => controller.abort();
+  }, [currentPage]);
 
+  useEffect(() => {
     setSearch('');
     setSelectedStatus('Todos');
     setSelectedType('Todos');
-    carregarVeiculos(controller.signal);
-
-    return () => controller.abort();
   }, []);
 
   const statusTabOptions = useMemo(
@@ -86,6 +94,10 @@ export function FleetPage() {
     setSelectedStatus((current) => (current === activeFilters.status ? current : activeFilters.status));
     setSelectedType((current) => (current === activeFilters.type ? current : activeFilters.type));
   }, [activeFilters.status, activeFilters.type]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeFilters.status, activeFilters.type]);
 
   const filteredVehicles = useMemo(
     () =>
@@ -231,6 +243,13 @@ export function FleetPage() {
             </div>
 
             <VehicleCardGrid onDeactivate={handleDeactivateVehicle} vehicles={filteredVehicles} />
+
+            <PagePagination
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              pageSize={FLEET_PAGE_SIZE}
+              totalItems={vehiclesData.totalItems}
+            />
           </>
         )}
       </SectionCard>

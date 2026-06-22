@@ -34,15 +34,15 @@ export function SolicitanteReservasPage() {
     Promise.resolve().then(() => {
       if (controller.signal.aborted) return;
       Promise.all([
-        listarUsuarios({ signal: controller.signal }),
-        listarVeiculos({ signal: controller.signal }),
+        listarUsuarios({ pageSize: 1000, signal: controller.signal }),
+        listarVeiculos({ pageSize: 1000, signal: controller.signal }),
       ])
-        .then(([users, vehicles]) => {
+        .then(([usersPage, vehiclesPage]) => {
           setOptionsData({
             loading: false,
             error: null,
-            users: users.map(mapBackendUserToView),
-            vehicles: vehicles.map(mapBackendVehicleToView),
+            users: usersPage.items.map(mapBackendUserToView),
+            vehicles: vehiclesPage.items.map(mapBackendVehicleToView),
           });
         })
         .catch((error) => {

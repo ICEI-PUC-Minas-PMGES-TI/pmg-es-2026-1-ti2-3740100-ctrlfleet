@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,12 +136,10 @@ public class MotoristaManutencaoService {
     }
 
     @Transactional(readOnly = true)
-    public List<ManutencaoResponseDTO> listarManutencoes() {
-        List<Manutencao> registros = manutencaoRepository.findAllByOrderByDataIdentificacaoDescIdDesc();
-        Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros);
-        return registros.stream()
-                .map(item -> enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId())))
-                .toList();
+    public Page<ManutencaoResponseDTO> listarManutencoesPaginado(Pageable pageable) {
+        Page<Manutencao> registros = manutencaoRepository.findAll(pageable);
+        Map<Long, Double> kmPorVeiculo = resolverQuilometragens(registros.getContent());
+        return registros.map(item -> enriquecerDto(item, kmPorVeiculo.get(item.getVeiculo().getId())));
     }
 
     @Transactional(readOnly = true)

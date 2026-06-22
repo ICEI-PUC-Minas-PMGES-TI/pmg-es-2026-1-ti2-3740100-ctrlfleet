@@ -14,6 +14,8 @@ import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,11 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public List<Usuario> listarTodos() {
         return usuarioRepository.findAllWithMotorista();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Usuario> listarPaginado(Pageable pageable) {
+        return usuarioRepository.findAllWithMotorista(pageable);
     }
 
     @Transactional(readOnly = true)

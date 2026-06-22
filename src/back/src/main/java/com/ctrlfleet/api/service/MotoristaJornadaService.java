@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,11 +99,11 @@ public class MotoristaJornadaService {
                 .toList();
     }
 
-    public List<RegistroUsoResponseDTO> listarHistorico(Long motoristaId) {
+    public Page<RegistroUsoResponseDTO> listarHistoricoPaginado(Long motoristaId, Pageable pageable) {
         validarMotorista(motoristaId);
-        return registroUsoRepository.findViagensByMotoristaId(motoristaId).stream()
-                .map(this::toRegistroUsoResponseDTO)
-                .toList();
+        return registroUsoRepository
+                .findViagensByMotoristaId(motoristaId, pageable)
+                .map(this::toRegistroUsoResponseDTO);
     }
 
     public ChecklistJornadaStatusDTO obterStatusChecklistSaida(Long reservaId, Long motoristaId) {

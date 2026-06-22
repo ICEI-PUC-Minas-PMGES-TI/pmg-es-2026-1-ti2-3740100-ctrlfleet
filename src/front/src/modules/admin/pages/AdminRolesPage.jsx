@@ -19,8 +19,8 @@ export function AdminRolesPage() {
     const controller = new AbortController();
     setUsersData({ loading: true, error: null, items: [] });
 
-    listarUsuarios({ signal: controller.signal })
-      .then((items) => {
+    listarUsuarios({ pageSize: 1000, signal: controller.signal })
+      .then(({ items }) => {
         setUsersData({ loading: false, error: null, items });
       })
       .catch((error) => {
