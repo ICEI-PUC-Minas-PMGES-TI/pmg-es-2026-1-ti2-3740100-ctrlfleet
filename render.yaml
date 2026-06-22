@@ -15,7 +15,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CTRLFLEET_CORS_ALLOWED_ORIGINS
-        value: https://ctrlfleet-web.onrender.com
+        value: https://ctrlfleet.onrender.com,https://ctrlfleet-web.onrender.com
       - key: SPRING_MAIL_HOST
         value: smtp-relay.brevo.com
       - key: SPRING_MAIL_PORT
@@ -31,7 +31,7 @@ services:
       - key: CTRLFLEET_MAIL_FROM_NAME
         value: CtrlFleet
       - key: CTRLFLEET_MAIL_APP_URL
-        value: https://ctrlfleet-web.onrender.com
+        value: https://ctrlfleet.onrender.com
       - key: SPRING_JPA_SHOW_SQL
         value: false
       - key: TZ
@@ -40,7 +40,7 @@ services:
         value: -Duser.timezone=America/Sao_Paulo
 
   - type: web
-    name: ctrlfleet-web
+    name: ctrlfleet
     runtime: static
     buildCommand: cd src/front && npm ci && npm run build
     staticPublishPath: src/front/dist
