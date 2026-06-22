@@ -79,7 +79,7 @@ Atualmente, a gestão de frotas públicas é feita, em muitos casos, por meio de
 
 ### 3.2. Descrição geral da proposta de solução
 
-A proposta é desenvolver um sistema web para centralizar e automatizar a gestão da frota pública. O sistema permitirá o cadastro de veículos e motoristas, registro de uso, controle de abastecimentos, acompanhamento de manutenções e monitoramento da documentação, além da geração de relatórios e alertas automáticos. Como limitação, o sistema depende do correto preenchimento dos dados pelos usuários e, inicialmente, não terá integração com outros sistemas externos. A solução busca melhorar a organização das informações, reduzir erros e apoiar a tomada de decisão. Entre os principais benefícios estão a redução de custos, maior controle da frota, melhor planejamento de manutenções e mais facilidade em auditorias e prestação de contas.
+A proposta é desenvolver um sistema web para centralizar e automatizar a gestão da frota pública. O sistema permitirá o cadastro de veículos e motoristas, registro de uso, controle de abastecimentos, acompanhamento de manutenções e monitoramento da documentação. O grande diferencial será a geração de alertas automáticos e dashboards com indicadores de desempenho (KPIs) medidos em tempo real. Como limitação, o sistema depende do correto preenchimento dos dados pelos usuários e, inicialmente, não terá integração com outros sistemas externos. A solução busca melhorar a organização das informações, reduzir erros e apoiar a tomada de decisão. Entre os principais benefícios estão a redução de custos, maior controle da frota, melhor planejamento de manutenções e mais facilidade em auditorias e prestação de contas.
 
 ### 3.3. Modelagem dos processos
 
@@ -113,7 +113,7 @@ _A sessão a seguir apresenta a descrição do produto de software desenvolvido.
 
 ## 7. Conclusão
 
-_Apresente aqui a conclusão do seu trabalho. Deve ser apresentada aqui uma discussão dos resultados obtidos no trabalho, local em que se verifica as observações pessoais de cada aluno. Essa seção poderá também apresentar sugestões de novas linhas de estudo._
+O desenvolvimento deste sistema representa um avanço significativo na modernização administrativa de órgãos públicos. Ao substituir fluxos manuais isolados por processos de negócio automatizados, auditáveis e baseados em dados, o sistema não apenas mitiga riscos legais e operacionais, mas também garante o uso eficiente dos recursos financeiros. A integração de interfaces específicas para cada participante do processo — do motorista ao gestor de frotas —, aliada ao monitoramento contínuo por meio de indicadores de desempenho, entrega uma plataforma robusta e escalável. Por fim, o projeto cumpre com êxito seu propósito acadêmico e social, consolidando na prática as metodologias de engenharia de software e a modelagem ágil em prol de uma administração pública mais transparente e responsável.
 
 # REFERÊNCIAS
 
