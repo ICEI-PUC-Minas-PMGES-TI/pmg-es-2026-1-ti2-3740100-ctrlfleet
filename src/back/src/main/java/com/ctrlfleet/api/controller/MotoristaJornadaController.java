@@ -9,6 +9,7 @@ import com.ctrlfleet.api.dto.motorista.MotoristaResumoDTO;
 import com.ctrlfleet.api.dto.motorista.RegistrarChecklistParcialRequestDTO;
 import com.ctrlfleet.api.dto.motorista.ReservaMotoristaResponseDTO;
 import com.ctrlfleet.api.dto.motorista.ViagemHistoricoReservaDTO;
+import com.ctrlfleet.api.dto.common.PageResponseDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
 import com.ctrlfleet.api.dto.veiculo.VeiculoResponseDTO;
 import com.ctrlfleet.api.service.MotoristaFrotaService;
@@ -16,6 +17,9 @@ import com.ctrlfleet.api.service.MotoristaJornadaService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,8 +74,13 @@ public class MotoristaJornadaController {
     }
 
     @GetMapping("/{motoristaId}/historico")
-    public ResponseEntity<List<RegistroUsoResponseDTO>> listarHistorico(@PathVariable Long motoristaId) {
-        return ResponseEntity.ok(motoristaJornadaService.listarHistorico(motoristaId));
+    public ResponseEntity<PageResponseDTO<RegistroUsoResponseDTO>> listarHistorico(
+            @PathVariable Long motoristaId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("dataSaida").descending());
+        return ResponseEntity.ok(
+                PageResponseDTO.from(motoristaJornadaService.listarHistoricoPaginado(motoristaId, pageable)));
     }
 
     @GetMapping("/{motoristaId}/reservas/concluidas")

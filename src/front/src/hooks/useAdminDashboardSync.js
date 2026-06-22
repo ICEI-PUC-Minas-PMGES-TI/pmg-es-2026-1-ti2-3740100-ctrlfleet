@@ -5,6 +5,7 @@ import { mapBackendUserToView } from '../services/usuarioMappers';
 
 const AUTO_SYNC_MS = 60_000;
 const RELATIVE_TICK_MS = 1_000;
+const FETCH_ALL_PAGE_SIZE = 1000;
 
 export function useAdminDashboardSync({ autoSync = true } = {}) {
   const abortRef = useRef(null);
@@ -31,9 +32,9 @@ export function useAdminDashboardSync({ autoSync = true } = {}) {
     }));
 
     try {
-      const [usersRaw, auditRaw] = await Promise.all([
-        listarUsuarios({ signal: controller.signal }),
-        listarAuditoria({ signal: controller.signal }),
+      const [usersPage, auditPage] = await Promise.all([
+        listarUsuarios({ pageSize: FETCH_ALL_PAGE_SIZE, signal: controller.signal }),
+        listarAuditoria({ pageSize: FETCH_ALL_PAGE_SIZE, signal: controller.signal }),
       ]);
 
       if (controller.signal.aborted) return;
@@ -43,8 +44,8 @@ export function useAdminDashboardSync({ autoSync = true } = {}) {
         syncing: false,
         error: null,
         lastSyncedAt: Date.now(),
-        users: usersRaw.map(mapBackendUserToView),
-        audit: auditRaw,
+        users: usersPage.items.map(mapBackendUserToView),
+        audit: auditPage.items,
       });
     } catch (error) {
       if (error.name === 'AbortError') return;

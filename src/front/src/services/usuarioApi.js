@@ -44,22 +44,13 @@ export async function desativarUsuario(id) {
 }
 
 /**
- * Busca todos os usuários cadastrados.
- * @returns {Promise<Array<{
- *   id: number,
- *   nome: string,
- *   email: string,
- *   matricula: string | null,
- *   cargo: string | null,
- *   perfilAcesso: string | null,
- *   tipoConta: string | null,
- *   status: string | null,
- *   dataAdmissao: string | null,
- *   dataDesligamento: string | null,
- * }>>}
+ * Busca uma página de usuários cadastrados.
+ * @param {{ page?: number, pageSize?: number, signal?: AbortSignal }} [options] `page` é 1-indexado.
+ * @returns {Promise<{ items: Array<object>, totalItems: number, page: number, totalPages: number }>}
  */
-export async function listarUsuarios({ signal } = {}) {
-  const res = await apiFetch('/usuarios', {
+export async function listarUsuarios({ page = 1, pageSize = 20, signal } = {}) {
+  const params = new URLSearchParams({ page: String(page - 1), size: String(pageSize) });
+  const res = await apiFetch(`/usuarios?${params}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },
     signal,
@@ -72,7 +63,12 @@ export async function listarUsuarios({ signal } = {}) {
     error.status = res.status;
     throw error;
   }
-  return Array.isArray(data) ? data : [];
+  return {
+    items: Array.isArray(data?.content) ? data.content : [],
+    totalItems: data?.totalElements ?? 0,
+    page: (data?.page ?? 0) + 1,
+    totalPages: data?.totalPages ?? 1,
+  };
 }
 
 async function acaoUsuario(id, path, method = 'PATCH') {

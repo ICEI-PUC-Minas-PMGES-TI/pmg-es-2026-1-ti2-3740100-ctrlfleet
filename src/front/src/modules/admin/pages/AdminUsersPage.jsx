@@ -4,6 +4,7 @@ import { UserTable } from '../../../components/admin/UserTable';
 import { Icon } from '../../../components/common/Icon';
 import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
+import { PagePagination } from '../../../components/common/PagePagination';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { userRoleOptions, userStatusTabs } from '../../../data/adminData';
@@ -85,6 +86,8 @@ const ACTION_CONFIG = {
   },
 };
 
+const USERS_PAGE_SIZE = 20;
+
 function filterByStatus(user, status) {
   return status === 'Todos' || user.status === status;
 }
@@ -100,11 +103,13 @@ export function AdminUsersPage() {
   const [selectedStatus, setSelectedStatus] = useState('Todos');
   const [actionModal, setActionModal] = useState({ key: null, user: null });
   const [feedback, setFeedback] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [usersData, setUsersData] = useState({
     loading: true,
     error: null,
     items: [],
+    totalItems: 0,
   });
   const [actionError, setActionError] = useState('');
 
@@ -112,12 +117,13 @@ export function AdminUsersPage() {
     const controller = new AbortController();
 
     setUsersData((current) => ({ ...current, loading: true, error: null }));
-    listarUsuarios({ signal: controller.signal })
-      .then((items) => {
+    listarUsuarios({ page: currentPage, pageSize: USERS_PAGE_SIZE, signal: controller.signal })
+      .then(({ items, totalItems }) => {
         setUsersData({
           loading: false,
           error: null,
           items: items.map(mapBackendUserToView),
+          totalItems,
         });
       })
       .catch((error) => {
@@ -126,11 +132,12 @@ export function AdminUsersPage() {
           loading: false,
           error: error.message || 'Falha ao carregar usuários.',
           items: [],
+          totalItems: 0,
         });
       });
 
     return () => controller.abort();
-  }, []);
+  }, [currentPage]);
 
   function openActionModal(actionKey, user) {
     setActionError('');
@@ -163,6 +170,10 @@ export function AdminUsersPage() {
       setActionError(message);
     }
   }
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [nameSearch, matriculaSearch, selectedRole, selectedStatus]);
 
   const filteredUsers = useMemo(() => {
     const normalizedName = nameSearch.trim().toLowerCase();
@@ -285,12 +296,19 @@ export function AdminUsersPage() {
           <>
             <div className="table-summary">
               <span>
-                Mostrando {filteredUsers.length} de {usersData.items.length} usuários
+                Mostrando {filteredUsers.length} de {usersData.items.length} usuários nesta página
               </span>
               <span>Permissões, status e dados cadastrais disponíveis em cada linha.</span>
             </div>
 
             <UserTable onUserAction={openActionModal} users={filteredUsers} />
+
+            <PagePagination
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              pageSize={USERS_PAGE_SIZE}
+              totalItems={usersData.totalItems}
+            />
           </>
         )}
       </SectionCard>

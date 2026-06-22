@@ -39,8 +39,8 @@ export function RequesterDashboardPage() {
   const carregarReservas = useCallback(
     (signal) => {
       setReservationsData((current) => ({ ...current, loading: true, error: null }));
-      return listarReservas(null, { signal, idUsuario: solicitanteId })
-        .then((items) => {
+      return listarReservas(null, { signal, idUsuario: solicitanteId, pageSize: 1000 })
+        .then(({ items }) => {
           setReservationsData({
             loading: false,
             error: null,

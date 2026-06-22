@@ -4,6 +4,8 @@ import com.ctrlfleet.api.domain.enums.PapelUsuario;
 import com.ctrlfleet.api.domain.model.Usuario;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     @Query("SELECT DISTINCT u FROM Usuario u LEFT JOIN FETCH u.motorista ORDER BY u.id")
     List<Usuario> findAllWithMotorista();
+
+    @Query(
+            value = "SELECT DISTINCT u FROM Usuario u LEFT JOIN FETCH u.motorista",
+            countQuery = "SELECT COUNT(DISTINCT u) FROM Usuario u")
+    Page<Usuario> findAllWithMotorista(Pageable pageable);
 
     @Query(
             "SELECT u FROM Usuario u LEFT JOIN FETCH u.motorista WHERE u.papel = :papel AND u.status = :status ORDER BY u.nome")

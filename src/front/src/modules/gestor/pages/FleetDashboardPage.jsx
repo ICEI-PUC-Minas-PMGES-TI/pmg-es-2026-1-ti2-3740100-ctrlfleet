@@ -53,8 +53,8 @@ export function FleetDashboardPage() {
     setVehiclesData((current) => ({ ...current, loading: true, error: null }));
     setReservasData((current) => ({ ...current, loading: true, error: null }));
 
-    listarVeiculos({ signal })
-      .then((items) => {
+    listarVeiculos({ pageSize: 1000, signal })
+      .then(({ items }) => {
         setVehiclesData({
           loading: false,
           error: null,
@@ -70,8 +70,8 @@ export function FleetDashboardPage() {
         });
       });
 
-    listarReservas(null, { signal })
-      .then((items) => {
+    listarReservas(null, { pageSize: 1000, signal })
+      .then(({ items }) => {
         setReservasData({
           loading: false,
           error: null,

@@ -58,7 +58,7 @@ export function Sidebar({ isOpen, onClose }) {
 
     async function refreshPendingUsersCount() {
       try {
-        const usuarios = await listarUsuarios();
+        const { items: usuarios } = await listarUsuarios({ pageSize: 1000 });
         if (ignore) return;
         const pendingCount = usuarios.filter((usuario) => usuario.status === 'PENDENTE').length;
         setPendingUsersCount(pendingCount);

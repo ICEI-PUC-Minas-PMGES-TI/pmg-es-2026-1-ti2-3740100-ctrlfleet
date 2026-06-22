@@ -1,16 +1,21 @@
 package com.ctrlfleet.api.controller;
 
+import com.ctrlfleet.api.dto.common.PageResponseDTO;
 import com.ctrlfleet.api.dto.manutencao.ConcluirManutencaoRequestDTO;
 import com.ctrlfleet.api.dto.manutencao.ManutencaoResponseDTO;
 import com.ctrlfleet.api.service.MotoristaManutencaoService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,8 +29,11 @@ public class ManutencaoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ManutencaoResponseDTO>> listar() {
-        return ResponseEntity.ok(manutencaoService.listarManutencoes());
+    public ResponseEntity<PageResponseDTO<ManutencaoResponseDTO>> listar(
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(
+                page, size, Sort.by("dataIdentificacao").descending().and(Sort.by("id").descending()));
+        return ResponseEntity.ok(PageResponseDTO.from(manutencaoService.listarManutencoesPaginado(pageable)));
     }
 
     @GetMapping("/veiculo/{veiculoId}")

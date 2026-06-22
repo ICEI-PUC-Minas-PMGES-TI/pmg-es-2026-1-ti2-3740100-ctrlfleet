@@ -5,12 +5,22 @@ async function request(path, options = {}) {
   return parseApiResponse(res);
 }
 
+/**
+ * @param {{ page?: number, pageSize?: number, idUsuario?: number, signal?: AbortSignal }} [options] `page` é 1-indexado.
+ * @returns {Promise<{ items: Array<object>, totalItems: number, page: number, totalPages: number }>}
+ */
 export async function listarReservas(status, options = {}) {
-  const params = new URLSearchParams();
+  const { page = 1, pageSize = 20, idUsuario, signal } = options;
+  const params = new URLSearchParams({ page: String(page - 1), size: String(pageSize) });
   if (status) params.set('status', status);
-  if (options.idUsuario != null) params.set('idUsuario', String(options.idUsuario));
-  const query = params.toString() ? `?${params}` : '';
-  return request(`/reservas${query}`, { signal: options.signal });
+  if (idUsuario != null) params.set('idUsuario', String(idUsuario));
+  const data = await request(`/reservas?${params}`, { signal });
+  return {
+    items: Array.isArray(data?.content) ? data.content : [],
+    totalItems: data?.totalElements ?? 0,
+    page: (data?.page ?? 0) + 1,
+    totalPages: data?.totalPages ?? 1,
+  };
 }
 
 export async function cancelarReserva(reservaId, payload = {}) {

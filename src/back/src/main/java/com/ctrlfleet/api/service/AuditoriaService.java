@@ -3,8 +3,8 @@ package com.ctrlfleet.api.service;
 import com.ctrlfleet.api.domain.model.AuditoriaEvento;
 import com.ctrlfleet.api.dto.auditoria.AuditoriaEventoResponseDTO;
 import com.ctrlfleet.api.repository.AuditoriaEventoRepository;
-import java.util.List;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +18,8 @@ public class AuditoriaService {
     }
 
     @Transactional(readOnly = true)
-    public List<AuditoriaEventoResponseDTO> listarEventos() {
-        return auditoriaEventoRepository.findAll(Sort.by(Sort.Direction.DESC, "criadoEm")).stream()
-                .map(AuditoriaEventoResponseDTO::fromEntity)
-                .toList();
+    public Page<AuditoriaEventoResponseDTO> listarEventos(Pageable pageable) {
+        return auditoriaEventoRepository.findAll(pageable).map(AuditoriaEventoResponseDTO::fromEntity);
     }
 
     @Transactional

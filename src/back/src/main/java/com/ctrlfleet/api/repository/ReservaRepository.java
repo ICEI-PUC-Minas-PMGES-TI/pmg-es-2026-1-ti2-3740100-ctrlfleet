@@ -5,6 +5,8 @@ import com.ctrlfleet.api.domain.model.Reserva;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,12 +15,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findAllByOrderByDataHoraInicioPrevistaDesc();
 
-    List<Reserva> findByStatusReservaOrderByDataHoraInicioPrevistaDesc(StatusReserva statusReserva);
+    Page<Reserva> findByStatusReserva(StatusReserva statusReserva, Pageable pageable);
 
-    List<Reserva> findByUsuario_IdOrderByDataHoraInicioPrevistaDesc(Long usuarioId);
+    Page<Reserva> findByUsuario_Id(Long usuarioId, Pageable pageable);
 
-    List<Reserva> findByUsuario_IdAndStatusReservaOrderByDataHoraInicioPrevistaDesc(
-            Long usuarioId, StatusReserva statusReserva);
+    Page<Reserva> findByUsuario_IdAndStatusReserva(Long usuarioId, StatusReserva statusReserva, Pageable pageable);
 
     @Query("""
             select r

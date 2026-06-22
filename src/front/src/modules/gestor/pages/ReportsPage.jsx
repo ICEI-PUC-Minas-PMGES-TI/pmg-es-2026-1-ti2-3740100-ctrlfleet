@@ -66,19 +66,19 @@ export function ReportsPage() {
     const controller = new AbortController();
 
     Promise.all([
-      listarVeiculos({ signal: controller.signal }),
-      listarReservas(null, { signal: controller.signal }),
+      listarVeiculos({ pageSize: 1000, signal: controller.signal }),
+      listarReservas(null, { pageSize: 1000, signal: controller.signal }),
       listarPainelManutencaoGestor({ signal: controller.signal }),
-      listarAuditoria({ signal: controller.signal }),
+      listarAuditoria({ pageSize: 1000, signal: controller.signal }),
     ])
-      .then(([veiculos, reservas, painelManutencao, auditoria]) => {
+      .then(([veiculosPage, reservasPage, painelManutencao, auditoriaPage]) => {
         setState({
           loading: false,
           error: null,
-          veiculos: veiculos || [],
-          reservas: reservas || [],
+          veiculos: veiculosPage.items || [],
+          reservas: reservasPage.items || [],
           manutencoes: flattenMaintenancePanel(painelManutencao),
-          auditoria: auditoria || [],
+          auditoria: auditoriaPage.items || [],
         });
       })
       .catch((error) => {

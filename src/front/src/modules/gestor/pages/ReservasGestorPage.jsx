@@ -3,6 +3,7 @@ import { ActionButton } from '../../../components/common/ActionButton';
 import { Icon } from '../../../components/common/Icon';
 import { Modal } from '../../../components/common/Modal';
 import { PageHeader } from '../../../components/common/PageHeader';
+import { PagePagination } from '../../../components/common/PagePagination';
 import { SectionCard } from '../../../components/common/SectionCard';
 import { StatCard } from '../../../components/common/StatCard';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
@@ -18,6 +19,7 @@ import {
 } from '../../../utils/reservaFilters';
 
 const STATUS_TABS = ['Todas', 'Solicitada', 'Aprovada', 'Em uso', 'Concluída', 'Reprovada', 'Cancelada'];
+const RESERVAS_PAGE_SIZE = 20;
 
 function formatDateTime(value) {
   if (!value) return '-';
@@ -31,10 +33,11 @@ function formatDateTime(value) {
 }
 
 export function ReservasGestorPage() {
-  const [state, setState] = useState({ loading: true, error: null, items: [] });
+  const [state, setState] = useState({ loading: true, error: null, items: [], totalItems: 0 });
   const [registrosPorReserva, setRegistrosPorReserva] = useState({});
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Todas');
+  const [currentPage, setCurrentPage] = useState(1);
   const [decisionModal, setDecisionModal] = useState({
     action: null,
     motivo: '',
@@ -43,25 +46,31 @@ export function ReservasGestorPage() {
     submitting: false,
   });
 
-  const carregarReservas = useCallback((signal) => {
-    setState((current) => ({ ...current, loading: true, error: null }));
-    return listarReservas(null, { signal })
-      .then((items) => setState({ loading: false, error: null, items: items || [] }))
-      .catch((error) => {
-        if (error.name === 'AbortError') return;
-        setState({ loading: false, error: error.message || 'Falha ao carregar reservas.', items: [] });
-      });
-  }, []);
+  const carregarReservas = useCallback(
+    (signal) => {
+      setState((current) => ({ ...current, loading: true, error: null }));
+      return listarReservas(null, { page: currentPage, pageSize: RESERVAS_PAGE_SIZE, signal })
+        .then(({ items, totalItems }) => setState({ loading: false, error: null, items: items || [], totalItems }))
+        .catch((error) => {
+          if (error.name === 'AbortError') return;
+          setState({ loading: false, error: error.message || 'Falha ao carregar reservas.', items: [], totalItems: 0 });
+        });
+    },
+    [currentPage],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
-    setSearch('');
-    setSelectedStatus('Todas');
     Promise.resolve().then(() => {
       if (!controller.signal.aborted) carregarReservas(controller.signal);
     });
     return () => controller.abort();
   }, [carregarReservas]);
+
+  useEffect(() => {
+    setSearch('');
+    setSelectedStatus('Todas');
+  }, []);
 
   const statusTabOptions = useMemo(
     () => buildReservaStatusTabs(state.items, STATUS_TABS),
@@ -80,6 +89,10 @@ export function ReservasGestorPage() {
   useEffect(() => {
     setSelectedStatus((current) => (current === activeFilters.status ? current : activeFilters.status));
   }, [activeFilters.status]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeFilters.status]);
 
   const filteredReservas = useMemo(
     () =>
@@ -285,6 +298,13 @@ export function ReservasGestorPage() {
               onReject={(reserva) => openDecisionModal(reserva, 'reprovar')}
               registrosPorReserva={registrosPorReserva}
               reservas={filteredReservas}
+            />
+
+            <PagePagination
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              pageSize={RESERVAS_PAGE_SIZE}
+              totalItems={state.totalItems}
             />
           </>
         )}

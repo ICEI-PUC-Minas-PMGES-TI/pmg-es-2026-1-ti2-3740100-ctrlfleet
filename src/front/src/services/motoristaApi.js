@@ -131,10 +131,20 @@ export async function registrarChecklistSaida(reservaId, payload) {
   return registrarChecklistParcialSaida(reservaId, payload.tipoId, payload);
 }
 
+/**
+ * @param {{ page?: number, pageSize?: number, signal?: AbortSignal }} [options] `page` é 1-indexado.
+ * @returns {Promise<{ items: Array<object>, totalItems: number, page: number, totalPages: number }>}
+ */
 export async function listarHistoricoMotorista(motoristaId, options = {}) {
-  return request(`/motoristas/${motoristaId}/historico`, {
-    signal: options.signal,
-  });
+  const { page = 1, pageSize = 20, signal } = options;
+  const params = new URLSearchParams({ page: String(page - 1), size: String(pageSize) });
+  const data = await request(`/motoristas/${motoristaId}/historico?${params}`, { signal });
+  return {
+    items: Array.isArray(data?.content) ? data.content : [],
+    totalItems: data?.totalElements ?? 0,
+    page: (data?.page ?? 0) + 1,
+    totalPages: data?.totalPages ?? 1,
+  };
 }
 
 /** @deprecated Use buscarChecklistPorTipo */

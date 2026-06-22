@@ -16,6 +16,8 @@ import com.ctrlfleet.api.repository.VeiculoRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,29 +47,18 @@ public class ReservaService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservaResponseDTO> listar(String status, Long idUsuario) {
+    public Page<ReservaResponseDTO> listarPaginado(String status, Long idUsuario, Pageable pageable) {
+        Page<Reserva> reservas;
         if (idUsuario != null) {
-            if (status == null || status.isBlank()) {
-                return reservaRepository.findByUsuario_IdOrderByDataHoraInicioPrevistaDesc(idUsuario).stream()
-                        .map(ReservaResponseDTO::fromEntity)
-                        .toList();
-            }
-            StatusReserva statusReserva = parseStatus(status);
-            return reservaRepository
-                    .findByUsuario_IdAndStatusReservaOrderByDataHoraInicioPrevistaDesc(idUsuario, statusReserva)
-                    .stream()
-                    .map(ReservaResponseDTO::fromEntity)
-                    .toList();
+            reservas = status == null || status.isBlank()
+                    ? reservaRepository.findByUsuario_Id(idUsuario, pageable)
+                    : reservaRepository.findByUsuario_IdAndStatusReserva(idUsuario, parseStatus(status), pageable);
+        } else {
+            reservas = status == null || status.isBlank()
+                    ? reservaRepository.findAll(pageable)
+                    : reservaRepository.findByStatusReserva(parseStatus(status), pageable);
         }
-        if (status == null || status.isBlank()) {
-            return reservaRepository.findAllByOrderByDataHoraInicioPrevistaDesc().stream()
-                    .map(ReservaResponseDTO::fromEntity)
-                    .toList();
-        }
-        StatusReserva statusReserva = parseStatus(status);
-        return reservaRepository.findByStatusReservaOrderByDataHoraInicioPrevistaDesc(statusReserva).stream()
-                .map(ReservaResponseDTO::fromEntity)
-                .toList();
+        return reservas.map(ReservaResponseDTO::fromEntity);
     }
 
     @Transactional

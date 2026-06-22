@@ -31,8 +31,8 @@ export function FinalizarUsoForm({ veiculoId, onFinalizado }) {
     if (!canManageUsuarios) return undefined;
 
     const controller = new AbortController();
-    listarUsuarios({ signal: controller.signal })
-      .then(setUsuarios)
+    listarUsuarios({ pageSize: 1000, signal: controller.signal })
+      .then(({ items }) => setUsuarios(items))
       .catch((error) => {
         if (error.name !== 'AbortError') {
           if (error.status === 403 || /403|forbidden/i.test(error.message || '')) {

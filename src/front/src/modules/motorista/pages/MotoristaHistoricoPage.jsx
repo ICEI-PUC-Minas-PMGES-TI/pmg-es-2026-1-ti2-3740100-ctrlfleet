@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FleetFilters } from '../../../components/gestor/FleetFilters';
 import { Icon } from '../../../components/common/Icon';
 import { PageHeader } from '../../../components/common/PageHeader';
+import { PagePagination } from '../../../components/common/PagePagination';
 import { StatCard } from '../../../components/common/StatCard';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { getCurrentMotoristaId } from '../../../services/currentMotorista';
@@ -101,9 +102,12 @@ function RegistroCard({ concluida, motoristaId, percorrida, registro, viagemNumb
   );
 }
 
+const HISTORICO_PAGE_SIZE = 20;
+
 export function MotoristaHistoricoPage() {
   const motoristaId = getCurrentMotoristaId();
-  const [state, setState] = useState({ loading: true, error: null, items: [] });
+  const [state, setState] = useState({ loading: true, error: null, items: [], totalItems: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState(() =>
     readStoredSortOrder(MOTORISTA_REGISTRO_VIEW_KEY, REGISTRO_VIEW_FILTERS, 'registros'),
   );
@@ -128,20 +132,25 @@ export function MotoristaHistoricoPage() {
       if (controller.signal.aborted) return;
       setState((current) => ({ ...current, loading: true, error: null }));
 
-      listarHistoricoMotorista(motoristaId, { signal: controller.signal })
-        .then((items) => setState({ loading: false, error: null, items: items || [] }))
+      listarHistoricoMotorista(motoristaId, {
+        page: currentPage,
+        pageSize: HISTORICO_PAGE_SIZE,
+        signal: controller.signal,
+      })
+        .then(({ items, totalItems }) => setState({ loading: false, error: null, items: items || [], totalItems }))
         .catch((error) => {
           if (error.name === 'AbortError') return;
           setState({
             loading: false,
             error: error.message || 'Não foi possível carregar o histórico.',
             items: [],
+            totalItems: 0,
           });
         });
     });
 
     return () => controller.abort();
-  }, [motoristaId]);
+  }, [motoristaId, currentPage]);
 
   const viagemNumbers = useMemo(
     () => buildMotoristaViagemNumbers(state.items),
@@ -315,6 +324,13 @@ export function MotoristaHistoricoPage() {
           ))}
         </div>
       )}
+
+      <PagePagination
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        pageSize={HISTORICO_PAGE_SIZE}
+        totalItems={state.totalItems}
+      />
     </div>
   );
 }
