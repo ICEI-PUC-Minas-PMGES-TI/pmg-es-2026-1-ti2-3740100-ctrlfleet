@@ -42,12 +42,4 @@ Parte desses valores já é acompanhada de forma operacional no dashboard do ges
 
 ---
 
-### Indicador transversal — Monitoramento de alertas
-
-| **Indicador** | **Objetivos** | **Descrição** | **Fonte de dados** | **Fórmula de cálculo** |
-| --- | --- | --- | --- | --- |
-| Taxa de resolução de alertas operacionais | Reduzir pendências críticas de documentação, manutenção e frota. **Meta: ≥ 90% em até 7 dias.** | Mede o percentual de alertas marcados como lidos (`lido = true`) em relação ao total de alertas gerados no período, considerando `data_geracao`. Complementa o painel de alertas do gestor. | Tabela `alertas` (`lido`, `data_geracao`, `prioridade`, `id_veiculo`) | `(nº de alertas com lido = true no período / nº total de alertas gerados no período) × 100` |
-
----
-
 _Obs.: todas as informações para gerar os indicadores estão contempladas no modelo relacional do CtrlFleet. As metas sugeridas podem ser revisadas periodicamente pelo gestor de frota conforme o tamanho e o perfil de uso da frota._
