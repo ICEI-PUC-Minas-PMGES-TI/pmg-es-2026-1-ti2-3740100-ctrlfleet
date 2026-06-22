@@ -40,7 +40,7 @@ services:
         value: -Duser.timezone=America/Sao_Paulo
 
   - type: web
-    name: ctrlfleet-web
+    name: ctrlfleet
     runtime: static
     buildCommand: cd src/front && npm ci && npm run build
     staticPublishPath: src/front/dist
