@@ -111,6 +111,25 @@ export function getHomePathForSession(session) {
   }
 }
 
+export function getProfilePathForSession(session = getAuthSession()) {
+  if (!session?.role) return '/login';
+
+  switch (session.role) {
+    case 'ROLE_ADMINISTRADOR':
+      return '/admin/perfil';
+    case 'ROLE_GESTOR_FROTA':
+      return '/gestor/perfil';
+    case 'ROLE_MOTORISTA': {
+      const motoristaId = getMotoristaIdFromSession(session);
+      return motoristaId ? `/motorista/${motoristaId}/perfil` : '/login';
+    }
+    case 'ROLE_SOLICITANTE':
+      return '/solicitante/perfil';
+    default:
+      return '/login';
+  }
+}
+
 export function getAreaForRole(role) {
   switch (role) {
     case 'ROLE_ADMINISTRADOR':

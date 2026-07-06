@@ -5,11 +5,13 @@ export const fleetNavigationItems = [
   { icon: 'maintenance', label: 'Manutenção', to: '/gestor/manutencao' },
   { icon: 'preventive', label: 'Prog. Preventiva', to: '/gestor/programacao-preventiva' },
   { icon: 'reports', label: 'Relatórios', to: '/gestor/relatorios' },
+  { icon: 'users', label: 'Meu perfil', to: '/gestor/perfil' },
 ];
 
 export const requesterNavigationItems = [
   { icon: 'dashboard', label: 'Dashboard', to: '/solicitante/dashboard' },
   { icon: 'reservations', label: 'Minhas reservas', to: '/solicitante/reservas' },
+  { icon: 'users', label: 'Meu perfil', to: '/solicitante/perfil' },
 ];
 
 export const dashboardStats = [
@@ -157,6 +159,7 @@ export const driverNavigationItems = [
   { icon: 'fleet', label: 'Meus veículos', to: '/motorista/:motoristaId/veiculos' },
   { icon: 'maintenance', label: 'Manutenções', to: '/motorista/:motoristaId/manutencao' },
   { icon: 'reports', label: 'Historico', to: '/motorista/:motoristaId/historico' },
+  { icon: 'users', label: 'Meu perfil', to: '/motorista/:motoristaId/perfil' },
 ];
 
 export const vehicleFormOptions = {

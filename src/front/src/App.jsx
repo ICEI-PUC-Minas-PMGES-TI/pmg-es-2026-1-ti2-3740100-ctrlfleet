@@ -38,6 +38,7 @@ import { LoginPage } from './modules/public/pages/LoginPage';
 import { RequesterDashboardPage } from './modules/solicitante/pages/RequesterDashboardPage';
 import { RequesterReservationCreatePage } from './modules/solicitante/pages/RequesterReservationCreatePage';
 import { RequesterReservationsPage } from './modules/solicitante/pages/RequesterReservationsPage';
+import { ProfilePage } from './modules/common/pages/ProfilePage';
 import { getMotoristaHomePathFromSession } from './services/authSession';
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
               <Route path="manutencao" element={<ManutencaoGestorPage />} />
               <Route path="programacao-preventiva" element={<ProgramacaoPreventivaGestorPage />} />
               <Route path="relatorios" element={<ReportsPage />} />
+              <Route path="perfil" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -77,6 +79,7 @@ function App() {
               <Route path="perfis" element={<AdminRolesPage />} />
               <Route path="auditoria" element={<AdminAuditPage />} />
               <Route path="indicadores" element={<AdminIndicadoresPage />} />
+              <Route path="perfil" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -87,6 +90,7 @@ function App() {
               <Route path=":motoristaId/veiculos" element={<MotoristaVeiculosPage />} />
               <Route path=":motoristaId/veiculos/:vehicleId" element={<MotoristaVeiculoDetalhePage />} />
               <Route path=":motoristaId/historico" element={<MotoristaHistoricoPage />} />
+              <Route path=":motoristaId/perfil" element={<ProfilePage />} />
               <Route path=":motoristaId/manutencao" element={<MotoristaManutencaoPage />} />
               <Route path=":motoristaId/manutencao/solicitar" element={<MotoristaSolicitarManutencaoPage />} />
               <Route path=":motoristaId/reservas/:reservaId" element={<MotoristaReservaDetalhePage />} />
@@ -122,6 +126,7 @@ function App() {
               <Route path="dashboard" element={<RequesterDashboardPage />} />
               <Route path="reservas" element={<RequesterReservationsPage />} />
               <Route path="reservas/nova" element={<RequesterReservationCreatePage />} />
+              <Route path="perfil" element={<ProfilePage />} />
             </Route>
           </Route>
 

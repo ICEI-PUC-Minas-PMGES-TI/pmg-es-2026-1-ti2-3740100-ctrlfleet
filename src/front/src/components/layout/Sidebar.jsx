@@ -8,13 +8,14 @@ import {
   getAreaLabel,
   getAuthSession,
   getMotoristaIdFromSession,
+  getProfilePathForSession,
   getUserInitials,
 } from '../../services/authSession';
 import { listarUsuarios } from '../../services/usuarioApi';
 
 export function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
-  const session = getAuthSession();
+  const [session, setSession] = useState(() => getAuthSession());
   const isAdminArea = location.pathname.startsWith('/admin');
   const isDriverArea = location.pathname.startsWith('/motorista');
   const isRequesterArea = location.pathname.startsWith('/solicitante');
@@ -48,6 +49,16 @@ export function Sidebar({ isOpen, onClose }) {
   const displayName = session?.nome ?? 'Usuário';
   const displayRole = session?.perfilAcesso ?? navigationLabel;
   const initials = getUserInitials(session?.nome);
+  const profilePath = getProfilePathForSession(session);
+
+  useEffect(() => {
+    function refreshSession() {
+      setSession(getAuthSession());
+    }
+
+    window.addEventListener('ctrlfleet:session-updated', refreshSession);
+    return () => window.removeEventListener('ctrlfleet:session-updated', refreshSession);
+  }, []);
 
   useEffect(() => {
     if (!isAdminArea) {
@@ -112,7 +123,7 @@ export function Sidebar({ isOpen, onClose }) {
       </nav>
 
       <div className="sidebar__footer">
-        <div className="sidebar__profile">
+        <Link className="sidebar__profile" onClick={onClose} to={profilePath}>
           <span className="sidebar__avatar">
             <span className="avatar-initials">{initials}</span>
           </span>
@@ -120,7 +131,7 @@ export function Sidebar({ isOpen, onClose }) {
             <strong>{displayName}</strong>
             <span>{displayRole}</span>
           </div>
-        </div>
+        </Link>
         <Link className="sidebar__logout" to="/login" onClick={clearAuthSession}>
           <Icon name="logout" />
           <span>Sair</span>
