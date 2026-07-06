@@ -3,7 +3,7 @@ import { Icon } from '../common/Icon';
 /**
  * @param {{
  *   tipo: { idTipoInspecao?: number, nome: string, descricao?: string | null },
- *   items: Array<{ id: number, nome: string, critico?: boolean }>,
+ *   items: Array<{ id: number, nome: string, critico?: boolean, obrigatorio?: boolean }>,
  *   checkedItems: Set<number>,
  *   onToggle: (itemId: number) => void,
  *   observacoes: Record<number, string>,
@@ -44,7 +44,7 @@ export function MotoristaChecklistTipoPanel({
       <p className="driver-checklist-tipo__hint">
         <Icon name="alert" />
         <span>
-          Marque cada item do checklist. A documentação do veículo é controlada automaticamente pelo sistema.
+          Marque os itens obrigatórios. Itens opcionais só precisam ser marcados quando se aplicarem ao veículo.
           Informe observações quando necessário.
         </span>
       </p>
@@ -60,11 +60,18 @@ export function MotoristaChecklistTipoPanel({
               />
               <span>{item.nome}</span>
               {item.critico ? <span className="driver-critical-badge">Crítico</span> : null}
+              {item.obrigatorio === false ? <span className="driver-optional-badge">Opcional</span> : null}
             </label>
             <input
               aria-label={`Observação de ${item.nome}`}
               onChange={(event) => onObservacaoChange(item.id, event.target.value)}
-              placeholder={item.critico ? 'Ocorrência crítica bloqueia a saída' : 'Observação opcional'}
+              placeholder={
+                item.critico
+                  ? 'Ocorrência crítica bloqueia a saída'
+                  : item.obrigatorio === false
+                    ? 'Descreva se houver avaria ou item deixado no veículo'
+                    : 'Observação opcional'
+              }
               type="text"
               value={observacoes[item.id] || ''}
             />

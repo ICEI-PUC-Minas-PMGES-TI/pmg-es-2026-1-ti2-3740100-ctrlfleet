@@ -4,11 +4,13 @@ public class ChecklistItemResponseDTO {
     private Long id;
     private String nome;
     private boolean critico;
+    private boolean obrigatorio;
 
-    public ChecklistItemResponseDTO(Long id, String nome, boolean critico) {
+    public ChecklistItemResponseDTO(Long id, String nome, boolean critico, boolean obrigatorio) {
         this.id = id;
         this.nome = nome;
         this.critico = critico;
+        this.obrigatorio = obrigatorio;
     }
 
     public Long getId() {
@@ -21,5 +23,9 @@ public class ChecklistItemResponseDTO {
 
     public boolean isCritico() {
         return critico;
+    }
+
+    public boolean isObrigatorio() {
+        return obrigatorio;
     }
 }

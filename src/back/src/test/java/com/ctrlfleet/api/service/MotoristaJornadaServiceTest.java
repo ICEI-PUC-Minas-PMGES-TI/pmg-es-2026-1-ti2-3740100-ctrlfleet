@@ -22,6 +22,7 @@ import com.ctrlfleet.api.dto.motorista.FinalizarTrajetoRequestDTO;
 import com.ctrlfleet.api.dto.motorista.IniciarCorridaRequestDTO;
 import com.ctrlfleet.api.dto.motorista.RegistrarChecklistParcialRequestDTO;
 import com.ctrlfleet.api.repository.CarroChecklistRepository;
+import com.ctrlfleet.api.repository.RegistroChecklistTipoRepository;
 import com.ctrlfleet.api.repository.ItemChecklistRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.ReservaRepository;
@@ -43,6 +44,7 @@ class MotoristaJornadaServiceTest {
     private ItemChecklistRepository itemChecklistRepository;
     private TipoInspecaoRepository tipoInspecaoRepository;
     private CarroChecklistRepository carroChecklistRepository;
+    private RegistroChecklistTipoRepository registroChecklistTipoRepository;
     private AuditoriaService auditoriaService;
     private MotoristaJornadaService service;
 
@@ -54,6 +56,7 @@ class MotoristaJornadaServiceTest {
         itemChecklistRepository = mock(ItemChecklistRepository.class);
         tipoInspecaoRepository = mock(TipoInspecaoRepository.class);
         carroChecklistRepository = mock(CarroChecklistRepository.class);
+        registroChecklistTipoRepository = mock(RegistroChecklistTipoRepository.class);
         auditoriaService = mock(AuditoriaService.class);
 
         when(tipoInspecaoRepository.findByFaseOrderByIdAsc("SAIDA"))
@@ -68,6 +71,7 @@ class MotoristaJornadaServiceTest {
                 itemChecklistRepository,
                 tipoInspecaoRepository,
                 carroChecklistRepository,
+                registroChecklistTipoRepository,
                 auditoriaService);
     }
 
@@ -89,9 +93,6 @@ class MotoristaJornadaServiceTest {
             registro.setId(44L);
             return registro;
         });
-        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(44L, 4L)).thenReturn(2L);
-        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(44L, 5L)).thenReturn(0L);
-
         var response = service.registrarChecklistParcialSaida(10L, 4L, dto);
 
         assertThat(response.getId()).isEqualTo(44L);
@@ -112,8 +113,8 @@ class MotoristaJornadaServiceTest {
                 .thenReturn(List.of(item(1L, "Limpeza interna")));
         when(itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(5L))
                 .thenReturn(List.of(item(2L, "Pneus")));
-        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(99L, 4L)).thenReturn(1L);
-        when(carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(99L, 5L)).thenReturn(0L);
+        when(carroChecklistRepository.existsByRegistroUsoIdAndItemId(99L, 1L)).thenReturn(true);
+        when(carroChecklistRepository.existsByRegistroUsoIdAndItemId(99L, 2L)).thenReturn(false);
 
         IniciarCorridaRequestDTO dto = new IniciarCorridaRequestDTO();
         dto.setIdMotorista(5L);
@@ -129,6 +130,9 @@ class MotoristaJornadaServiceTest {
         when(registroUsoRepository.buscarUltimaQuilometragemVeiculo(reserva.getVeiculo().getId()))
                 .thenReturn(Optional.of(12000.0));
         when(carroChecklistRepository.existsByRegistroUsoIdAndItemId(any(), any())).thenReturn(false);
+        when(registroChecklistTipoRepository.existsByRegistroUsoIdAndTipoInspecaoId(any(), any()))
+                .thenReturn(false);
+        when(registroChecklistTipoRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private RegistrarChecklistParcialRequestDTO parcialRequest(
@@ -170,6 +174,7 @@ class MotoristaJornadaServiceTest {
         ItemChecklist item = new ItemChecklist();
         ReflectionTestUtils.setField(item, "id", id);
         ReflectionTestUtils.setField(item, "nome", nome);
+        item.setObrigatorio(true);
         return item;
     }
 

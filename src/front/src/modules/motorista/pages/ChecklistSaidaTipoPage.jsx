@@ -38,9 +38,13 @@ export function ChecklistSaidaTipoPage() {
   }, [tipoId]);
 
   const items = useMemo(() => checklistData.tipo?.itens || [], [checklistData.tipo]);
-  const allChecked = useMemo(
-    () => items.length > 0 && items.every((item) => checkedItems.has(item.id)),
-    [checkedItems, items],
+  const requiredItems = useMemo(
+    () => items.filter((item) => item.obrigatorio !== false),
+    [items],
+  );
+  const allRequiredChecked = useMemo(
+    () => requiredItems.length > 0 && requiredItems.every((item) => checkedItems.has(item.id)),
+    [checkedItems, requiredItems],
   );
   const criticalObservationItems = useMemo(
     () =>
@@ -49,7 +53,7 @@ export function ChecklistSaidaTipoPage() {
       ),
     [items, observacoes],
   );
-  const canSubmit = allChecked && criticalObservationItems.length === 0 && !submitState.loading;
+  const canSubmit = allRequiredChecked && criticalObservationItems.length === 0 && !submitState.loading;
 
   function toggleItem(itemId) {
     setCheckedItems((current) => {

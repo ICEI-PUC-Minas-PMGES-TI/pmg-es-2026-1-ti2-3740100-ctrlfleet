@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 public interface CarroChecklistRepository extends JpaRepository<CarroChecklist, Long> {
     boolean existsByRegistroUsoIdAndItemId(Long registroUsoId, Long itemId);
 
+    void deleteByRegistroUsoIdAndItemId(Long registroUsoId, Long itemId);
+
     long countByRegistroUsoId(Long registroUsoId);
 
     @Query(

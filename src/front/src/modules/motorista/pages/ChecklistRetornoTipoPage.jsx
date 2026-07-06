@@ -33,11 +33,15 @@ export function ChecklistRetornoTipoPage() {
   }, [tipoId]);
 
   const items = useMemo(() => checklistData.tipo?.itens || [], [checklistData.tipo]);
-  const allChecked = useMemo(
-    () => items.length > 0 && items.every((item) => checkedItems.has(item.id)),
-    [checkedItems, items],
+  const requiredItems = useMemo(
+    () => items.filter((item) => item.obrigatorio !== false),
+    [items],
   );
-  const canSubmit = allChecked && !submitState.loading;
+  const canSubmit = useMemo(() => {
+    if (items.length === 0 || submitState.loading) return false;
+    if (requiredItems.length === 0) return true;
+    return requiredItems.every((item) => checkedItems.has(item.id));
+  }, [checkedItems, items.length, requiredItems, submitState.loading]);
   const corridaPath = `/motorista/${motoristaId}/reservas/${reservaId}/corrida`;
 
   if (!tripSummary) {

@@ -374,27 +374,38 @@ UPDATE tipo_inspecao SET fase = 'MENSAL' WHERE id_tipo_inspecao = 3;
 DELETE FROM carro_checklist WHERE id_item IN (SELECT id_item FROM item_checklist WHERE id_tipo_inspecao IN (1, 2));
 DELETE FROM item_checklist WHERE id_tipo_inspecao IN (1, 2);
 
-INSERT INTO item_checklist (id_item, id_tipo_inspecao, nome) VALUES
-(1,  4, 'Limpeza interna'),
-(2,  4, 'Limpeza externa'),
-(3,  4, 'Vidros e espelhos limpos'),
-(4,  5, 'Pneus calibrados'),
-(5,  5, 'Freios e pedal conferidos'),
-(6,  5, 'Triângulo, macaco e chave de roda'),
-(7,  6, 'Faróis, lanternas e setas'),
-(8,  6, 'Luz de freio e ré'),
-(9,  7, 'Nível de combustível adequado'),
-(10, 8, 'Avarias visíveis'),
-(11, 8, 'Itens pessoais retirados'),
-(12, 9, 'Combustível remanescente registrado'),
-(13, 9, 'Veículo entregue em condições de uso'),
-(14, 3, 'Óleo do motor'),
-(15, 3, 'Sistema de freios'),
-(16, 3, 'Iluminação e setas'),
-(17, 3, 'Bateria e sistema elétrico')
+ALTER TABLE item_checklist ADD COLUMN IF NOT EXISTS obrigatorio boolean NOT NULL DEFAULT true;
+
+INSERT INTO item_checklist (id_item, id_tipo_inspecao, nome, obrigatorio) VALUES
+(1,  4, 'Limpeza interna', true),
+(2,  4, 'Limpeza externa', true),
+(3,  4, 'Vidros e espelhos limpos', true),
+(4,  5, 'Pneus calibrados', true),
+(5,  5, 'Freios e pedal conferidos', true),
+(6,  5, 'Triângulo, macaco e chave de roda', true),
+(7,  6, 'Faróis, lanternas e setas', true),
+(8,  6, 'Luz de freio e ré', true),
+(9,  7, 'Nível de combustível adequado', true),
+(10, 8, 'Avarias visíveis', false),
+(11, 8, 'Itens pessoais retirados', false),
+(12, 9, 'Combustível remanescente registrado', true),
+(13, 9, 'Veículo entregue em condições de uso', true),
+(14, 3, 'Óleo do motor', true),
+(15, 3, 'Sistema de freios', true),
+(16, 3, 'Iluminação e setas', true),
+(17, 3, 'Bateria e sistema elétrico', true)
 ON CONFLICT (id_item) DO UPDATE SET
   id_tipo_inspecao = EXCLUDED.id_tipo_inspecao,
-  nome = EXCLUDED.nome;
+  nome = EXCLUDED.nome,
+  obrigatorio = EXCLUDED.obrigatorio;
+
+CREATE TABLE IF NOT EXISTS registro_checklist_tipo (
+  id_registro_tipo bigserial PRIMARY KEY,
+  id_uso bigint NOT NULL REFERENCES registros_uso(id_uso),
+  id_tipo_inspecao bigint NOT NULL REFERENCES tipo_inspecao(id_tipo_inspecao),
+  concluido_em timestamp NOT NULL,
+  UNIQUE (id_uso, id_tipo_inspecao)
+);
 
 DELETE FROM item_checklist WHERE nome ILIKE '%documenta%';
 

@@ -26,6 +26,9 @@ public class ItemChecklist {
     @Column(nullable = false)
     private String nome;
 
+    @Column(nullable = false)
+    private boolean obrigatorio = true;
+
     public Long getId() {
         return id;
     }
@@ -36,5 +39,13 @@ public class ItemChecklist {
 
     public String getNome() {
         return nome;
+    }
+
+    public boolean isObrigatorio() {
+        return obrigatorio;
+    }
+
+    public void setObrigatorio(boolean obrigatorio) {
+        this.obrigatorio = obrigatorio;
     }
 }

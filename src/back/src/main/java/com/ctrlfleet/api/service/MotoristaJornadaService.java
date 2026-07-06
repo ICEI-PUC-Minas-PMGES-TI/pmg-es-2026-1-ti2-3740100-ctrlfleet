@@ -4,6 +4,7 @@ import com.ctrlfleet.api.domain.enums.StatusReserva;
 import com.ctrlfleet.api.domain.enums.StatusVeiculo;
 import com.ctrlfleet.api.domain.model.CarroChecklist;
 import com.ctrlfleet.api.domain.model.ItemChecklist;
+import com.ctrlfleet.api.domain.model.RegistroChecklistTipo;
 import com.ctrlfleet.api.domain.model.RegistroUso;
 import com.ctrlfleet.api.domain.model.Reserva;
 import com.ctrlfleet.api.domain.model.TipoInspecao;
@@ -22,6 +23,7 @@ import com.ctrlfleet.api.dto.motorista.ReservaMotoristaResponseDTO;
 import com.ctrlfleet.api.dto.registrouso.RegistroUsoResponseDTO;
 import com.ctrlfleet.api.repository.CarroChecklistRepository;
 import com.ctrlfleet.api.repository.ItemChecklistRepository;
+import com.ctrlfleet.api.repository.RegistroChecklistTipoRepository;
 import com.ctrlfleet.api.repository.RegistroUsoRepository;
 import com.ctrlfleet.api.repository.ReservaRepository;
 import com.ctrlfleet.api.repository.TipoInspecaoRepository;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -52,6 +55,7 @@ public class MotoristaJornadaService {
     private final ItemChecklistRepository itemChecklistRepository;
     private final TipoInspecaoRepository tipoInspecaoRepository;
     private final CarroChecklistRepository carroChecklistRepository;
+    private final RegistroChecklistTipoRepository registroChecklistTipoRepository;
     private final AuditoriaService auditoriaService;
 
     public MotoristaJornadaService(
@@ -61,6 +65,7 @@ public class MotoristaJornadaService {
             ItemChecklistRepository itemChecklistRepository,
             TipoInspecaoRepository tipoInspecaoRepository,
             CarroChecklistRepository carroChecklistRepository,
+            RegistroChecklistTipoRepository registroChecklistTipoRepository,
             AuditoriaService auditoriaService) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
@@ -68,6 +73,7 @@ public class MotoristaJornadaService {
         this.itemChecklistRepository = itemChecklistRepository;
         this.tipoInspecaoRepository = tipoInspecaoRepository;
         this.carroChecklistRepository = carroChecklistRepository;
+        this.registroChecklistTipoRepository = registroChecklistTipoRepository;
         this.auditoriaService = auditoriaService;
     }
 
@@ -180,7 +186,8 @@ public class MotoristaJornadaService {
 
         List<ChecklistItemResponseDTO> itens = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId)
                 .stream()
-                .map(item -> new ChecklistItemResponseDTO(item.getId(), item.getNome(), isItemCritico(item)))
+                .map(item -> new ChecklistItemResponseDTO(
+                        item.getId(), item.getNome(), isItemCritico(item), item.isObrigatorio()))
                 .toList();
 
         return new ChecklistTipoResponseDTO(tipo.getId(), tipo.getNome(), tipo.getDescricao(), itens);
@@ -211,9 +218,9 @@ public class MotoristaJornadaService {
         }
 
         List<ItemChecklist> itensDoTipo = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
-        validarChecklistObrigatorio(dto.getItensChecklist(), itensDoTipo);
+        validarItensChecklist(dto.getItensChecklist(), itensDoTipo);
         validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensDoTipo);
-        salvarChecklist(registro, itensDoTipo, dto.getObservacoesChecklist());
+        salvarChecklistTipo(registro, tipoInspecaoId, dto.getItensChecklist(), dto.getObservacoesChecklist());
 
         auditoriaService.registrar(
                 "CHECKLIST_PARCIAL_SAIDA",
@@ -248,9 +255,9 @@ public class MotoristaJornadaService {
                 .orElseThrow(() -> new IllegalArgumentException("Não existe trajeto aberto para esta reserva."));
 
         List<ItemChecklist> itensDoTipo = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
-        validarChecklistObrigatorio(dto.getItensChecklist(), itensDoTipo);
+        validarItensChecklist(dto.getItensChecklist(), itensDoTipo);
         validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensDoTipo);
-        salvarChecklist(registro, itensDoTipo, dto.getObservacoesChecklist());
+        salvarChecklistTipo(registro, tipoInspecaoId, dto.getItensChecklist(), dto.getObservacoesChecklist());
 
         return toRegistroUsoResponseDTO(registro);
     }
@@ -503,9 +510,15 @@ public class MotoristaJornadaService {
 
         if (dto.getItensChecklist() != null && !dto.getItensChecklist().isEmpty()) {
             List<ItemChecklist> itensInformados = itemChecklistRepository.findByIdIn(dto.getItensChecklist());
-            validarChecklistObrigatorio(dto.getItensChecklist(), itensInformados);
+            validarItensChecklist(dto.getItensChecklist(), itensInformados);
             validarOcorrenciasCriticas(dto.getObservacoesChecklist(), itensInformados);
-            salvarChecklist(registro, itensInformados, dto.getObservacoesChecklist());
+            Set<Long> tipoIds = itensInformados.stream()
+                    .map(item -> item.getTipoInspecao().getId())
+                    .collect(Collectors.toSet());
+            for (Long tipoId : tipoIds) {
+                salvarChecklistTipo(
+                        registro, tipoId, dto.getItensChecklist(), dto.getObservacoesChecklist());
+            }
         }
 
         registro.setDataRetorno(HorarioOperacional.agora());
@@ -553,24 +566,71 @@ public class MotoristaJornadaService {
         return registroUsoRepository.save(registro);
     }
 
-    private void validarChecklistObrigatorio(List<Long> itensSelecionados, List<ItemChecklist> itensObrigatorios) {
+    private void validarItensChecklist(List<Long> itensSelecionados, List<ItemChecklist> itensDoTipo) {
         Set<Long> selecionados = new HashSet<>(itensSelecionados == null ? List.of() : itensSelecionados);
-        List<Long> obrigatorios = itensObrigatorios.stream().map(ItemChecklist::getId).toList();
+        Set<Long> validos = itensDoTipo.stream().map(ItemChecklist::getId).collect(Collectors.toSet());
 
-        if (!selecionados.containsAll(obrigatorios)) {
-            throw new IllegalArgumentException("Todos os itens obrigatórios do checklist devem ser marcados.");
-        }
-        if (!new HashSet<>(obrigatorios).containsAll(selecionados)) {
+        if (!validos.containsAll(selecionados)) {
             throw new IllegalArgumentException("Checklist contém itens inválidos para o tipo de inspeção.");
+        }
+
+        List<Long> obrigatorios =
+                itensDoTipo.stream().filter(ItemChecklist::isObrigatorio).map(ItemChecklist::getId).toList();
+        if (!selecionados.containsAll(obrigatorios)) {
+            throw new IllegalArgumentException("Marque todos os itens obrigatórios antes de salvar.");
         }
     }
 
-    private void validarOcorrenciasCriticas(Map<Long, String> observacoes, List<ItemChecklist> itensObrigatorios) {
+    private void salvarChecklistTipo(
+            RegistroUso registro,
+            Long tipoInspecaoId,
+            List<Long> itensSelecionados,
+            Map<Long, String> observacoes) {
+        List<ItemChecklist> itensDoTipo = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
+        Set<Long> selecionados = new HashSet<>(itensSelecionados == null ? List.of() : itensSelecionados);
+        LocalDateTime agora = HorarioOperacional.agora();
+
+        for (ItemChecklist item : itensDoTipo) {
+            boolean marcado = selecionados.contains(item.getId());
+            boolean exists = carroChecklistRepository.existsByRegistroUsoIdAndItemId(registro.getId(), item.getId());
+            if (marcado && !exists) {
+                String observacao = observacoes == null ? null : observacoes.get(item.getId());
+                carroChecklistRepository.save(new CarroChecklist(
+                        registro,
+                        item,
+                        agora,
+                        observacao == null || observacao.isBlank() ? null : observacao.trim()));
+            } else if (!marcado && exists) {
+                carroChecklistRepository.deleteByRegistroUsoIdAndItemId(registro.getId(), item.getId());
+            }
+        }
+
+        marcarTipoConcluido(registro, tipoInspecaoId);
+    }
+
+    private void marcarTipoConcluido(RegistroUso registro, Long tipoInspecaoId) {
+        if (registroChecklistTipoRepository.existsByRegistroUsoIdAndTipoInspecaoId(
+                registro.getId(), tipoInspecaoId)) {
+            return;
+        }
+
+        TipoInspecao tipo = tipoInspecaoRepository
+                .findById(tipoInspecaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de checklist não encontrado."));
+        registroChecklistTipoRepository.save(
+                new RegistroChecklistTipo(registro, tipo, HorarioOperacional.agora()));
+    }
+
+    private List<ItemChecklist> itensObrigatorios(List<ItemChecklist> itens) {
+        return itens.stream().filter(ItemChecklist::isObrigatorio).toList();
+    }
+
+    private void validarOcorrenciasCriticas(Map<Long, String> observacoes, List<ItemChecklist> itensDoTipo) {
         if (observacoes == null || observacoes.isEmpty()) {
             return;
         }
 
-        for (ItemChecklist item : itensObrigatorios) {
+        for (ItemChecklist item : itensDoTipo) {
             String observacao = observacoes.get(item.getId());
             if (isItemCritico(item) && observacao != null && !observacao.isBlank()) {
                 throw new IllegalArgumentException(
@@ -617,23 +677,6 @@ public class MotoristaJornadaService {
         return PALAVRAS_CHAVE_ITENS_CRITICOS.stream().anyMatch(nome::contains);
     }
 
-    private void salvarChecklist(
-            RegistroUso registro, List<ItemChecklist> itensObrigatorios, Map<Long, String> observacoes) {
-        LocalDateTime agora = HorarioOperacional.agora();
-        for (ItemChecklist item : itensObrigatorios) {
-            if (carroChecklistRepository.existsByRegistroUsoIdAndItemId(registro.getId(), item.getId())) {
-                continue;
-            }
-            String observacao = observacoes == null ? null : observacoes.get(item.getId());
-            carroChecklistRepository.save(
-                    new CarroChecklist(
-                            registro,
-                            item,
-                            agora,
-                            observacao == null || observacao.isBlank() ? null : observacao.trim()));
-        }
-    }
-
     private Reserva buscarReserva(Long reservaId) {
         return reservaRepository
                 .findById(reservaId)
@@ -671,14 +714,22 @@ public class MotoristaJornadaService {
                 .map(tipo -> {
                     List<ItemChecklist> itens =
                             itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipo.getId());
-                    int total = itens.size();
-                    long concluidos = registro.getId() == null
+                    List<ItemChecklist> obrigatorios = itensObrigatorios(itens);
+                    int totalItens = obrigatorios.isEmpty() ? 1 : obrigatorios.size();
+                    int itensConcluidos = registro.getId() == null
                             ? 0
-                            : carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(
-                                    registro.getId(), tipo.getId());
-                    boolean concluido = total > 0 && concluidos >= total;
+                            : contarItensMarcados(registro.getId(), obrigatorios, tipo.getId());
+                    boolean concluido = tipoConcluido(registro, tipo.getId());
+                    if (obrigatorios.isEmpty() && concluido) {
+                        itensConcluidos = 1;
+                    }
                     return new ChecklistTipoProgressoDTO(
-                            tipo.getId(), tipo.getNome(), tipo.getDescricao(), total, (int) concluidos, concluido);
+                            tipo.getId(),
+                            tipo.getNome(),
+                            tipo.getDescricao(),
+                            totalItens,
+                            itensConcluidos,
+                            concluido);
                 })
                 .toList();
 
@@ -702,12 +753,37 @@ public class MotoristaJornadaService {
     }
 
     private boolean tipoConcluido(RegistroUso registro, Long tipoInspecaoId) {
+        if (registro == null || registro.getId() == null) {
+            return false;
+        }
+
         List<ItemChecklist> itens = itemChecklistRepository.findByTipoInspecaoIdOrderByIdAsc(tipoInspecaoId);
         if (itens.isEmpty()) {
-            return true;
+            return registroChecklistTipoRepository.existsByRegistroUsoIdAndTipoInspecaoId(
+                    registro.getId(), tipoInspecaoId);
         }
-        long marcados = carroChecklistRepository.countByRegistroUsoIdAndTipoInspecaoId(registro.getId(), tipoInspecaoId);
-        return marcados >= itens.size();
+
+        List<ItemChecklist> obrigatorios = itensObrigatorios(itens);
+        if (obrigatorios.isEmpty()) {
+            return registroChecklistTipoRepository.existsByRegistroUsoIdAndTipoInspecaoId(
+                    registro.getId(), tipoInspecaoId);
+        }
+
+        return obrigatorios.stream()
+                .allMatch(item -> carroChecklistRepository.existsByRegistroUsoIdAndItemId(
+                        registro.getId(), item.getId()));
+    }
+
+    private int contarItensMarcados(Long registroUsoId, List<ItemChecklist> itens, Long tipoInspecaoId) {
+        if (itens.isEmpty()) {
+            return registroChecklistTipoRepository.existsByRegistroUsoIdAndTipoInspecaoId(registroUsoId, tipoInspecaoId)
+                    ? 1
+                    : 0;
+        }
+
+        return (int) itens.stream()
+                .filter(item -> carroChecklistRepository.existsByRegistroUsoIdAndItemId(registroUsoId, item.getId()))
+                .count();
     }
 
     private boolean checklistSaidaPreenchido(RegistroUso registro) {
