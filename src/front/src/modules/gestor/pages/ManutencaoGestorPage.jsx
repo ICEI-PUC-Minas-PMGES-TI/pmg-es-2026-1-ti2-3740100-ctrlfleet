@@ -232,7 +232,14 @@ export function ManutencaoGestorPage() {
         await reprovarManutencao(item.id, payload);
       }
       await carregarPainel();
-      closeDecisionModal();
+      setDecisionModal({
+        action: null,
+        item: null,
+        motivo: '',
+        prioridade: 'MEDIA',
+        open: false,
+        submitting: false,
+      });
     } catch (error) {
       setState((current) => ({
         ...current,

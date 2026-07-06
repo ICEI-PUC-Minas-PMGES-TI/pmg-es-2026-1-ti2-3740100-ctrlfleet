@@ -214,8 +214,10 @@ public class GestorManutencaoService {
         Veiculo veiculo = manutencao.getVeiculo();
         if (veiculo.getStatus() != StatusVeiculo.DESATIVADO) {
             veiculo.setStatus(StatusVeiculo.MANUTENCAO);
+            veiculoRepository.save(veiculo);
         }
 
+        manutencao = manutencaoRepository.save(manutencao);
         registrarDecisao("MANUTENCAO_INICIADA", manutencao, dto, "Em andamento", "info");
         Double km = registroUsoRepository
                 .buscarUltimaQuilometragemVeiculo(veiculo.getId())
@@ -240,8 +242,10 @@ public class GestorManutencaoService {
         Veiculo veiculo = manutencao.getVeiculo();
         if (veiculo.getStatus() == StatusVeiculo.MANUTENCAO) {
             veiculo.setStatus(StatusVeiculo.DISPONIVEL);
+            veiculoRepository.save(veiculo);
         }
 
+        manutencao = manutencaoRepository.save(manutencao);
         registrarDecisao("MANUTENCAO_CONCLUIDA", manutencao, dto, "Concluída", "success");
         Double km = registroUsoRepository
                 .buscarUltimaQuilometragemVeiculo(veiculo.getId())
@@ -263,8 +267,10 @@ public class GestorManutencaoService {
         Veiculo veiculo = manutencao.getVeiculo();
         if (veiculo.getStatus() != StatusVeiculo.DESATIVADO) {
             veiculo.setStatus(StatusVeiculo.MANUTENCAO);
+            veiculoRepository.save(veiculo);
         }
 
+        manutencao = manutencaoRepository.save(manutencao);
         registrarDecisao("MANUTENCAO_APROVADA", manutencao, dto, "Agendada", "success");
         return enriquecerDto(manutencao, manutencao.getQuilometragemRegistro());
     }
@@ -278,7 +284,8 @@ public class GestorManutencaoService {
         }
 
         manutencao.setPrioridade(dto.getPrioridade());
-        registrarDecisao("MANUTENCAO_PRIORIDADE", manutencao, dto, "Prioridade atualizada", "info");
+        manutencao = manutencaoRepository.save(manutencao);
+        registrarDecisao("MANUTENCAO_PRIORIDADE", manutencao, dto, "Atualizada", "info");
         return enriquecerDto(
                 manutencao,
                 registroUsoRepository
@@ -295,6 +302,7 @@ public class GestorManutencaoService {
         }
 
         manutencao.setStatus(StatusManutencao.REPROVADA);
+        manutencao = manutencaoRepository.save(manutencao);
         registrarDecisao("MANUTENCAO_REPROVADA", manutencao, dto, "Reprovada", "warning");
         return enriquecerDto(manutencao, manutencao.getQuilometragemRegistro());
     }
