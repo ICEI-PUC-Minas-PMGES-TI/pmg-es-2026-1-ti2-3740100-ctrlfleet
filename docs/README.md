@@ -151,7 +151,7 @@ _Atualizar os links e adicionar novos links para que a estrutura do código este
 ## Apêndice B - Apresentação final
 
 
-[Slides da apresentação final](presentations/apresentacao-CtrlFleet.pdf)
+[Slides da apresentação final](presentations/apresentacao-ctrlfleet.pdf)
 
 
 [Vídeo da apresentação final](video/)
